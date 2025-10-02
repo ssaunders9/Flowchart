@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WSU Chemical Engineering Curriculum</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; background: #f5f5f5; }
+        
+        .skip-link { position: absolute; top: -40px; left: 0; background: #A60F2D; color: white; padding: 8px 16px; text-decoration: none; z-index: 100; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        
+        header { background: #A60F2D; color: white; padding: 20px; margin-bottom: 30px; border-radius: 8px; }
+        h1 { font-size: 1.8em; margin-bottom: 10px; }
+        .subtitle { font-size: 1.1em; opacity: 0.9; }
+        .diagram-wrapper { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; scroll-behavior: smooth; }
+        .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 30px; scroll-snap-type: x mandatory; }
+        .semester-column { flex: 0 0 180px; display: flex; flex-direction: column; gap: 12px; scroll-snap-align: start; }
+        .semester-header { font-size: 1em; font-weight: bold; color: white; background: #A60F2D; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 5px; }
+        .course { padding: 10px; border-radius: 6px; border: 3px solid #333; min-height: 75px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
+        .course:focus { 
+            outline: 3px solid #000; 
+            outline-offset: 2px; 
+            box-shadow: 0 0 0 5px rgba(166, 15, 45, 0.3);
+            transform: translateY(-2px);
+        }
+        .course:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .course.engineering { background: #8fc9f7; border-color: #1565c0; color: #0d3c61; }
+        .course.science { background: #a5d6a7; border-color: #2e7d32; color: #1b5e20; }
+        .course.ucore { background: #ce93d8; border-color: #6a1b9a; color: #4a148c; }
+        .course.technical { background: #bdbdbd; border-color: #616161; color: #212121; }
+        .course-code { font-weight: bold; font-size: 1em; display: block; margin-bottom: 4px; text-align: center; }
+        .course-name { font-size: 0.85em; display: block; margin-bottom: 4px; text-align: center; }
+        .course-credits { font-size: 0.8em; display: block; text-align: center; }
+        
+        .relationship-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff9800;
+            color: white;
+            border-radius: 4px;
+            padding: 3px 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            z-index: 200;
+        }
+        
+        .relationship-badge.prereq { background: #ff9800; }
+        .relationship-badge.coreq { background: #2196f3; }
+        .relationship-badge.leadsto { background: #4caf50; }
+        
+        .notes-indicator {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background: #757575;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            z-index: 200;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .notes-indicator:hover {
+            transform: scale(1.1);
+            background: #616161;
+        }
+
+        .alternatives-indicator {
+            position: absolute;
+            bottom: -8px;
+            left: -8px;
+            background: #616161;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65em;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            z-index: 200;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .alternatives-indicator:hover {
+            transform: scale(1.1);
+            background: #424242;
+        }
+        
+        .notes-tooltip {
+            position: fixed;
+            background: white;
+            border: 2px solid #757575;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            max-width: 400px;
+            z-index: 10000;
+            display: none;
+        }
+        
+        .notes-tooltip.visible {
+            display: block;
+        }
+        
+        .notes-tooltip[role="tooltip"] {
+            outline: none;
+        }
+        
+        .notes-tooltip-header {
+            font-weight: bold;
+            color: #424242;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .notes-tooltip-content {
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .notes-tooltip-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            color: #666;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        
+        .notes-tooltip-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .alternatives-tooltip {
+            border-color: #616161;
+        }
+
+        .alternatives-tooltip .notes-tooltip-header {
+            color: #424242;
+            border-bottom-color: #616161;
+        }
+        
+        .text-semester { margin-bottom: 40px; }
+        .text-semester h3 { color: #A60F2D; font-size: 1.4em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #A60F2D; }
+        .text-course { margin-bottom: 15px; padding: 15px; border-left: 5px solid #1565c0; background: #f5f5f5; border-radius: 4px; }
+        .text-course.science { border-left-color: #2e7d32; }
+        .text-course.ucore { border-left-color: #6a1b9a; }
+        .text-course h4 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
+        .text-course p { margin: 5px 0; color: #666; }
+        .keyboard-hint { background: #f0f0f0; padding: 15px; margin-bottom: 20px; border-radius: 6px; border-left: 4px solid #A60F2D; }
+        .keyboard-hint h3 { font-size: 1em; margin-bottom: 8px; color: #A60F2D; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; }
+        .keyboard-hint h3:hover { color: #8a0c24; }
+        .keyboard-hint h3::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s ease; }
+        .keyboard-hint h3.collapsed::after { transform: rotate(-90deg); }
+        .keyboard-hint ul { margin-left: 20px; transition: all 0.3s ease; overflow: hidden; }
+        .keyboard-hint ul.hidden { max-height: 0; opacity: 0; margin: 0; }
+        .keyboard-hint li { margin: 5px 0; }
+        .keyboard-hint kbd { background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold; }
+        
+        .legend { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .legend h3 { color: #A60F2D; margin-bottom: 15px; }
+        .legend-section { margin-bottom: 20px; }
+        .legend-section:last-child { margin-bottom: 0; }
+        .legend-section h4 { font-size: 1em; margin-bottom: 10px; color: #333; }
+        .legend-items { display: flex; flex-wrap: wrap; gap: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-box { width: 30px; height: 30px; border-radius: 4px; border: 3px solid; }
+        .legend-box.engineering { background: #8fc9f7; border-color: #1565c0; }
+        .legend-box.science { background: #a5d6a7; border-color: #2e7d32; }
+        .legend-box.ucore { background: #ce93d8; border-color: #6a1b9a; }
+        .legend-box.technical { background: #bdbdbd; border-color: #616161; }
+        .legend-label { font-size: 0.9em; font-weight: 500; }
+        
+        .scroll-indicators { display: flex; justify-content: center; gap: 8px; margin-top: 15px; padding: 10px; }
+        .scroll-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; }
+        .scroll-dot:hover { background: #999; }
+        .scroll-dot:focus { 
+            outline: 3px solid #A60F2D; 
+            outline-offset: 3px;
+            background: #999;
+        }
+        .scroll-dot.active { background: #A60F2D; width: 12px; height: 12px; border-color: #8a0c24; }
+        .scroll-dot.out-of-view { background: #888; opacity: 0.5; border: 2px solid #555; }
+        .scroll-hint { text-align: center; color: #666; font-size: 0.9em; margin-top: 10px; padding: 8px; background: #f9f9f9; border-radius: 4px; }
+        
+        @media (max-width: 768px) {
+            .scroll-hint { font-size: 0.85em; }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .course:hover { transform: none; }
+            .scroll-dot { transition: none; }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <header role="banner">
+        <h1>Washington State University</h1>
+        <p class="subtitle">Voiland School of Chemical Engineering and Bioengineering</p>
+        <p class="subtitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</p>
+    </header>
+    
+    <main role="main" id="main-content">
+        <div id="announcements" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" aria-live="polite" aria-atomic="true"></div>
+        
+        <div class="legend">
+            <h3>Legend</h3>
+            
+            <div class="legend-section">
+                <h4>Course Types:</h4>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-box engineering"></div>
+                        <span class="legend-label">Engineering</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box science"></div>
+                        <span class="legend-label">Science/Math</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box ucore"></div>
+                        <span class="legend-label">UCORE</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box technical"></div>
+                        <span class="legend-label">Technical Elective</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="legend-section">
+                <h4>Course Relationships (click any course to see):</h4>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 5px solid #000; background: #fff; box-shadow: 0 0 0 3px #A60F2D; border-radius: 4px;"></div>
+                        <span class="legend-label">Selected Course</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 5px solid #ff9800; background: #fff3e0; box-shadow: 0 0 10px rgba(255, 152, 0, 0.6); border-radius: 4px;"></div>
+                        <span class="legend-label">Prerequisites (must take first)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 5px solid #2196f3; background: #e3f2fd; box-shadow: 0 0 10px rgba(33, 150, 243, 0.6); border-radius: 4px;"></div>
+                        <span class="legend-label">Co-requisites (take together)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 5px solid #4caf50; background: #e8f5e9; box-shadow: 0 0 10px rgba(76, 175, 80, 0.6); border-radius: 4px;"></div>
+                        <span class="legend-label">Leads to (unlocks these courses)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="legend-section">
+                <h4>Additional Indicators:</h4>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative;">
+                            <div style="position: absolute; top: -8px; left: -8px; background: #757575; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; border: 2px solid white;">i</div>
+                        </div>
+                        <span class="legend-label">Course has notes (click to view)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative;">
+                            <div style="position: absolute; bottom: -8px; left: -8px; background: #616161; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; font-weight: bold; border: 2px solid white;">OR</div>
+                        </div>
+                        <span class="legend-label">Course has alternatives (click to view)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="keyboard-hint">
+            <h3 id="keyboardToggle" class="collapsed" onclick="toggleKeyboardHint()">⌨️ Keyboard Navigation</h3>
+            <ul id="keyboardList" class="hidden">
+                <li><kbd>Tab</kbd> - Navigate between courses and buttons</li>
+                <li><kbd>Enter</kbd> or <kbd>Space</kbd> - Select course to view prerequisites</li>
+                <li><kbd>I</kbd> - View notes for the focused course (if it has notes)</li>
+                <li><kbd>A</kbd> - View alternatives for the focused course (if it has alternatives)</li>
+                <li><kbd>Arrow Keys</kbd> - Move between courses in the grid</li>
+                <li><kbd>Escape</kbd> - Close tooltips or clear selection</li>
+                <li><kbd>V</kbd> - Toggle visual/text views</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button id="toggleBtn" onclick="toggleView()" style="padding: 12px 24px; font-size: 1em; font-weight: bold; background: #A60F2D; color: white; border: 2px solid #A60F2D; border-radius: 6px; cursor: pointer;">
+                Switch to Text-Only View
+            </button>
+        </div>
+        
+        <div class="diagram-wrapper" id="visualView">
+            <svg id="connectionsSvg" aria-hidden="true" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;"></svg>
+            <div class="diagram-container" id="flowchartContainer"></div>
+        </div>
+        <div class="scroll-controls">
+            <div class="scroll-indicators">
+                <div id="scrollIndicators"></div>
+            </div>
+            <div class="scroll-hint">💡 Swipe or scroll horizontally to view all semesters • Click dots to jump to a semester</div>
+        </div>
+        
+        <div id="textView" style="display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 style="color: #A60F2D; margin-bottom: 20px;">Text-Based Course Listing</h2>
+            <div id="textContent"></div>
+        </div>
+        
+        <!-- Notes tooltip -->
+        <div id="notesTooltip" class="notes-tooltip" role="tooltip" aria-live="polite">
+            <button class="notes-tooltip-close" onclick="closeNotesTooltip()" aria-label="Close notes">✕</button>
+            <div class="notes-tooltip-header" id="tooltipHeader"></div>
+            <div class="notes-tooltip-content" id="tooltipContent"></div>
+        </div>
+
+        <!-- Alternatives tooltip -->
+        <div id="alternativesTooltip" class="notes-tooltip alternatives-tooltip" role="tooltip" aria-live="polite">
+            <button class="notes-tooltip-close" onclick="closeAlternativesTooltip()" aria-label="Close alternatives">✕</button>
+            <div class="notes-tooltip-header" id="alternativesHeader"></div>
+            <div class="notes-tooltip-content" id="alternativesContent"></div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { courseData, semesterOrder } from './courseData.js';
+
+        // Make courseData and semesterOrder available globally
+        window.courseData = courseData;
+        window.semesterOrder = semesterOrder;
+
+        function buildLeadsToMap() {
+            const leadsToMap = {};
+            
+            Object.keys(courseData).forEach(key => {
+                leadsToMap[key] = { asPrereq: [], asCoreq: [] };
+            });
+            
+            Object.entries(courseData).forEach(([courseKey, course]) => {
+                course.prereqs.forEach(prereqKey => {
+                    if (leadsToMap[prereqKey]) {
+                        leadsToMap[prereqKey].asPrereq.push(courseKey);
+                    }
+                });
+                
+                course.coreqs.forEach(coreqKey => {
+                    if (leadsToMap[coreqKey]) {
+                        leadsToMap[coreqKey].asCoreq.push(courseKey);
+                    }
+                });
+            });
+            
+            return leadsToMap;
+        }
+        
+        let leadsToMap = {};
+        let selectedCourseKey = null;
+        let connectionCounts = {};
+        let sourceConnectionCounts = {};
+        let currentNotesIndicator = null;
+        
+        function showNotesTooltip(courseKey, event, indicatorElement) {
+            event.stopPropagation();
+            
+            const course = courseData[courseKey];
+            if (!course || !course.notes || course.notes.trim() === '') return;
+            
+            const tooltip = document.getElementById('notesTooltip');
+            const header = document.getElementById('tooltipHeader');
+            const content = document.getElementById('tooltipContent');
+            const announcer = document.getElementById('announcements');
+            
+            header.textContent = `${course.code} - ${course.name}`;
+            content.textContent = course.notes;
+            
+            const x = event.clientX;
+            const y = event.clientY;
+            
+            tooltip.style.left = `${x + 10}px`;
+            tooltip.style.top = `${y + 10}px`;
+            
+            tooltip.classList.add('visible');
+            
+            const tooltipId = 'notesTooltip';
+            indicatorElement.setAttribute('aria-describedby', tooltipId);
+            currentNotesIndicator = indicatorElement;
+            
+            if (announcer) {
+                announcer.textContent = `Notes for ${course.code}: ${course.notes}`;
+            }
+            
+            setTimeout(() => {
+                const rect = tooltip.getBoundingClientRect();
+                if (rect.right > window.innerWidth) {
+                    tooltip.style.left = `${window.innerWidth - rect.width - 20}px`;
+                }
+                if (rect.bottom > window.innerHeight) {
+                    tooltip.style.top = `${window.innerHeight - rect.height - 20}px`;
+                }
+                
+                const closeBtn = tooltip.querySelector('.notes-tooltip-close');
+                if (closeBtn) {
+                    closeBtn.focus();
+                }
+            }, 0);
+        }
+        
+        function closeNotesTooltip() {
+            const tooltip = document.getElementById('notesTooltip');
+            tooltip.classList.remove('visible');
+
+            if (currentNotesIndicator) {
+                currentNotesIndicator.removeAttribute('aria-describedby');
+                currentNotesIndicator = null;
+            }
+        }
+
+        let currentAlternativesIndicator = null;
+
+        function showAlternativesTooltip(courseKey, event, indicatorElement) {
+            event.stopPropagation();
+
+            const course = courseData[courseKey];
+            if (!course || !course.alternatives || course.alternatives.length === 0) return;
+
+            const tooltip = document.getElementById('alternativesTooltip');
+            const header = document.getElementById('alternativesHeader');
+            const content = document.getElementById('alternativesContent');
+            const announcer = document.getElementById('announcements');
+
+            header.textContent = `${course.code} - Alternative Courses`;
+
+            if (course.alternatives.length === 1) {
+                content.textContent = course.alternatives[0];
+            } else {
+                content.innerHTML = course.alternatives.map((alt, index) => {
+                    return `<strong>Option ${index + 1}:</strong> ${alt}`;
+                }).join('<br><br>');
+            }
+
+            const x = event.clientX;
+            const y = event.clientY;
+
+            tooltip.style.left = `${x + 10}px`;
+            tooltip.style.top = `${y + 10}px`;
+
+            tooltip.classList.add('visible');
+
+            const tooltipId = 'alternativesTooltip';
+            indicatorElement.setAttribute('aria-describedby', tooltipId);
+            currentAlternativesIndicator = indicatorElement;
+
+            if (announcer) {
+                if (course.alternatives.length === 1) {
+                    announcer.textContent = `Alternative course for ${course.code}: ${course.alternatives[0]}`;
+                } else {
+                    const altText = course.alternatives.map((alt, index) =>
+                        `Option ${index + 1}: ${alt}`
+                    ).join('. ');
+                    announcer.textContent = `Alternative courses for ${course.code}. ${altText}`;
+                }
+            }
+
+            setTimeout(() => {
+                const rect = tooltip.getBoundingClientRect();
+                if (rect.right > window.innerWidth) {
+                    tooltip.style.left = `${window.innerWidth - rect.width - 20}px`;
+                }
+                if (rect.bottom > window.innerHeight) {
+                    tooltip.style.top = `${window.innerHeight - rect.height - 20}px`;
+                }
+
+                const closeBtn = tooltip.querySelector('.notes-tooltip-close');
+                if (closeBtn) {
+                    closeBtn.focus();
+                }
+            }, 0);
+        }
+
+        function closeAlternativesTooltip() {
+            const tooltip = document.getElementById('alternativesTooltip');
+            tooltip.classList.remove('visible');
+
+            if (currentAlternativesIndicator) {
+                currentAlternativesIndicator.removeAttribute('aria-describedby');
+                currentAlternativesIndicator = null;
+            }
+        }
+        
+        window.clearHighlights = function() {
+            document.querySelectorAll('.course').forEach(courseDiv => {
+                courseDiv.classList.remove('selected', 'highlighted-prereq', 'highlighted-coreq', 'highlighted-leadsto', 'dimmed');
+                courseDiv.style.border = '';
+                courseDiv.style.boxShadow = '';
+                courseDiv.style.opacity = '';
+                courseDiv.style.filter = '';
+                courseDiv.style.transform = '';
+                courseDiv.style.zIndex = '';
+                
+                const badge = courseDiv.querySelector('.relationship-badge');
+                if (badge) badge.remove();
+            });
+            
+            const svg = document.getElementById('connectionsSvg');
+            if (svg) svg.innerHTML = '';
+            
+            connectionCounts = {};
+            sourceConnectionCounts = {};
+            
+            if (selectedCourseKey) {
+                const announcer = document.getElementById('announcements');
+                if (announcer) {
+                    announcer.textContent = 'Course selection cleared.';
+                }
+            }
+            
+            selectedCourseKey = null;
+        };
+        
+        function updateSVGSize() {
+            const svg = document.getElementById('connectionsSvg');
+            const container = document.getElementById('flowchartContainer');
+            
+            if (!svg || !container) return;
+            
+            svg.style.width = container.scrollWidth + 'px';
+            svg.style.height = container.scrollHeight + 'px';
+            svg.setAttribute('width', container.scrollWidth);
+            svg.setAttribute('height', container.scrollHeight);
+        }
+        
+        function drawConnection(fromKey, toKey, color, type) {
+            const fromDiv = document.querySelector(`[data-course-key="${fromKey}"]`);
+            const toDiv = document.querySelector(`[data-course-key="${toKey}"]`);
+            const svg = document.getElementById('connectionsSvg');
+            const wrapper = document.getElementById('visualView');
+            const container = document.getElementById('flowchartContainer');
+            
+            if (!fromDiv || !toDiv || !svg || !wrapper || !container) return;
+            
+            const fromRect = fromDiv.getBoundingClientRect();
+            const toRect = toDiv.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const wrapperRect = wrapper.getBoundingClientRect();
+            
+            const scrollLeft = wrapper.scrollLeft;
+            const scrollTop = wrapper.scrollTop;
+            
+            const fromCourse = courseData[fromKey];
+            const toCourse = courseData[toKey];
+            const sameSemester = fromCourse.semester === toCourse.semester;
+            
+            let fromX, fromY, toX, toY;
+            
+            if (sameSemester) {
+                const fromIsAbove = fromRect.top < toRect.top;
+                
+                if (fromIsAbove) {
+                    fromX = fromRect.left - wrapperRect.left + scrollLeft + fromRect.width / 2;
+                    fromY = fromRect.top - wrapperRect.top + scrollTop + fromRect.height;
+                    toX = toRect.left - wrapperRect.left + scrollLeft + toRect.width / 2;
+                    toY = toRect.top - wrapperRect.top + scrollTop;
+                } else {
+                    fromX = fromRect.left - wrapperRect.left + scrollLeft + fromRect.width / 2;
+                    fromY = fromRect.top - wrapperRect.top + scrollTop;
+                    toX = toRect.left - wrapperRect.left + scrollLeft + toRect.width / 2;
+                    toY = toRect.top - wrapperRect.top + scrollTop + toRect.height;
+                }
+            } else {
+                if (!sourceConnectionCounts[fromKey]) {
+                    sourceConnectionCounts[fromKey] = 0;
+                }
+                
+                const sourceIndex = sourceConnectionCounts[fromKey];
+                const totalSourceConnections = window.srcTotalConnections[fromKey] || 1;
+                
+                let sourceVerticalOffset = 0;
+                if (totalSourceConnections > 1) {
+                    const spacing = 15;
+                    const totalSpread = (totalSourceConnections - 1) * spacing;
+                    sourceVerticalOffset = (sourceIndex * spacing) - (totalSpread / 2);
+                }
+                
+                sourceConnectionCounts[fromKey]++;
+                
+                if (!connectionCounts[toKey]) {
+                    connectionCounts[toKey] = 0;
+                }
+                
+                const connectionIndex = connectionCounts[toKey];
+                const totalConnections = window.destTotalConnections[toKey] || 1;
+                
+                let destVerticalOffset = 0;
+                if (totalConnections > 1) {
+                    const spacing = 15;
+                    const totalSpread = (totalConnections - 1) * spacing;
+                    destVerticalOffset = (connectionIndex * spacing) - (totalSpread / 2);
+                }
+                
+                connectionCounts[toKey]++;
+                
+                fromX = fromRect.left - wrapperRect.left + scrollLeft + fromRect.width;
+                fromY = fromRect.top - wrapperRect.top + scrollTop + fromRect.height / 2 + sourceVerticalOffset;
+                
+                toX = toRect.left - wrapperRect.left + scrollLeft;
+                toY = toRect.top - wrapperRect.top + scrollTop + toRect.height / 2 + destVerticalOffset;
+            }
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const d = `M ${fromX} ${fromY} L ${toX} ${toY}`;
+            
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', color);
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-opacity', '0.7');
+            path.setAttribute('marker-end', `url(#arrow-${type})`);
+            
+            svg.appendChild(path);
+        }
+        
+        function createArrowMarkers() {
+            const svg = document.getElementById('connectionsSvg');
+            if (!svg) return;
+            
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            
+            const types = [
+                { id: 'prereq', color: '#ff9800' },
+                { id: 'coreq', color: '#2196f3' },
+                { id: 'leadsto', color: '#4caf50' }
+            ];
+            
+            types.forEach(type => {
+                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                marker.setAttribute('id', `arrow-${type.id}`);
+                marker.setAttribute('markerWidth', '10');
+                marker.setAttribute('markerHeight', '10');
+                marker.setAttribute('refX', '9');
+                marker.setAttribute('refY', '3');
+                marker.setAttribute('orient', 'auto');
+                marker.setAttribute('markerUnits', 'strokeWidth');
+                
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                polygon.setAttribute('points', '0 0, 10 3, 0 6');
+                polygon.setAttribute('fill', type.color);
+                
+                marker.appendChild(polygon);
+                defs.appendChild(marker);
+            });
+            
+            svg.appendChild(defs);
+        }
+        
+        window.highlightRelatedCourses = function(courseKey) {
+            window.clearHighlights();
+            
+            const course = courseData[courseKey];
+            const leadsTo = leadsToMap[courseKey];
+            
+            if (!course || !leadsTo) return;
+            
+            requestAnimationFrame(() => {
+                const selectedDiv = document.querySelector(`[data-course-key="${courseKey}"]`);
+                if (selectedDiv) {
+                    selectedDiv.classList.add('selected');
+                    selectedDiv.style.border = '5px solid #000';
+                    selectedDiv.style.boxShadow = '0 0 0 4px #A60F2D, 0 0 20px rgba(166, 15, 45, 0.5)';
+                    selectedDiv.style.zIndex = '100';
+                    selectedDiv.style.opacity = '1';
+                    selectedDiv.style.filter = 'none';
+                }
+                
+                document.querySelectorAll('.course').forEach(courseDiv => {
+                    if (courseDiv.getAttribute('data-course-key') !== courseKey) {
+                        courseDiv.classList.add('dimmed');
+                        courseDiv.style.opacity = '0.25';
+                        courseDiv.style.filter = 'grayscale(80%)';
+                    }
+                });
+                
+                course.prereqs.forEach(prereqKey => {
+                    const prereqDiv = document.querySelector(`[data-course-key="${prereqKey}"]`);
+                    if (prereqDiv) {
+                        prereqDiv.classList.remove('dimmed');
+                        prereqDiv.classList.add('highlighted-prereq');
+                        prereqDiv.style.border = '5px solid #ff9800';
+                        prereqDiv.style.boxShadow = '0 0 15px rgba(255, 152, 0, 0.8)';
+                        prereqDiv.style.opacity = '1';
+                        prereqDiv.style.filter = 'none';
+                        
+                        const badge = document.createElement('div');
+                        badge.className = 'relationship-badge prereq';
+                        badge.textContent = 'PR';
+                        prereqDiv.appendChild(badge);
+                    }
+                });
+                
+                course.coreqs.forEach(coreqKey => {
+                    const coreqDiv = document.querySelector(`[data-course-key="${coreqKey}"]`);
+                    if (coreqDiv) {
+                        coreqDiv.classList.remove('dimmed');
+                        coreqDiv.classList.add('highlighted-coreq');
+                        coreqDiv.style.border = '5px solid #2196f3';
+                        coreqDiv.style.boxShadow = '0 0 15px rgba(33, 150, 243, 0.8)';
+                        coreqDiv.style.opacity = '1';
+                        coreqDiv.style.filter = 'none';
+                        
+                        const badge = document.createElement('div');
+                        badge.className = 'relationship-badge coreq';
+                        badge.textContent = 'CO';
+                        coreqDiv.appendChild(badge);
+                    }
+                });
+                
+                // Filter out courses that are already shown as corequisites
+                const allLeadsTo = [...leadsTo.asPrereq, ...leadsTo.asCoreq].filter(
+                    key => !course.coreqs.includes(key)
+                );
+                allLeadsTo.forEach(leadsToKey => {
+                    const leadsToDiv = document.querySelector(`[data-course-key="${leadsToKey}"]`);
+                    if (leadsToDiv) {
+                        leadsToDiv.classList.remove('dimmed');
+                        leadsToDiv.classList.add('highlighted-leadsto');
+                        leadsToDiv.style.border = '5px solid #4caf50';
+                        leadsToDiv.style.boxShadow = '0 0 15px rgba(76, 175, 80, 0.8)';
+                        leadsToDiv.style.opacity = '1';
+                        leadsToDiv.style.filter = 'none';
+                        
+                        const badge = document.createElement('div');
+                        badge.className = 'relationship-badge leadsto';
+                        badge.textContent = '→';
+                        leadsToDiv.appendChild(badge);
+                    }
+                });
+                
+                requestAnimationFrame(() => {
+                    const destConnectionCounts = {};
+                    const srcConnectionCounts = {};
+                    
+                    const prereqsSorted = [...course.prereqs].sort((a, b) => {
+                        const divA = document.querySelector(`[data-course-key="${a}"]`);
+                        const divB = document.querySelector(`[data-course-key="${b}"]`);
+                        if (!divA || !divB) return 0;
+                        return divA.getBoundingClientRect().top - divB.getBoundingClientRect().top;
+                    });
+                    
+                    const coreqsSorted = [...course.coreqs].sort((a, b) => {
+                        const divA = document.querySelector(`[data-course-key="${a}"]`);
+                        const divB = document.querySelector(`[data-course-key="${b}"]`);
+                        if (!divA || !divB) return 0;
+                        return divA.getBoundingClientRect().top - divB.getBoundingClientRect().top;
+                    });
+                    
+                    const allLeadsTo = [...leadsTo.asPrereq, ...leadsTo.asCoreq];
+                    const leadsToSorted = allLeadsTo.sort((a, b) => {
+                        const divA = document.querySelector(`[data-course-key="${a}"]`);
+                        const divB = document.querySelector(`[data-course-key="${b}"]`);
+                        if (!divA || !divB) return 0;
+                        return divA.getBoundingClientRect().top - divB.getBoundingClientRect().top;
+                    });
+                    
+                    prereqsSorted.forEach(prereqKey => {
+                        if (!destConnectionCounts[courseKey]) destConnectionCounts[courseKey] = 0;
+                        destConnectionCounts[courseKey]++;
+                        
+                        if (!srcConnectionCounts[prereqKey]) srcConnectionCounts[prereqKey] = 0;
+                        srcConnectionCounts[prereqKey]++;
+                    });
+                    
+                    coreqsSorted.forEach(coreqKey => {
+                        if (!destConnectionCounts[courseKey]) destConnectionCounts[courseKey] = 0;
+                        destConnectionCounts[courseKey]++;
+                        
+                        if (!srcConnectionCounts[coreqKey]) srcConnectionCounts[coreqKey] = 0;
+                        srcConnectionCounts[coreqKey]++;
+                    });
+                    
+                    leadsToSorted.forEach(leadsToKey => {
+                        if (!destConnectionCounts[leadsToKey]) destConnectionCounts[leadsToKey] = 0;
+                        destConnectionCounts[leadsToKey]++;
+                        
+                        if (!srcConnectionCounts[courseKey]) srcConnectionCounts[courseKey] = 0;
+                        srcConnectionCounts[courseKey]++;
+                    });
+                    
+                    window.destTotalConnections = destConnectionCounts;
+                    window.srcTotalConnections = srcConnectionCounts;
+                    
+                    prereqsSorted.forEach(prereqKey => {
+                        drawConnection(prereqKey, courseKey, '#ff9800', 'prereq');
+                    });
+                    
+                    coreqsSorted.forEach(coreqKey => {
+                        drawConnection(coreqKey, courseKey, '#2196f3', 'coreq');
+                    });
+                    
+                    leadsToSorted.forEach(leadsToKey => {
+                        drawConnection(courseKey, leadsToKey, '#4caf50', 'leadsto');
+                    });
+                    
+                    announceSelection(courseKey, course, leadsToSorted);
+                    
+                    updateSVGSize();
+                });
+            });
+            
+            selectedCourseKey = courseKey;
+        };
+        
+        function announceSelection(courseKey, course, leadsTo) {
+            const announcer = document.getElementById('announcements');
+            if (!announcer) return;
+            
+            const courseInfo = courseData[courseKey];
+            if (!courseInfo) return;
+            
+            const prereqCount = course.prereqs.length;
+            const coreqCount = course.coreqs.length;
+            const leadsToCount = leadsTo.length;
+            
+            let message = `${courseInfo.code} ${courseInfo.name} selected. `;
+            
+            if (prereqCount === 0 && coreqCount === 0 && leadsToCount === 0) {
+                message += 'This course has no prerequisites, co-requisites, or courses it leads to.';
+            } else {
+                const parts = [];
+                
+                if (prereqCount > 0) {
+                    const prereqNames = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
+                    parts.push(`${prereqCount} prerequisite${prereqCount > 1 ? 's' : ''}: ${prereqNames}`);
+                }
+                
+                if (coreqCount > 0) {
+                    const coreqNames = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
+                    parts.push(`${coreqCount} co-requisite${coreqCount > 1 ? 's' : ''}: ${coreqNames}`);
+                }
+                
+                if (leadsToCount > 0) {
+                    const leadsToNames = leadsTo.map(l => courseData[l]?.code || l).join(', ');
+                    parts.push(`leads to ${leadsToCount} course${leadsToCount > 1 ? 's' : ''}: ${leadsToNames}`);
+                }
+                
+                message += parts.join('. ') + '.';
+            }
+            
+            announcer.textContent = message;
+        }
+        
+        function buildFlowchart() {
+            const container = document.getElementById('flowchartContainer');
+            
+            const courseBySemester = {};
+            semesterOrder.forEach(sem => courseBySemester[sem] = []);
+            
+            Object.entries(courseData).forEach(([key, course]) => {
+                courseBySemester[course.semester].push({key, ...course});
+            });
+            
+            function getSortPriority(courseCode) {
+                if (courseCode.startsWith('CHE-')) return 1;
+                if (courseCode.startsWith('BIOENG-')) return 1;
+                if (courseCode.startsWith('ELEC-CHE')) return 2;
+                if (courseCode.startsWith('ELEC-TECH')) return 3;
+                if (courseCode.startsWith('CHEM-')) return 4;
+                if (courseCode.startsWith('MATH-')) return 5;
+                if (courseCode.startsWith('PHYS-')) return 6;
+                if (courseCode.startsWith('BIOLOGY-')) return 7;
+                if (courseCode.startsWith('ENGL-')) return 8;
+                if (courseCode.startsWith('HIST-')) return 9;
+                if (courseCode.startsWith('ECONS-')) return 10;
+                if (courseCode.startsWith('ELEC-')) return 11;
+                return 12;
+            }
+            
+            semesterOrder.forEach(semester => {
+                courseBySemester[semester].sort((a, b) => {
+                    const priorityA = getSortPriority(a.key);
+                    const priorityB = getSortPriority(b.key);
+                    if (priorityA !== priorityB) {
+                        return priorityA - priorityB;
+                    }
+                    return a.key.localeCompare(b.key);
+                });
+            });
+            
+            semesterOrder.forEach(semester => {
+                const column = document.createElement('div');
+                column.className = 'semester-column';
+                
+                const header = document.createElement('div');
+                header.className = 'semester-header';
+                const parts = semester.split(' ');
+                header.innerHTML = `${parts[0]} ${parts[1]}<br>${parts[2]}`;
+                column.appendChild(header);
+                
+                courseBySemester[semester].forEach(course => {
+                    const courseDiv = document.createElement('div');
+                    courseDiv.className = `course ${course.type}`;
+                    courseDiv.setAttribute('tabindex', '0');
+                    courseDiv.setAttribute('data-course-key', course.key);
+                    
+                    const prereqText = course.prereqs.length > 0
+                        ? `Requires: ${course.prereqs.map(p => courseData[p]?.code || p).join(', ')}.`
+                        : '';
+
+                    const coreqText = course.coreqs.length > 0
+                        ? ` With: ${course.coreqs.map(c => courseData[c]?.code || c).join(', ')}.`
+                        : '';
+
+                    const alternativesText = course.alternatives && course.alternatives.length > 0
+                        ? ` Has ${course.alternatives.length} alternative course${course.alternatives.length > 1 ? 's' : ''}, press A to view.`
+                        : '';
+
+                    const ariaLabel = `${course.code}, ${course.credits} credits. ${prereqText}${coreqText}${alternativesText}`;
+                    courseDiv.setAttribute('aria-label', ariaLabel);
+                    
+                    courseDiv.innerHTML = `
+                        <span class="course-code">${course.code}</span>
+                        <span class="course-name">${course.shortName || course.name}</span>
+                        <span class="course-credits">${course.credits} cr</span>
+                    `;
+                    
+                    if (course.notes && course.notes.trim() !== '') {
+                        const notesIndicator = document.createElement('div');
+                        notesIndicator.className = 'notes-indicator';
+                        notesIndicator.textContent = 'i';
+                        notesIndicator.setAttribute('aria-hidden', 'true');
+                        notesIndicator.setAttribute('title', 'This course has notes - press I to view');
+
+                        notesIndicator.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const rect = courseDiv.getBoundingClientRect();
+                            const syntheticEvent = {
+                                clientX: rect.left + rect.width / 2,
+                                clientY: rect.top + rect.height / 2,
+                                stopPropagation: () => {}
+                            };
+                            showNotesTooltip(course.key, syntheticEvent, courseDiv);
+                        });
+
+                        courseDiv.appendChild(notesIndicator);
+                        courseDiv.setAttribute('data-has-notes', 'true');
+                    }
+
+                    if (course.alternatives && course.alternatives.length > 0) {
+                        const alternativesIndicator = document.createElement('div');
+                        alternativesIndicator.className = 'alternatives-indicator';
+                        alternativesIndicator.textContent = 'OR';
+                        alternativesIndicator.setAttribute('aria-hidden', 'true');
+                        alternativesIndicator.setAttribute('title', `Alternative: ${course.alternatives.join(', ')}`);
+
+                        alternativesIndicator.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const rect = courseDiv.getBoundingClientRect();
+                            const syntheticEvent = {
+                                clientX: rect.left + rect.width / 2,
+                                clientY: rect.bottom,
+                                stopPropagation: () => {}
+                            };
+                            showAlternativesTooltip(course.key, syntheticEvent, alternativesIndicator);
+                        });
+
+                        courseDiv.appendChild(alternativesIndicator);
+                        courseDiv.setAttribute('data-has-alternatives', 'true');
+                    }
+                    
+                    courseDiv.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (selectedCourseKey === course.key) {
+                            window.clearHighlights();
+                        } else {
+                            window.highlightRelatedCourses(course.key);
+                        }
+                    });
+                    
+                    courseDiv.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (selectedCourseKey === course.key) {
+                                window.clearHighlights();
+                            } else {
+                                window.highlightRelatedCourses(course.key);
+                            }
+                        }
+
+                        if ((e.key === 'i' || e.key === 'I') && courseDiv.getAttribute('data-has-notes') === 'true') {
+                            e.preventDefault();
+                            const rect = courseDiv.getBoundingClientRect();
+                            const syntheticEvent = {
+                                clientX: rect.left + rect.width / 2,
+                                clientY: rect.top + rect.height / 2,
+                                stopPropagation: () => {}
+                            };
+                            showNotesTooltip(course.key, syntheticEvent, courseDiv);
+                        }
+
+                        if ((e.key === 'a' || e.key === 'A') && courseDiv.getAttribute('data-has-alternatives') === 'true') {
+                            e.preventDefault();
+                            const rect = courseDiv.getBoundingClientRect();
+                            const syntheticEvent = {
+                                clientX: rect.left + rect.width / 2,
+                                clientY: rect.bottom,
+                                stopPropagation: () => {}
+                            };
+                            const altIndicator = courseDiv.querySelector('.alternatives-indicator');
+                            showAlternativesTooltip(course.key, syntheticEvent, altIndicator);
+                        }
+                    });
+                    
+                    column.appendChild(courseDiv);
+                });
+                
+                container.appendChild(column);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            leadsToMap = buildLeadsToMap();
+            buildFlowchart();
+            buildTextView();
+            setupScrollIndicators();
+            createArrowMarkers();
+            
+            updateSVGSize();
+            
+            window.addEventListener('resize', updateSVGSize);
+            
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.course') && selectedCourseKey) {
+                    window.clearHighlights();
+                }
+
+                if (!e.target.closest('.notes-tooltip') && !e.target.closest('.notes-indicator')) {
+                    closeNotesTooltip();
+                }
+
+                if (!e.target.closest('#alternativesTooltip') && !e.target.closest('.alternatives-indicator')) {
+                    closeAlternativesTooltip();
+                }
+            });
+        });
+        
+        function setupScrollIndicators() {
+            const container = document.getElementById('flowchartContainer');
+            const indicatorsDiv = document.getElementById('scrollIndicators');
+            const wrapper = document.getElementById('visualView');
+            
+            if (!container || !indicatorsDiv || !wrapper) return;
+            
+            semesterOrder.forEach((semester, index) => {
+                const dot = document.createElement('button');
+                dot.className = 'scroll-dot';
+                dot.setAttribute('type', 'button');
+                dot.setAttribute('aria-label', `Jump to ${semester}`);
+                
+                if (index === 0) {
+                    dot.classList.add('active');
+                }
+                
+                dot.addEventListener('click', () => {
+                    const columns = container.querySelectorAll('.semester-column');
+                    if (columns[index]) {
+                        columns[index].scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'nearest', 
+                            inline: 'start' 
+                        });
+                    }
+                });
+                
+                indicatorsDiv.appendChild(dot);
+            });
+            
+            let scrollTimeout;
+            wrapper.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    updateActiveIndicator();
+                }, 100);
+            });
+        }
+        
+        function updateActiveIndicator() {
+            const wrapper = document.getElementById('visualView');
+            const container = document.getElementById('flowchartContainer');
+            const dots = document.querySelectorAll('.scroll-dot');
+            
+            if (!wrapper || !container || dots.length === 0) return;
+            
+            const scrollLeft = wrapper.scrollLeft;
+            const wrapperWidth = wrapper.clientWidth;
+            const scrollWidth = wrapper.scrollWidth;
+            const columns = container.querySelectorAll('.semester-column');
+            
+            const visibleLeft = scrollLeft;
+            const visibleRight = scrollLeft + wrapperWidth;
+            
+            if (scrollLeft + wrapperWidth >= scrollWidth - 5) {
+                dots.forEach((dot, index) => {
+                    if (index === dots.length - 1) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                    
+                    const column = columns[index];
+                    const columnLeft = column.offsetLeft - container.offsetLeft;
+                    const columnRight = columnLeft + column.offsetWidth;
+                    const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
+                    
+                    if (isInView) {
+                        dot.classList.remove('out-of-view');
+                    } else {
+                        dot.classList.add('out-of-view');
+                    }
+                });
+                return;
+            }
+            
+            if (scrollLeft <= 5) {
+                dots.forEach((dot, index) => {
+                    if (index === 0) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                    
+                    const column = columns[index];
+                    const columnLeft = column.offsetLeft - container.offsetLeft;
+                    const columnRight = columnLeft + column.offsetWidth;
+                    const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
+                    
+                    if (isInView) {
+                        dot.classList.remove('out-of-view');
+                    } else {
+                        dot.classList.add('out-of-view');
+                    }
+                });
+                return;
+            }
+            
+            let activeIndex = 0;
+            let minDistance = Infinity;
+            
+            columns.forEach((column, index) => {
+                const columnLeft = column.offsetLeft - container.offsetLeft;
+                const distance = Math.abs(scrollLeft - columnLeft);
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    activeIndex = index;
+                }
+            });
+            
+            dots.forEach((dot, index) => {
+                if (index === activeIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+                
+                const column = columns[index];
+                const columnLeft = column.offsetLeft - container.offsetLeft;
+                const columnRight = columnLeft + column.offsetWidth;
+                const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
+                
+                if (isInView) {
+                    dot.classList.remove('out-of-view');
+                } else {
+                    dot.classList.add('out-of-view');
+                }
+            });
+        }
+        
+        function buildTextView() {
+            const container = document.getElementById('textContent');
+            
+            const courseBySemester = {};
+            semesterOrder.forEach(sem => courseBySemester[sem] = []);
+            
+            Object.entries(courseData).forEach(([key, course]) => {
+                courseBySemester[course.semester].push({key, ...course});
+            });
+            
+            semesterOrder.forEach(semester => {
+                const semesterDiv = document.createElement('div');
+                semesterDiv.className = 'text-semester';
+                
+                const header = document.createElement('h3');
+                header.textContent = semester;
+                semesterDiv.appendChild(header);
+                
+                courseBySemester[semester].forEach(course => {
+                    const courseDiv = document.createElement('div');
+                    courseDiv.className = `text-course ${course.type}`;
+                    
+                    const heading = document.createElement('h4');
+                    heading.textContent = `${course.code} - ${course.name} (${course.credits} credits)`;
+                    courseDiv.appendChild(heading);
+                    
+                    const typeMap = {
+                        'engineering': 'Engineering',
+                        'science': course.code.startsWith('MATH') ? 'Math' : 'Science',
+                        'ucore': 'UCORE',
+                        'technical': 'Technical Elective'
+                    };
+                    
+                    const typeP = document.createElement('p');
+                    typeP.textContent = `Type: ${typeMap[course.type]}`;
+                    courseDiv.appendChild(typeP);
+                    
+                    const prereqP = document.createElement('p');
+                    if (course.prereqs.length > 0) {
+                        const prereqNames = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
+                        prereqP.innerHTML = `<strong>Prerequisites:</strong> ${prereqNames}`;
+                    } else {
+                        prereqP.innerHTML = `<strong>Prerequisites:</strong> None`;
+                    }
+                    courseDiv.appendChild(prereqP);
+                    
+                    if (course.coreqs.length > 0) {
+                        const coreqP = document.createElement('p');
+                        const coreqNames = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
+                        coreqP.innerHTML = `<strong>Co-requisites:</strong> ${coreqNames}`;
+                        courseDiv.appendChild(coreqP);
+                    }
+
+                    if (course.alternatives && course.alternatives.length > 0) {
+                        const altP = document.createElement('p');
+                        if (course.alternatives.length === 1) {
+                            altP.innerHTML = `<strong>Alternative:</strong> ${course.alternatives[0]}`;
+                        } else {
+                            const altList = course.alternatives.map((alt, index) =>
+                                `<br>&nbsp;&nbsp;Option ${index + 1}: ${alt}`
+                            ).join('');
+                            altP.innerHTML = `<strong>Alternatives:</strong>${altList}`;
+                        }
+                        altP.style.color = '#00bcd4';
+                        altP.style.fontWeight = '500';
+                        courseDiv.appendChild(altP);
+                    }
+
+                    if (course.notes && course.notes.trim() !== '') {
+                        const notesP = document.createElement('p');
+                        notesP.innerHTML = `<strong>Notes:</strong> ${course.notes}`;
+                        notesP.style.fontStyle = 'italic';
+                        notesP.style.color = '#444';
+                        courseDiv.appendChild(notesP);
+                    }
+                    
+                    semesterDiv.appendChild(courseDiv);
+                });
+                
+                container.appendChild(semesterDiv);
+            });
+        }
+        
+        function toggleKeyboardHint() {
+            const heading = document.getElementById('keyboardToggle');
+            const list = document.getElementById('keyboardList');
+            
+            const isCollapsed = heading.classList.toggle('collapsed');
+            list.classList.toggle('hidden');
+            
+            heading.setAttribute('aria-expanded', !isCollapsed);
+        }
+        
+        let currentView = 'visual';
+        function toggleView() {
+            const visualView = document.getElementById('visualView');
+            const textView = document.getElementById('textView');
+            const scrollControls = document.querySelector('.scroll-controls');
+            const btn = document.getElementById('toggleBtn');
+            const announcer = document.getElementById('announcements');
+            
+            if (currentView === 'visual') {
+                visualView.style.display = 'none';
+                textView.style.display = 'block';
+                scrollControls.style.display = 'none';
+                btn.textContent = 'Switch to Visual Flowchart';
+                
+                if (announcer) {
+                    announcer.textContent = 'Switched to text-only view. Courses are now listed by semester with full details.';
+                }
+                
+                currentView = 'text';
+            } else {
+                visualView.style.display = 'block';
+                textView.style.display = 'none';
+                scrollControls.style.display = 'block';
+                btn.textContent = 'Switch to Text-Only View';
+                
+                if (announcer) {
+                    announcer.textContent = 'Switched to visual flowchart view. Interactive course boxes are now displayed.';
+                }
+                
+                currentView = 'visual';
+            }
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            const focusedElement = document.activeElement;
+            
+            if (e.key === 'Escape') {
+                const notesTooltip = document.getElementById('notesTooltip');
+                const alternativesTooltip = document.getElementById('alternativesTooltip');
+
+                if (notesTooltip && notesTooltip.classList.contains('visible')) {
+                    closeNotesTooltip();
+                }
+
+                if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
+                    closeAlternativesTooltip();
+                }
+
+                window.clearHighlights();
+                return;
+            }
+            
+            if (e.key === 'v' || e.key === 'V') {
+                if (!focusedElement.matches('input, textarea')) {
+                    toggleView();
+                }
+                return;
+            }
+            
+            if (!focusedElement.classList.contains('course')) return;
+            
+            const allCourses = Array.from(document.querySelectorAll('.course'));
+            const currentIndex = allCourses.indexOf(focusedElement);
+            let nextIndex = currentIndex;
+            
+            const currentColumn = focusedElement.closest('.semester-column');
+            const columns = Array.from(document.querySelectorAll('.semester-column'));
+            const columnIndex = columns.indexOf(currentColumn);
+            const coursesInColumn = Array.from(currentColumn.querySelectorAll('.course'));
+            const positionInColumn = coursesInColumn.indexOf(focusedElement);
+            
+            switch(e.key) {
+                case 'ArrowRight':
+                    e.preventDefault();
+                    if (columnIndex < columns.length - 1) {
+                        const nextColumn = columns[columnIndex + 1];
+                        const nextColumnCourses = Array.from(nextColumn.querySelectorAll('.course'));
+                        const targetCourse = nextColumnCourses[Math.min(positionInColumn, nextColumnCourses.length - 1)];
+                        if (targetCourse) targetCourse.focus();
+                    }
+                    break;
+                    
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    if (columnIndex > 0) {
+                        const prevColumn = columns[columnIndex - 1];
+                        const prevColumnCourses = Array.from(prevColumn.querySelectorAll('.course'));
+                        const targetCourse = prevColumnCourses[Math.min(positionInColumn, prevColumnCourses.length - 1)];
+                        if (targetCourse) targetCourse.focus();
+                    }
+                    break;
+                    
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (positionInColumn < coursesInColumn.length - 1) {
+                        coursesInColumn[positionInColumn + 1].focus();
+                    }
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (positionInColumn > 0) {
+                        coursesInColumn[positionInColumn - 1].focus();
+                    }
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
