@@ -14,6 +14,24 @@
         header { background: #A60F2D; color: white; padding: 20px; margin-bottom: 30px; border-radius: 8px; }
         h1 { font-size: 1.8em; margin-bottom: 10px; }
         .subtitle { font-size: 1.1em; opacity: 0.9; }
+
+        .program-selector { margin-top: 15px; }
+        .program-selector label { font-size: 1em; font-weight: bold; margin-right: 10px; display: inline-block; }
+        .program-selector select {
+            font-size: 1em;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid white;
+            background: white;
+            color: #A60F2D;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 300px;
+        }
+        .program-selector select:focus {
+            outline: 3px solid #fff;
+            outline-offset: 2px;
+        }
         .diagram-wrapper { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; scroll-behavior: smooth; }
         .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 30px; scroll-snap-type: x mandatory; }
         .semester-column { flex: 0 0 180px; display: flex; flex-direction: column; gap: 12px; scroll-snap-align: start; }
@@ -89,18 +107,19 @@
             background: #616161;
             color: white;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.65em;
+            font-size: 0.6em;
             font-weight: bold;
             border: 2px solid white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             z-index: 200;
             cursor: pointer;
             transition: transform 0.2s ease;
+            line-height: 1;
         }
 
         .alternatives-indicator:hover {
@@ -189,8 +208,13 @@
         .keyboard-hint li { margin: 5px 0; }
         .keyboard-hint kbd { background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold; }
         
-        .legend { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .legend h3 { color: #A60F2D; margin-bottom: 15px; }
+        .legend { background: #f0f0f0; padding: 15px; margin-bottom: 20px; border-radius: 6px; border-left: 4px solid #A60F2D; }
+        .legend h3 { font-size: 1em; margin-bottom: 8px; color: #A60F2D; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; }
+        .legend h3:hover { color: #8a0c24; }
+        .legend h3::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s ease; }
+        .legend h3.collapsed::after { transform: rotate(-90deg); }
+        .legend-content { transition: all 0.3s ease; overflow: hidden; }
+        .legend-content.hidden { max-height: 0; opacity: 0; margin: 0; }
         .legend-section { margin-bottom: 20px; }
         .legend-section:last-child { margin-bottom: 0; }
         .legend-section h4 { font-size: 1em; margin-bottom: 10px; color: #333; }
@@ -237,15 +261,26 @@
     <header role="banner">
         <h1>Washington State University</h1>
         <p class="subtitle">Voiland School of Chemical Engineering and Bioengineering</p>
-        <p class="subtitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</p>
+        <p class="subtitle" id="programTitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</p>
+        <div class="program-selector">
+            <label for="programSelect">Select Program:</label>
+            <select id="programSelect" onchange="switchProgram()" aria-label="Select degree program">
+                <option value="CHE">Chemical Engineering</option>
+                <option value="BIOENG-BMSE">Bioengineering: Biomedical Systems</option>
+                <option value="BIOENG-CMBE">Bioengineering: Cellular/Molecular Bioengineering</option>
+                <option value="BIOENG-PREMED-BMSE">Bioengineering: Pre-Med Biomedical Systems</option>
+                <option value="BIOENG-PREMED-CMBE">Bioengineering: Pre-Med Cellular/Molecular</option>
+            </select>
+        </div>
     </header>
     
     <main role="main" id="main-content">
         <div id="announcements" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" aria-live="polite" aria-atomic="true"></div>
         
         <div class="legend">
-            <h3>Legend</h3>
-            
+            <h3 id="legendToggle" class="collapsed" onclick="toggleLegend()">📊 Legend</h3>
+
+            <div class="legend-content hidden" id="legendContent">
             <div class="legend-section">
                 <h4>Course Types:</h4>
                 <div class="legend-items">
@@ -307,8 +342,9 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
-        
+
         <div class="keyboard-hint">
             <h3 id="keyboardToggle" class="collapsed" onclick="toggleKeyboardHint()">⌨️ Keyboard Navigation</h3>
             <ul id="keyboardList" class="hidden">
@@ -359,8 +395,176 @@
         </div>
     </main>
 
-    <script type="module">
-        import { courseData, semesterOrder } from './courseData.js';
+    <script>
+        // Master data structure containing all programs
+        const programsData = {
+            'CHE': {
+                name: 'Chemical Engineering',
+                fullTitle: 'Bachelor of Science - Chemical Engineering (4 Year Plan)',
+                courseData: {
+            'CHE-101': { code: 'CHE 101', name: 'Overview of Chemical Engineering', shortName: 'CHE Overview', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+            'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: ['MATH-171'], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
+            'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calc I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+            'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+            'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Contemp Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. No prerequisites.'], notes: '' },
+
+            'CHE-110': { code: 'CHE 110', name: 'Introduction to Chemical Engineering', shortName: 'Intro to CHE', credits: 2, type: 'engineering', semester: 'Year 1 Spring', prereqs: ['CHE-101', 'MATH-171'], coreqs: ['CHEM-105'], alternatives: [], notes: '' },
+            'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
+            'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+            'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calc II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
+            'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
+
+            'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['CHE-110', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: CHE 110 or Junior standing.' },
+            'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
+            'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I [PSCI]', shortName: 'Physics I (PSCI)', credits: 3, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I [PSCI]. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
+            'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers [PSCI]', shortName: 'Phys Lab I (PSCI)', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
+            'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calc III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
+            'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 2 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
+
+            'CHE-211': { code: 'CHE 211', name: 'Process Simulation', shortName: 'Proc Sim', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
+            'CHEM-348': { code: 'CHEM 348', name: 'Organic Chemistry II and Problem Solving', shortName: 'Org Chem II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['CHEM-345'], coreqs: [], alternatives: ['MBIOS 303 - Introductory Biochemistry. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.'], notes: '' },
+            'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
+            'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
+            'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Alg', credits: 2, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
+            'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Diff Eq', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
+
+            'CHE-301': { code: 'CHE 301', name: 'Chemical Engineering Thermodynamics', shortName: 'Thermo I', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-101', 'PHYS-202', 'PHYS-212'], coreqs: ['CHE-211', 'CHEM-345'], alternatives: [], notes: '' },
+            'CHE-310': { code: 'CHE 310', name: 'Introduction to Transport Processes', shortName: 'Transport', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['CHE-211', 'MATH-315'], alternatives: [], notes: '' },
+            'CHE-498': { code: 'CHE 498', name: 'Seminar', shortName: 'Seminar', credits: 1, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+            'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Fall', prereqs: ['ENGL-101'], coreqs: [], alternatives: ['ENGL 403 - Technical and Professional Writing ESL. Prereqs: ENGLISH 101 or 105; junior standing; pass University Writing Portfolio.'], notes: '' },
+            'ELEC-TECH-1': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'MSE 201 or any 300-400-level BIO ENG, CHEM, CHE, CE, E E, ENGR, MATH, ME, MSE, PHYSICS, or STAT course as approved by advisor.' },
+            'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
+
+            'CHE-302': { code: 'CHE 302', name: 'Chemical Engineering Thermodynamics II', shortName: 'Thermo II', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-301'], coreqs: [], alternatives: [], notes: '' },
+            'CHE-321': { code: 'CHE 321', name: 'Kinetics and Reactor Design', shortName: 'Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310'], coreqs: ['CHE-302'], alternatives: [], notes: '' },
+            'CHE-332': { code: 'CHE 332', name: 'Fluid Mechanics and Heat Transfer', shortName: 'Fluids/Heat', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310'], coreqs: ['CHE-302'], alternatives: [], notes: '' },
+            'CHE-334': { code: 'CHE 334', name: 'Chemical Engineering Separations', shortName: 'Separations', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310', 'CHEM-345'], coreqs: ['CHE-302'], alternatives: [], notes: '' },
+
+            'CHE-432': { code: 'CHE 432', name: 'Chemical Engineering Lab I [M]', shortName: 'Lab I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: ['CHE-352', 'ENGL-402'], alternatives: [], notes: 'This course requires significant lab time. Plan your schedule accordingly and expect 6-8 hours of lab work per week in addition to lecture time.' },
+            'CHE-441': { code: 'CHE 441', name: 'Process Control', shortName: 'Proc Control', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: [], alternatives: [], notes: '' },
+            'CHE-450': { code: 'CHE 450', name: 'Chemical Process Analysis and Design I', shortName: 'Design I', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: ['CHE-352', 'ENGL-402'], alternatives: [], notes: '' },
+            'CHE-352': { code: 'CHE 352', name: 'Chemical Process Safety', shortName: 'Proc Safety', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-321', 'CHE-332'], coreqs: [], alternatives: [], notes: '' },
+            'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
+
+            'CHE-433': { code: 'CHE 433', name: 'Chemical Engineering Lab II [M]', shortName: 'Lab II [M]', credits: 2, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['CHE-432'], coreqs: [], alternatives: [], notes: '' },
+            'CHE-451': { code: 'CHE 451', name: 'Chemical Process Analysis and Design II [M]', shortName: 'Design II [M]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['CHE-450'], coreqs: [], alternatives: [], notes: '' },
+            'ELEC-CHE-1': { code: 'Elective', name: 'Chemical Engineering Elective', shortName: 'CHE Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level CHE course not used to fulfill major requirements. A maximum of 3 credits is allowed in CHE 488, 495, and 499 combined.' },
+            'ELEC-CHE-2': { code: 'Elective', name: 'Chemical Engineering Elective', shortName: 'CHE Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level CHE course not used to fulfill major requirements. A maximum of 3 credits is allowed in CHE 488, 495, and 499 combined.' },
+            'ELEC-TECH-2': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'MSE 201 or any 300-400-level BIO ENG, CHEM, CHE, CE, E E, ENGR, MATH, ME, MSE, PHYSICS, or STAT course as approved by advisor.' }
+                },
+                semesterOrder: [
+                    'Year 1 Fall', 'Year 1 Spring',
+                    'Year 2 Fall', 'Year 2 Spring',
+                    'Year 3 Fall', 'Year 3 Spring',
+                    'Year 4 Fall', 'Year 4 Spring'
+                ]
+            },
+            'BIOENG-BMSE': {
+                name: 'Bioengineering: Biomedical Systems',
+                fullTitle: 'Bachelor of Science - Bioengineering: Biomedical Systems (4 Year Plan)',
+                courseData: {
+                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
+                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Contemp Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. No prerequisites.'], notes: '' },
+                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calc I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+
+                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
+                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calc II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
+
+                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.' },
+                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
+                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Alg', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
+                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calc III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
+                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
+                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
+
+                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
+                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Diff Eq', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
+                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
+                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
+                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
+                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 2 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
+
+                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '' },
+                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '' },
+                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instrum [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '' },
+                    'CE-211': { code: 'C E 211', name: 'Statics', shortName: 'Statics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: ['MATH-172', 'PHYS-201'], alternatives: [], notes: '' },
+                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
+
+                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '' },
+                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-COMM': { code: 'Elective', name: 'Communication or Writing Elective', shortName: '[COMM]/[WRTG]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose a UCORE [COMM] or [WRTG] course.<br><br>[COMM] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/comm/<br><br>[WRTG] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/wrtg/' },
+                    'EE-261': { code: 'E E 261', name: 'Electrical Circuits I', shortName: 'Circuits I', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['PHYS-202', 'PHYS-212'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
+
+                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I', shortName: 'Capstone I', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '' },
+                    'BIOENG-420': { code: 'BIO ENG 420', name: 'Mechanics of Biological Materials', shortName: 'Bio Mechanics', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CE-211'], coreqs: [], alternatives: [], notes: 'Requires senior standing.' },
+                    'BIOENG-430': { code: 'BIO ENG 430', name: 'Bioinstrumentation', shortName: 'Bioinstrument', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['EE-261', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '' },
+                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
+                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
+
+                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '' },
+                    'BIOENG-440': { code: 'BIO ENG 440', name: 'Physiological Control Systems', shortName: 'Phys Control Sys', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-360'], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-BIOENG': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose from approved Bioengineering electives. Consult with advisor.' },
+                    'ELEC-TECH': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 300-400 level BIO ENG, CHEM, CHE, CE, CS, E E, ENGR, MATH, ME, MSE, PHYSICS, or STAT course as approved by advisor.' },
+                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
+                    'EXIT-INTERVIEW': { code: 'Exit Interview', name: 'Complete BIO ENG Exit Interview', shortName: 'Exit Interview', credits: 0, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Required milestone - complete the exit interview before graduation.' }
+                },
+                semesterOrder: [
+                    'Year 1 Fall', 'Year 1 Spring',
+                    'Year 2 Fall', 'Year 2 Spring',
+                    'Year 3 Fall', 'Year 3 Spring',
+                    'Year 4 Fall', 'Year 4 Spring'
+                ]
+            },
+            'BIOENG-CMBE': {
+                name: 'Bioengineering: Cellular/Molecular Bioengineering',
+                fullTitle: 'Bachelor of Science - Bioengineering: Cellular/Molecular Bioengineering (4 Year Plan)',
+                courseData: {
+                    // TODO: Add BIOENG-CMBE data - placeholder for now
+                },
+                semesterOrder: [
+                    'Year 1 Fall', 'Year 1 Spring',
+                    'Year 2 Fall', 'Year 2 Spring',
+                    'Year 3 Fall', 'Year 3 Spring',
+                    'Year 4 Fall', 'Year 4 Spring'
+                ]
+            },
+            'BIOENG-PREMED-BMSE': {
+                name: 'Bioengineering: Pre-Med Biomedical Systems',
+                fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Biomedical Systems (4 Year Plan)',
+                courseData: {
+                    // TODO: Add BIOENG-PREMED-BMSE data - placeholder for now
+                },
+                semesterOrder: [
+                    'Year 1 Fall', 'Year 1 Spring',
+                    'Year 2 Fall', 'Year 2 Spring',
+                    'Year 3 Fall', 'Year 3 Spring',
+                    'Year 4 Fall', 'Year 4 Spring'
+                ]
+            },
+            'BIOENG-PREMED-CMBE': {
+                name: 'Bioengineering: Pre-Med Cellular/Molecular',
+                fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Cellular/Molecular (4 Year Plan)',
+                courseData: {
+                    // TODO: Add BIOENG-PREMED-CMBE data - placeholder for now
+                },
+                semesterOrder: [
+                    'Year 1 Fall', 'Year 1 Spring',
+                    'Year 2 Fall', 'Year 2 Spring',
+                    'Year 3 Fall', 'Year 3 Spring',
+                    'Year 4 Fall', 'Year 4 Spring'
+                ]
+            }
+        };
+
+        // Current program state
+        let currentProgram = 'CHE';
+        let courseData = programsData[currentProgram].courseData;
+        let semesterOrder = programsData[currentProgram].semesterOrder;
 
         // Make courseData and semesterOrder available globally
         window.courseData = courseData;
@@ -398,17 +602,26 @@
         
         function showNotesTooltip(courseKey, event, indicatorElement) {
             event.stopPropagation();
-            
+
+            // Close any open tooltips first
+            closeAlternativesTooltip();
+
             const course = courseData[courseKey];
             if (!course || !course.notes || course.notes.trim() === '') return;
-            
+
             const tooltip = document.getElementById('notesTooltip');
             const header = document.getElementById('tooltipHeader');
             const content = document.getElementById('tooltipContent');
             const announcer = document.getElementById('announcements');
             
             header.textContent = `${course.code} - ${course.name}`;
-            content.textContent = course.notes;
+
+            // Convert URLs in notes to clickable links
+            const notesWithLinks = course.notes.replace(
+                /(https?:\/\/[^\s<]+)/g,
+                '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #A60F2D; text-decoration: underline;">$1</a>'
+            );
+            content.innerHTML = notesWithLinks;
             
             const x = event.clientX;
             const y = event.clientY;
@@ -442,7 +655,7 @@
             }, 0);
         }
         
-        function closeNotesTooltip() {
+        window.closeNotesTooltip = function() {
             const tooltip = document.getElementById('notesTooltip');
             tooltip.classList.remove('visible');
 
@@ -450,12 +663,15 @@
                 currentNotesIndicator.removeAttribute('aria-describedby');
                 currentNotesIndicator = null;
             }
-        }
+        };
 
         let currentAlternativesIndicator = null;
 
         function showAlternativesTooltip(courseKey, event, indicatorElement) {
             event.stopPropagation();
+
+            // Close any open tooltips first
+            closeNotesTooltip();
 
             const course = courseData[courseKey];
             if (!course || !course.alternatives || course.alternatives.length === 0) return;
@@ -514,7 +730,7 @@
             }, 0);
         }
 
-        function closeAlternativesTooltip() {
+        window.closeAlternativesTooltip = function() {
             const tooltip = document.getElementById('alternativesTooltip');
             tooltip.classList.remove('visible');
 
@@ -522,7 +738,7 @@
                 currentAlternativesIndicator.removeAttribute('aria-describedby');
                 currentAlternativesIndicator = null;
             }
-        }
+        };
         
         window.clearHighlights = function() {
             document.querySelectorAll('.course').forEach(courseDiv => {
@@ -566,32 +782,32 @@
             svg.setAttribute('height', container.scrollHeight);
         }
         
-        function drawConnection(fromKey, toKey, color, type) {
+        function drawConnection(fromKey, toKey, color, type, sourcePositionIndex) {
             const fromDiv = document.querySelector(`[data-course-key="${fromKey}"]`);
             const toDiv = document.querySelector(`[data-course-key="${toKey}"]`);
             const svg = document.getElementById('connectionsSvg');
             const wrapper = document.getElementById('visualView');
             const container = document.getElementById('flowchartContainer');
-            
+
             if (!fromDiv || !toDiv || !svg || !wrapper || !container) return;
-            
+
             const fromRect = fromDiv.getBoundingClientRect();
             const toRect = toDiv.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
             const wrapperRect = wrapper.getBoundingClientRect();
-            
+
             const scrollLeft = wrapper.scrollLeft;
             const scrollTop = wrapper.scrollTop;
-            
+
             const fromCourse = courseData[fromKey];
             const toCourse = courseData[toKey];
             const sameSemester = fromCourse.semester === toCourse.semester;
-            
+
             let fromX, fromY, toX, toY;
-            
+
             if (sameSemester) {
                 const fromIsAbove = fromRect.top < toRect.top;
-                
+
                 if (fromIsAbove) {
                     fromX = fromRect.left - wrapperRect.left + scrollLeft + fromRect.width / 2;
                     fromY = fromRect.top - wrapperRect.top + scrollTop + fromRect.height;
@@ -607,86 +823,51 @@
                 if (!sourceConnectionCounts[fromKey]) {
                     sourceConnectionCounts[fromKey] = 0;
                 }
-                
+
                 const sourceIndex = sourceConnectionCounts[fromKey];
                 const totalSourceConnections = window.srcTotalConnections[fromKey] || 1;
-                
+
                 let sourceVerticalOffset = 0;
                 if (totalSourceConnections > 1) {
                     const spacing = 15;
                     const totalSpread = (totalSourceConnections - 1) * spacing;
                     sourceVerticalOffset = (sourceIndex * spacing) - (totalSpread / 2);
                 }
-                
+
                 sourceConnectionCounts[fromKey]++;
-                
-                if (!connectionCounts[toKey]) {
-                    connectionCounts[toKey] = 0;
-                }
-                
-                const connectionIndex = connectionCounts[toKey];
+
+                // Use sourcePositionIndex to determine destination point
+                // Sources with higher positions get higher destination points
                 const totalConnections = window.destTotalConnections[toKey] || 1;
-                
+
                 let destVerticalOffset = 0;
-                if (totalConnections > 1) {
+                if (totalConnections > 1 && sourcePositionIndex !== undefined) {
                     const spacing = 15;
                     const totalSpread = (totalConnections - 1) * spacing;
-                    destVerticalOffset = (connectionIndex * spacing) - (totalSpread / 2);
+                    destVerticalOffset = (sourcePositionIndex * spacing) - (totalSpread / 2);
                 }
-                
-                connectionCounts[toKey]++;
-                
+
                 fromX = fromRect.left - wrapperRect.left + scrollLeft + fromRect.width;
                 fromY = fromRect.top - wrapperRect.top + scrollTop + fromRect.height / 2 + sourceVerticalOffset;
-                
+
                 toX = toRect.left - wrapperRect.left + scrollLeft;
                 toY = toRect.top - wrapperRect.top + scrollTop + toRect.height / 2 + destVerticalOffset;
             }
             
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             const d = `M ${fromX} ${fromY} L ${toX} ${toY}`;
-            
+
             path.setAttribute('d', d);
             path.setAttribute('stroke', color);
             path.setAttribute('stroke-width', '3');
             path.setAttribute('fill', 'none');
             path.setAttribute('stroke-opacity', '0.7');
-            path.setAttribute('marker-end', `url(#arrow-${type})`);
-            
+
             svg.appendChild(path);
         }
         
         function createArrowMarkers() {
-            const svg = document.getElementById('connectionsSvg');
-            if (!svg) return;
-            
-            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-            
-            const types = [
-                { id: 'prereq', color: '#ff9800' },
-                { id: 'coreq', color: '#2196f3' },
-                { id: 'leadsto', color: '#4caf50' }
-            ];
-            
-            types.forEach(type => {
-                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-                marker.setAttribute('id', `arrow-${type.id}`);
-                marker.setAttribute('markerWidth', '10');
-                marker.setAttribute('markerHeight', '10');
-                marker.setAttribute('refX', '9');
-                marker.setAttribute('refY', '3');
-                marker.setAttribute('orient', 'auto');
-                marker.setAttribute('markerUnits', 'strokeWidth');
-                
-                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                polygon.setAttribute('points', '0 0, 10 3, 0 6');
-                polygon.setAttribute('fill', type.color);
-                
-                marker.appendChild(polygon);
-                defs.appendChild(marker);
-            });
-            
-            svg.appendChild(defs);
+            // Arrow markers removed - not currently used
         }
         
         window.highlightRelatedCourses = function(courseKey) {
@@ -824,16 +1005,96 @@
                     window.destTotalConnections = destConnectionCounts;
                     window.srcTotalConnections = srcConnectionCounts;
                     
-                    prereqsSorted.forEach(prereqKey => {
-                        drawConnection(prereqKey, courseKey, '#ff9800', 'prereq');
+                    // Combine prereqs and coreqs with their types and calculate angles
+                    const courseDiv = document.querySelector(`[data-course-key="${courseKey}"]`);
+                    const courseRect = courseDiv ? courseDiv.getBoundingClientRect() : null;
+
+                    // Filter out coreqs in same semester (they use vertical connections without offsets)
+                    const coreqsDifferentSemester = coreqsSorted.filter(key => {
+                        const coreqCourse = courseData[key];
+                        return coreqCourse && coreqCourse.semester !== course.semester;
                     });
-                    
-                    coreqsSorted.forEach(coreqKey => {
-                        drawConnection(coreqKey, courseKey, '#2196f3', 'coreq');
+
+                    const incomingConnections = [
+                        ...prereqsSorted.map(key => ({key, type: 'prereq', color: '#ff9800'})),
+                        ...coreqsDifferentSemester.map(key => ({key, type: 'coreq', color: '#2196f3'}))
+                    ];
+
+                    // Calculate position and angle from each source to destination
+                    incomingConnections.forEach(conn => {
+                        const sourceDiv = document.querySelector(`[data-course-key="${conn.key}"]`);
+                        if (sourceDiv && courseRect) {
+                            const sourceRect = sourceDiv.getBoundingClientRect();
+                            conn.verticalPos = sourceRect.top + sourceRect.height / 2;
+                            const dx = courseRect.left - (sourceRect.left + sourceRect.width);
+                            const dy = (courseRect.top + courseRect.height / 2) - (sourceRect.top + sourceRect.height / 2);
+                            conn.angle = Math.atan2(dy, dx);
+                        } else {
+                            conn.verticalPos = 0;
+                            conn.angle = 0;
+                        }
                     });
-                    
-                    leadsToSorted.forEach(leadsToKey => {
-                        drawConnection(courseKey, leadsToKey, '#4caf50', 'leadsto');
+
+                    // Sort primarily by vertical position, secondarily by angle
+                    incomingConnections.sort((a, b) => {
+                        const verticalDiff = a.verticalPos - b.verticalPos;
+                        // If vertical positions are significantly different (>20px), use that
+                        if (Math.abs(verticalDiff) > 20) {
+                            return verticalDiff;
+                        }
+                        // Otherwise use angle to break ties
+                        return a.angle - b.angle;
+                    });
+
+                    // Draw all incoming connections with continuous indexing based on angle
+                    incomingConnections.forEach((conn, index) => {
+                        drawConnection(conn.key, courseKey, conn.color, conn.type, index);
+                    });
+
+                    // Draw coreqs in same semester (they don't use the offset system)
+                    const coreqsSameSemester = coreqsSorted.filter(key => {
+                        const coreqCourse = courseData[key];
+                        return coreqCourse && coreqCourse.semester === course.semester;
+                    });
+                    coreqsSameSemester.forEach(coreqKey => {
+                        drawConnection(coreqKey, courseKey, '#2196f3', 'coreq', undefined);
+                    });
+
+                    // Calculate angles for outgoing connections
+                    const outgoingConnections = leadsToSorted.map(key => ({
+                        key,
+                        type: 'leadsto',
+                        color: '#4caf50'
+                    }));
+
+                    outgoingConnections.forEach(conn => {
+                        const destDiv = document.querySelector(`[data-course-key="${conn.key}"]`);
+                        if (destDiv && courseRect) {
+                            const destRect = destDiv.getBoundingClientRect();
+                            conn.verticalPos = destRect.top + destRect.height / 2;
+                            const dx = destRect.left - (courseRect.left + courseRect.width);
+                            const dy = (destRect.top + destRect.height / 2) - (courseRect.top + courseRect.height / 2);
+                            conn.angle = Math.atan2(dy, dx);
+                        } else {
+                            conn.verticalPos = 0;
+                            conn.angle = 0;
+                        }
+                    });
+
+                    // Sort primarily by vertical position, secondarily by angle
+                    outgoingConnections.sort((a, b) => {
+                        const verticalDiff = a.verticalPos - b.verticalPos;
+                        // If vertical positions are significantly different (>20px), use that
+                        if (Math.abs(verticalDiff) > 20) {
+                            return verticalDiff;
+                        }
+                        // Otherwise use angle to break ties
+                        return a.angle - b.angle;
+                    });
+
+                    // Draw outgoing connections with angle-based indexing
+                    outgoingConnections.forEach((conn, index) => {
+                        drawConnection(courseKey, conn.key, conn.color, conn.type, index);
                     });
                     
                     announceSelection(courseKey, course, leadsToSorted);
@@ -898,16 +1159,22 @@
                 if (courseCode.startsWith('CHE-')) return 1;
                 if (courseCode.startsWith('BIOENG-')) return 1;
                 if (courseCode.startsWith('ELEC-CHE')) return 2;
-                if (courseCode.startsWith('ELEC-TECH')) return 3;
-                if (courseCode.startsWith('CHEM-')) return 4;
-                if (courseCode.startsWith('MATH-')) return 5;
-                if (courseCode.startsWith('PHYS-')) return 6;
-                if (courseCode.startsWith('BIOLOGY-')) return 7;
-                if (courseCode.startsWith('ENGL-')) return 8;
-                if (courseCode.startsWith('HIST-')) return 9;
-                if (courseCode.startsWith('ECONS-')) return 10;
-                if (courseCode.startsWith('ELEC-')) return 11;
-                return 12;
+                if (courseCode.startsWith('ELEC-BIOENG')) return 2;
+                if (courseCode.startsWith('ENGR-')) return 3;
+                if (courseCode.startsWith('EE-')) return 3;  // Electrical Engineering
+                if (courseCode.startsWith('CE-')) return 3;  // Civil Engineering
+                if (courseCode.startsWith('ELEC-TECH')) return 4;
+                if (courseCode.startsWith('CHEM-')) return 5;
+                if (courseCode.startsWith('MBIOS-')) return 5;  // Treat MBIOS like chemistry
+                if (courseCode.startsWith('MATH-')) return 6;
+                if (courseCode.startsWith('PHYS-')) return 7;
+                if (courseCode.startsWith('BIOLOGY-')) return 8;
+                if (courseCode.startsWith('ENGL-')) return 9;
+                if (courseCode.startsWith('HIST-')) return 10;
+                if (courseCode.startsWith('ECONS-')) return 11;
+                if (courseCode.startsWith('ELEC-')) return 12;
+                if (courseCode.startsWith('STAT-')) return 13;
+                return 14;
             }
             
             semesterOrder.forEach(semester => {
@@ -967,6 +1234,14 @@
 
                         notesIndicator.addEventListener('click', (e) => {
                             e.stopPropagation();
+
+                            // Check if clicking the same indicator to toggle off
+                            const tooltip = document.getElementById('notesTooltip');
+                            if (tooltip && tooltip.classList.contains('visible') && currentNotesIndicator === courseDiv) {
+                                closeNotesTooltip();
+                                return;
+                            }
+
                             const rect = courseDiv.getBoundingClientRect();
                             const syntheticEvent = {
                                 clientX: rect.left + rect.width / 2,
@@ -989,6 +1264,14 @@
 
                         alternativesIndicator.addEventListener('click', (e) => {
                             e.stopPropagation();
+
+                            // Check if clicking the same indicator to toggle off
+                            const tooltip = document.getElementById('alternativesTooltip');
+                            if (tooltip && tooltip.classList.contains('visible') && currentAlternativesIndicator === alternativesIndicator) {
+                                closeAlternativesTooltip();
+                                return;
+                            }
+
                             const rect = courseDiv.getBoundingClientRect();
                             const syntheticEvent = {
                                 clientX: rect.left + rect.width / 2,
@@ -1003,6 +1286,22 @@
                     }
                     
                     courseDiv.addEventListener('click', (e) => {
+                        // Close any open tooltips first
+                        const notesTooltip = document.getElementById('notesTooltip');
+                        const alternativesTooltip = document.getElementById('alternativesTooltip');
+
+                        if (!e.target.closest('.notes-indicator')) {
+                            if (notesTooltip && notesTooltip.classList.contains('visible')) {
+                                closeNotesTooltip();
+                            }
+                        }
+
+                        if (!e.target.closest('.alternatives-indicator')) {
+                            if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
+                                closeAlternativesTooltip();
+                            }
+                        }
+
                         e.stopPropagation();
                         if (selectedCourseKey === course.key) {
                             window.clearHighlights();
@@ -1051,29 +1350,111 @@
                 container.appendChild(column);
             });
         }
-        
-        document.addEventListener('DOMContentLoaded', function() {
+
+        window.switchProgram = function() {
+            const select = document.getElementById('programSelect');
+            const newProgram = select.value;
+
+            if (newProgram === currentProgram) return;
+
+            // Close any open tooltips
+            closeNotesTooltip();
+            closeAlternativesTooltip();
+
+            // Clear highlights
+            window.clearHighlights();
+
+            // Update current program
+            currentProgram = newProgram;
+            courseData = programsData[currentProgram].courseData;
+            semesterOrder = programsData[currentProgram].semesterOrder;
+
+            // Update global references
+            window.courseData = courseData;
+            window.semesterOrder = semesterOrder;
+
+            // Update page title
+            const programTitle = document.getElementById('programTitle');
+            if (programTitle) {
+                programTitle.textContent = programsData[currentProgram].fullTitle;
+            }
+
+            // Clear existing flowchart and text view
+            const flowchartContainer = document.getElementById('flowchartContainer');
+            const textContent = document.getElementById('textContent');
+            const svg = document.getElementById('connectionsSvg');
+
+            if (flowchartContainer) flowchartContainer.innerHTML = '';
+            if (textContent) textContent.innerHTML = '';
+            if (svg) svg.innerHTML = '';
+
+            // Rebuild everything
             leadsToMap = buildLeadsToMap();
             buildFlowchart();
             buildTextView();
             setupScrollIndicators();
             createArrowMarkers();
-            
             updateSVGSize();
-            
+
+            // Announce the change
+            const announcer = document.getElementById('announcements');
+            if (announcer) {
+                announcer.textContent = `Switched to ${programsData[currentProgram].name} program.`;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for URL parameter to set initial program
+            const urlParams = new URLSearchParams(window.location.search);
+            const programParam = urlParams.get('program');
+            if (programParam && programsData[programParam]) {
+                currentProgram = programParam;
+                courseData = programsData[currentProgram].courseData;
+                semesterOrder = programsData[currentProgram].semesterOrder;
+                window.courseData = courseData;
+                window.semesterOrder = semesterOrder;
+
+                // Update dropdown
+                const select = document.getElementById('programSelect');
+                if (select) select.value = currentProgram;
+
+                // Update title
+                const programTitle = document.getElementById('programTitle');
+                if (programTitle) {
+                    programTitle.textContent = programsData[currentProgram].fullTitle;
+                }
+            }
+
+            leadsToMap = buildLeadsToMap();
+            buildFlowchart();
+            buildTextView();
+            setupScrollIndicators();
+            createArrowMarkers();
+
+            updateSVGSize();
+
             window.addEventListener('resize', updateSVGSize);
             
             document.addEventListener('click', (e) => {
+                // Close tooltips if clicking outside
+                const notesTooltip = document.getElementById('notesTooltip');
+                const alternativesTooltip = document.getElementById('alternativesTooltip');
+
+                if (notesTooltip && notesTooltip.classList.contains('visible')) {
+                    if (!e.target.closest('#notesTooltip') && !e.target.closest('.notes-indicator')) {
+                        closeNotesTooltip();
+                    }
+                }
+
+                if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
+                    if (!e.target.closest('#alternativesTooltip') && !e.target.closest('.alternatives-indicator')) {
+                        closeAlternativesTooltip();
+                    }
+                }
+
+                // Clear course highlights if clicking outside
                 if (!e.target.closest('.course') && selectedCourseKey) {
                     window.clearHighlights();
-                }
-
-                if (!e.target.closest('.notes-tooltip') && !e.target.closest('.notes-indicator')) {
-                    closeNotesTooltip();
-                }
-
-                if (!e.target.closest('#alternativesTooltip') && !e.target.closest('.alternatives-indicator')) {
-                    closeAlternativesTooltip();
                 }
             });
         });
@@ -1082,9 +1463,12 @@
             const container = document.getElementById('flowchartContainer');
             const indicatorsDiv = document.getElementById('scrollIndicators');
             const wrapper = document.getElementById('visualView');
-            
+
             if (!container || !indicatorsDiv || !wrapper) return;
-            
+
+            // Clear existing indicators
+            indicatorsDiv.innerHTML = '';
+
             semesterOrder.forEach((semester, index) => {
                 const dot = document.createElement('button');
                 dot.className = 'scroll-dot';
@@ -1212,41 +1596,41 @@
         
         function buildTextView() {
             const container = document.getElementById('textContent');
-            
+
             const courseBySemester = {};
             semesterOrder.forEach(sem => courseBySemester[sem] = []);
-            
+
             Object.entries(courseData).forEach(([key, course]) => {
                 courseBySemester[course.semester].push({key, ...course});
             });
-            
+
             semesterOrder.forEach(semester => {
                 const semesterDiv = document.createElement('div');
                 semesterDiv.className = 'text-semester';
-                
+
                 const header = document.createElement('h3');
                 header.textContent = semester;
                 semesterDiv.appendChild(header);
-                
+
                 courseBySemester[semester].forEach(course => {
                     const courseDiv = document.createElement('div');
                     courseDiv.className = `text-course ${course.type}`;
-                    
+
                     const heading = document.createElement('h4');
                     heading.textContent = `${course.code} - ${course.name} (${course.credits} credits)`;
                     courseDiv.appendChild(heading);
-                    
+
                     const typeMap = {
                         'engineering': 'Engineering',
                         'science': course.code.startsWith('MATH') ? 'Math' : 'Science',
                         'ucore': 'UCORE',
                         'technical': 'Technical Elective'
                     };
-                    
+
                     const typeP = document.createElement('p');
                     typeP.textContent = `Type: ${typeMap[course.type]}`;
                     courseDiv.appendChild(typeP);
-                    
+
                     const prereqP = document.createElement('p');
                     if (course.prereqs.length > 0) {
                         const prereqNames = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
@@ -1255,7 +1639,7 @@
                         prereqP.innerHTML = `<strong>Prerequisites:</strong> None`;
                     }
                     courseDiv.appendChild(prereqP);
-                    
+
                     if (course.coreqs.length > 0) {
                         const coreqP = document.createElement('p');
                         const coreqNames = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
@@ -1273,8 +1657,6 @@
                             ).join('');
                             altP.innerHTML = `<strong>Alternatives:</strong>${altList}`;
                         }
-                        altP.style.color = '#00bcd4';
-                        altP.style.fontWeight = '500';
                         courseDiv.appendChild(altP);
                     }
 
@@ -1285,56 +1667,66 @@
                         notesP.style.color = '#444';
                         courseDiv.appendChild(notesP);
                     }
-                    
+
                     semesterDiv.appendChild(courseDiv);
                 });
-                
+
                 container.appendChild(semesterDiv);
             });
         }
-        
-        function toggleKeyboardHint() {
+
+        window.toggleLegend = function() {
+            const heading = document.getElementById('legendToggle');
+            const content = document.getElementById('legendContent');
+
+            const isCollapsed = heading.classList.toggle('collapsed');
+            content.classList.toggle('hidden');
+
+            heading.setAttribute('aria-expanded', !isCollapsed);
+        };
+
+        window.toggleKeyboardHint = function() {
             const heading = document.getElementById('keyboardToggle');
             const list = document.getElementById('keyboardList');
-            
+
             const isCollapsed = heading.classList.toggle('collapsed');
             list.classList.toggle('hidden');
-            
+
             heading.setAttribute('aria-expanded', !isCollapsed);
-        }
-        
+        };
+
         let currentView = 'visual';
-        function toggleView() {
+        window.toggleView = function() {
             const visualView = document.getElementById('visualView');
             const textView = document.getElementById('textView');
             const scrollControls = document.querySelector('.scroll-controls');
             const btn = document.getElementById('toggleBtn');
             const announcer = document.getElementById('announcements');
-            
+
             if (currentView === 'visual') {
                 visualView.style.display = 'none';
                 textView.style.display = 'block';
                 scrollControls.style.display = 'none';
                 btn.textContent = 'Switch to Visual Flowchart';
-                
+
                 if (announcer) {
                     announcer.textContent = 'Switched to text-only view. Courses are now listed by semester with full details.';
                 }
-                
+
                 currentView = 'text';
             } else {
                 visualView.style.display = 'block';
                 textView.style.display = 'none';
                 scrollControls.style.display = 'block';
                 btn.textContent = 'Switch to Text-Only View';
-                
+
                 if (announcer) {
                     announcer.textContent = 'Switched to visual flowchart view. Interactive course boxes are now displayed.';
                 }
-                
+
                 currentView = 'visual';
             }
-        }
+        };
         
         document.addEventListener('keydown', (e) => {
             const focusedElement = document.activeElement;
