@@ -192,17 +192,17 @@
         }
         
         .text-semester { margin-bottom: 40px; }
-        .text-semester h3 { color: #A60F2D; font-size: 1.4em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #A60F2D; }
+        .text-semester h2 { color: #A60F2D; font-size: 1.4em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #A60F2D; }
         .text-course { margin-bottom: 15px; padding: 15px; border-left: 5px solid #1565c0; background: #f5f5f5; border-radius: 4px; }
         .text-course.science { border-left-color: #2e7d32; }
         .text-course.ucore { border-left-color: #6a1b9a; }
         .text-course h4 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
         .text-course p { margin: 5px 0; color: #666; }
         .keyboard-hint { background: #f0f0f0; padding: 15px; margin-bottom: 20px; border-radius: 6px; border-left: 4px solid #A60F2D; }
-        .keyboard-hint h3 { font-size: 1em; margin-bottom: 8px; color: #A60F2D; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; }
-        .keyboard-hint h3:hover { color: #8a0c24; }
-        .keyboard-hint h3::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s ease; }
-        .keyboard-hint h3.collapsed::after { transform: rotate(-90deg); }
+        .keyboard-hint h2 { font-size: 1em; margin-bottom: 8px; color: #A60F2D; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; font-weight: bold; }
+        .keyboard-hint h2:hover { color: #8a0c24; }
+        .keyboard-hint h2::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s ease; }
+        .keyboard-hint h2.collapsed::after { transform: rotate(-90deg); }
         .keyboard-hint ul { margin-left: 20px; transition: all 0.3s ease; overflow: hidden; }
         .keyboard-hint ul.hidden { max-height: 0; opacity: 0; margin: 0; }
         .keyboard-hint li { margin: 5px 0; }
@@ -346,7 +346,7 @@
         </div>
 
         <div class="keyboard-hint">
-            <h3 id="keyboardToggle" class="collapsed" onclick="toggleKeyboardHint()">⌨️ Keyboard Navigation</h3>
+            <h2 id="keyboardToggle" class="collapsed" onclick="toggleKeyboardHint()">⌨️ Keyboard Navigation</h2>
             <ul id="keyboardList" class="hidden">
                 <li><kbd>Tab</kbd> - Navigate between courses and buttons</li>
                 <li><kbd>Enter</kbd> or <kbd>Space</kbd> - Select course to view prerequisites</li>
@@ -365,7 +365,9 @@
         </div>
         
         <div class="diagram-wrapper" id="visualView">
-            <svg id="connectionsSvg" aria-hidden="true" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;"></svg>
+            <svg id="connectionsSvg" aria-hidden="true" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;">
+                <title>Decorative connection lines between courses</title>
+            </svg>
             <div class="diagram-container" id="flowchartContainer"></div>
         </div>
         <div class="scroll-controls">
@@ -1608,7 +1610,7 @@
                 const semesterDiv = document.createElement('div');
                 semesterDiv.className = 'text-semester';
 
-                const header = document.createElement('h3');
+                const header = document.createElement('h2');
                 header.textContent = semester;
                 semesterDiv.appendChild(header);
 
