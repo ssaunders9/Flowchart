@@ -7,7 +7,13 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; line-height: 1.6; padding: 1.25rem; background: #f5f5f5; }
-        
+
+        /* Standardized focus indicator for accessibility */
+        *:focus {
+            outline: 3px solid #A60F2D;
+            outline-offset: 2px;
+        }
+
         .skip-link { position: absolute; top: -2.5rem; left: 0; background: #A60F2D; color: white; padding: 0.5rem 1rem; text-decoration: none; z-index: 100; font-weight: bold; }
         .skip-link:focus { top: 0; }
 
@@ -28,7 +34,8 @@
             color: #A60F2D;
             font-weight: bold;
             cursor: pointer;
-            min-width: 300px;
+            max-width: 100%;
+            min-width: min(300px, 100%);
         }
         .program-selector select:focus {
             outline: 3px solid #fff;
@@ -40,15 +47,17 @@
         .program-selector select optgroup {
             font-weight: bold;
         }
-        .diagram-wrapper { background: white; padding: 1.875rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; scroll-behavior: smooth; }
-        .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 30px; scroll-snap-type: x mandatory; margin: 0 auto; }
+        .diagram-wrapper { background: white; padding: 1.875rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; scroll-behavior: smooth; display: flex; justify-content: flex-start; }
+        .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 30px; scroll-snap-type: x mandatory; }
+
+        @media (min-width: 1700px) {
+            .diagram-wrapper { justify-content: center; }
+        }
         .semester-column { flex: 0 0 180px; display: flex; flex-direction: column; gap: 12px; scroll-snap-align: start; }
         .semester-header { font-size: 1em; font-weight: bold; color: white; background: #A60F2D; padding: 0.625rem; border-radius: 0.375rem; text-align: center; margin-bottom: 0.313rem; }
         .semester-header .credits { font-weight: normal; font-size: 0.85em; opacity: 0.9; }
         .course { padding: 0.625rem; border-radius: 0.375rem; border: 3px solid #333; min-height: 4.688rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
-        .course:focus { 
-            outline: 3px solid #000; 
-            outline-offset: 2px; 
+        .course:focus {
             box-shadow: 0 0 0 5px rgba(166, 15, 45, 0.3);
             transform: translateY(-2px);
         }
@@ -224,8 +233,8 @@
         }
         
         .text-semester { margin-bottom: 40px; }
-        .text-semester h2 { color: #A60F2D; font-size: 1.4em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #A60F2D; }
-        .text-semester h3 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
+        .text-semester h3 { color: #A60F2D; font-size: 1.4em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #A60F2D; }
+        .text-semester h4 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
         .text-course { margin-bottom: 15px; padding: 15px; border-left: 5px solid #1565c0; background: #f5f5f5; border-radius: 4px; }
         .text-course.science { border-left-color: #2e7d32; }
         .text-course.ucore { border-left-color: #6a1b9a; }
@@ -254,8 +263,6 @@
         .scroll-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; cursor: pointer; transition: all 0.3s ease; border: 2px solid #ff5252; }
         .scroll-dot:hover { background: #A60F2D; border-color: #8a0c24; transform: scale(1.2); }
         .scroll-dot:focus {
-            outline: 3px solid #A60F2D;
-            outline-offset: 3px;
             background: #A60F2D;
         }
         .scroll-dot.active { background: #A60F2D; width: 14px; height: 14px; border: 3px solid #8a0c24; box-shadow: 0 0 8px rgba(166, 15, 45, 0.5); }
@@ -354,9 +361,159 @@
             background: #8a0c24;
         }
 
-        .modal-button:focus {
-            outline: 3px solid #000;
-            outline-offset: 2px;
+        /* Modal button uses default focus style */
+
+        /* Print Styles */
+        @media print {
+            /* Hide interactive elements */
+            .skip-link,
+            .program-selector,
+            .scroll-indicators,
+            .scroll-hint,
+            .legend button,
+            #guideToggle,
+            #toggleBtn,
+            .modal-overlay,
+            .notes-tooltip,
+            .alternatives-tooltip {
+                display: none !important;
+            }
+
+            /* Reset body and container */
+            body {
+                padding: 0;
+                background: white;
+            }
+
+            header {
+                background: white !important;
+                color: #000 !important;
+                border: 2px solid #000;
+                page-break-after: avoid;
+            }
+
+            h1 {
+                color: #000 !important;
+            }
+
+            .subtitle {
+                color: #333 !important;
+            }
+
+            /* Expand legend */
+            .legend-content {
+                max-height: none !important;
+                opacity: 1 !important;
+            }
+
+            /* Flowchart container - show all semesters */
+            .diagram-wrapper {
+                overflow: visible !important;
+                box-shadow: none;
+                padding: 10px;
+                page-break-inside: avoid;
+            }
+
+            .diagram-container {
+                min-width: 100% !important;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                gap: 15px;
+            }
+
+            .semester-column {
+                flex: 0 0 auto;
+                width: 180px;
+                page-break-inside: avoid;
+            }
+
+            /* Course boxes - ensure good print contrast */
+            .course {
+                border: 2px solid #000 !important;
+                page-break-inside: avoid;
+                box-shadow: none !important;
+                transform: none !important;
+            }
+
+            .course.engineering {
+                background: #d6ebff !important;
+                color: #000 !important;
+            }
+
+            .course.science {
+                background: #d4f4d4 !important;
+                color: #000 !important;
+            }
+
+            .course.ucore {
+                background: #f0d4ff !important;
+                color: #000 !important;
+            }
+
+            .course.technical {
+                background: #e0e0e0 !important;
+                color: #000 !important;
+            }
+
+            .semester-header {
+                background: white !important;
+                color: #000 !important;
+                border: 2px solid #000;
+            }
+
+            /* Hide SVG connections - they don't print well */
+            #connectionsSvg {
+                display: none !important;
+            }
+
+            /* Show badges in print */
+            .notes-indicator,
+            .alternatives-indicator,
+            .relationship-badge,
+            .semester-restriction-badge {
+                border-color: #000 !important;
+            }
+
+            /* Add page breaks between major sections */
+            main {
+                page-break-before: avoid;
+            }
+
+            /* Footer with generation date */
+            body::after {
+                content: "Generated: " attr(data-print-date);
+                display: block;
+                text-align: center;
+                font-size: 0.8em;
+                color: #666;
+                margin-top: 20px;
+                padding-top: 10px;
+                border-top: 1px solid #ccc;
+            }
+
+            /* Remove transitions and animations */
+            * {
+                transition: none !important;
+                animation: none !important;
+            }
+
+            /* Optimize link display */
+            a[href^="http"]::after {
+                content: " (" attr(href) ")";
+                font-size: 0.8em;
+                color: #666;
+            }
+        }
+
+        /* Print-specific layout for landscape */
+        @media print and (orientation: landscape) {
+            .diagram-container {
+                gap: 20px;
+            }
+
+            .semester-column {
+                width: 200px;
+            }
         }
     </style>
 </head>
@@ -388,7 +545,7 @@
         <p class="subtitle" id="programTitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</p>
         <div class="program-selector">
             <label for="programSelect">Select Program:</label>
-            <select id="programSelect" aria-label="Select degree program">
+            <select id="programSelect">
                 <!-- Options will be populated dynamically from programsData -->
             </select>
         </div>
@@ -1691,6 +1848,19 @@
                 
                 container.appendChild(column);
             });
+
+            // Center flowchart on large screens, otherwise start at left
+            setTimeout(() => {
+                centerFlowchartOnInit();
+            }, 0);
+        }
+
+        function centerFlowchartOnInit() {
+            const wrapper = document.getElementById('visualView');
+            if (!wrapper) return;
+
+            // Always start with Year 1 Fall visible (leftmost position)
+            wrapper.scrollLeft = 0;
         }
 
         window.switchProgram = function() {
@@ -1959,6 +2129,14 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Set print date for footer
+            const printDate = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.body.setAttribute('data-print-date', printDate);
+
             // Populate program selector from programsData
             populateProgramSelector();
 
@@ -2070,10 +2248,12 @@
                 const dot = document.createElement('button');
                 dot.className = 'scroll-dot';
                 dot.setAttribute('type', 'button');
-                dot.setAttribute('aria-label', `Jump to ${semester}`);
-                
+
                 if (index === 0) {
                     dot.classList.add('active');
+                    dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
+                } else {
+                    dot.setAttribute('aria-label', `Jump to ${semester}`);
                 }
                 
                 dot.addEventListener('click', () => {
@@ -2123,10 +2303,13 @@
             
             if (scrollLeft + wrapperWidth >= scrollWidth - 5) {
                 dots.forEach((dot, index) => {
+                    const semester = window.semesterOrder[index];
                     if (index === dots.length - 1) {
                         dot.classList.add('active');
+                        dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
                     } else {
                         dot.classList.remove('active');
+                        dot.setAttribute('aria-label', `Jump to ${semester}`);
                     }
                     
                     const column = columns[index];
@@ -2145,10 +2328,13 @@
             
             if (scrollLeft <= 5) {
                 dots.forEach((dot, index) => {
+                    const semester = window.semesterOrder[index];
                     if (index === 0) {
                         dot.classList.add('active');
+                        dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
                     } else {
                         dot.classList.remove('active');
+                        dot.setAttribute('aria-label', `Jump to ${semester}`);
                     }
                     
                     const column = columns[index];
@@ -2179,10 +2365,13 @@
             });
             
             dots.forEach((dot, index) => {
+                const semester = window.semesterOrder[index];
                 if (index === activeIndex) {
                     dot.classList.add('active');
+                    dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
                 } else {
                     dot.classList.remove('active');
+                    dot.setAttribute('aria-label', `Jump to ${semester}`);
                 }
                 
                 const column = columns[index];
@@ -2212,7 +2401,7 @@
                 const semesterDiv = document.createElement('div');
                 semesterDiv.className = 'text-semester';
 
-                const header = document.createElement('h2');
+                const header = document.createElement('h3');
                 header.textContent = semester;
                 semesterDiv.appendChild(header);
 
@@ -2220,7 +2409,7 @@
                     const courseDiv = document.createElement('div');
                     courseDiv.className = `text-course ${course.type}`;
 
-                    const heading = document.createElement('h3');
+                    const heading = document.createElement('h4');
                     heading.textContent = `${course.code} - ${course.name} (${course.credits} credits)`;
                     courseDiv.appendChild(heading);
 
@@ -2340,81 +2529,6 @@
                 }, 100);
             }
         };
-        
-        document.addEventListener('keydown', (e) => {
-            const focusedElement = document.activeElement;
-            
-            if (e.key === 'Escape') {
-                const notesTooltip = document.getElementById('notesTooltip');
-                const alternativesTooltip = document.getElementById('alternativesTooltip');
-
-                if (notesTooltip && notesTooltip.classList.contains('visible')) {
-                    closeNotesTooltip();
-                }
-
-                if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
-                    closeAlternativesTooltip();
-                }
-
-                window.clearHighlights();
-                return;
-            }
-            
-            if (e.key === 'v' || e.key === 'V') {
-                if (!focusedElement.matches('input, textarea')) {
-                    toggleView();
-                }
-                return;
-            }
-            
-            if (!focusedElement.classList.contains('course')) return;
-            
-            const allCourses = Array.from(document.querySelectorAll('.course'));
-            const currentIndex = allCourses.indexOf(focusedElement);
-            let nextIndex = currentIndex;
-            
-            const currentColumn = focusedElement.closest('.semester-column');
-            const columns = Array.from(document.querySelectorAll('.semester-column'));
-            const columnIndex = columns.indexOf(currentColumn);
-            const coursesInColumn = Array.from(currentColumn.querySelectorAll('.course'));
-            const positionInColumn = coursesInColumn.indexOf(focusedElement);
-            
-            switch(e.key) {
-                case 'ArrowRight':
-                    e.preventDefault();
-                    if (columnIndex < columns.length - 1) {
-                        const nextColumn = columns[columnIndex + 1];
-                        const nextColumnCourses = Array.from(nextColumn.querySelectorAll('.course'));
-                        const targetCourse = nextColumnCourses[Math.min(positionInColumn, nextColumnCourses.length - 1)];
-                        if (targetCourse) targetCourse.focus();
-                    }
-                    break;
-                    
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    if (columnIndex > 0) {
-                        const prevColumn = columns[columnIndex - 1];
-                        const prevColumnCourses = Array.from(prevColumn.querySelectorAll('.course'));
-                        const targetCourse = prevColumnCourses[Math.min(positionInColumn, prevColumnCourses.length - 1)];
-                        if (targetCourse) targetCourse.focus();
-                    }
-                    break;
-                    
-                case 'ArrowDown':
-                    e.preventDefault();
-                    if (positionInColumn < coursesInColumn.length - 1) {
-                        coursesInColumn[positionInColumn + 1].focus();
-                    }
-                    break;
-                    
-                case 'ArrowUp':
-                    e.preventDefault();
-                    if (positionInColumn > 0) {
-                        coursesInColumn[positionInColumn - 1].focus();
-                    }
-                    break;
-            }
-        });
     </script>
 </body>
 </html>
