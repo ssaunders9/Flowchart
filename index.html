@@ -470,14 +470,15 @@
             }
 
             /* Hide unnecessary legend sections in print */
-            .legend-section:nth-child(1),  /* Course Types */
-            .legend-section:nth-child(2),  /* Course Relationships */
-            .legend-section:nth-child(4) { /* Keyboard Navigation */
+            /* Note: nth-child counts from h3, so legend-section:nth-child(2) is first section */
+            .legend-section:nth-child(2),  /* Course Types */
+            .legend-section:nth-child(3),  /* Course Relationships */
+            .legend-section:nth-child(5) { /* Keyboard Navigation */
                 display: none !important;
             }
 
-            /* Keep only the Additional Indicators section (3rd section) visible */
-            .legend-section:nth-child(3) {
+            /* Keep only the Additional Indicators section (4th child) visible */
+            .legend-section:nth-child(4) {
                 display: block !important;
             }
 
@@ -494,7 +495,7 @@
                 display: flex !important;
                 flex-wrap: nowrap !important;
                 justify-content: space-between !important;
-                gap: 0.05in !important;
+                gap: 0.02in !important;
             }
 
             .semester-column {
@@ -503,7 +504,7 @@
                 min-width: 0 !important;
                 display: flex;
                 flex-direction: column;
-                gap: 0.18in !important;
+                gap: 0.15in !important;
             }
 
             .semester-header {
