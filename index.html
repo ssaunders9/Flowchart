@@ -370,7 +370,6 @@
             .program-selector,
             .scroll-indicators,
             .scroll-hint,
-            .legend,
             #toggleBtn,
             .modal-overlay,
             .notes-tooltip,
@@ -395,7 +394,7 @@
                 color: #000 !important;
                 border: 1px solid #000;
                 padding: 0.3in !important;
-                margin-bottom: 0.1in !important;
+                margin-bottom: 0.05in !important;
                 border-radius: 0 !important;
             }
 
@@ -408,6 +407,66 @@
             .subtitle {
                 color: #333 !important;
                 font-size: 9pt !important;
+            }
+
+            /* Print legend */
+            .legend {
+                display: block !important;
+                background: white !important;
+                border: 1px solid #000 !important;
+                padding: 0.08in !important;
+                margin-bottom: 0.1in !important;
+                border-radius: 0 !important;
+            }
+
+            .legend-content {
+                display: block !important;
+                max-height: none !important;
+                opacity: 1 !important;
+                margin: 0 !important;
+            }
+
+            #guideToggle {
+                display: none !important;
+            }
+
+            .legend-section {
+                margin-bottom: 0.06in !important;
+            }
+
+            .legend-section:last-child {
+                margin-bottom: 0 !important;
+            }
+
+            .legend-section h4 {
+                font-size: 7pt !important;
+                margin-bottom: 0.03in !important;
+                font-weight: bold !important;
+            }
+
+            .legend-items {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 0.08in !important;
+            }
+
+            .legend-item {
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.03in !important;
+            }
+
+            .legend-box {
+                width: 0.15in !important;
+                height: 0.15in !important;
+                border-radius: 0 !important;
+                border: 1px solid #000 !important;
+                flex-shrink: 0 !important;
+            }
+
+            .legend-label {
+                font-size: 6pt !important;
+                font-weight: normal !important;
             }
 
             /* Flowchart container - compact layout */
@@ -432,32 +491,37 @@
                 min-width: 0 !important;
                 display: flex;
                 flex-direction: column;
-                gap: 0.12in !important;
+                gap: 0.18in !important;
             }
 
             .semester-header {
                 background: white !important;
                 color: #000 !important;
                 border: 1px solid #000 !important;
-                padding: 0.05in !important;
+                padding: 0.08in !important;
                 font-size: 8pt !important;
-                margin-bottom: 0.06in !important;
+                margin-bottom: 0.08in !important;
                 border-radius: 0 !important;
+                line-height: 1.4 !important;
             }
 
             .semester-header .credits {
                 font-size: 7pt !important;
+                display: block !important;
+                margin-top: 0.03in !important;
             }
 
             .semester-header br {
-                display: none;
+                display: block !important;
+                content: "" !important;
+                margin: 0.02in 0 !important;
             }
 
             /* Compact course boxes */
             .course {
                 border: 1px solid #000 !important;
-                padding: 0.06in !important;
-                min-height: 0.55in !important;
+                padding: 0.08in !important;
+                min-height: 0.65in !important;
                 page-break-inside: avoid;
                 box-shadow: none !important;
                 transform: none !important;
