@@ -495,7 +495,7 @@
                 display: flex !important;
                 flex-wrap: nowrap !important;
                 justify-content: space-between !important;
-                gap: 0.02in !important;
+                gap: 0.06in !important;
             }
 
             .semester-column {
@@ -504,7 +504,7 @@
                 min-width: 0 !important;
                 display: flex;
                 flex-direction: column;
-                gap: 0.15in !important;
+                gap: 0.08in !important;
             }
 
             .semester-header {
@@ -538,28 +538,28 @@
             /* Compact course boxes */
             .course {
                 border: 1px solid #000 !important;
-                padding: 0.08in !important;
-                min-height: 0.65in !important;
+                padding: 0.05in !important;
+                min-height: 0.45in !important;
                 page-break-inside: avoid;
                 box-shadow: none !important;
                 transform: none !important;
                 border-radius: 0 !important;
-                font-size: 7pt !important;
+                font-size: 6pt !important;
             }
 
             .course-code {
-                font-size: 7.5pt !important;
-                margin-bottom: 0.01in !important;
+                font-size: 6.5pt !important;
+                margin-bottom: 0.005in !important;
             }
 
             .course-name {
-                font-size: 6.5pt !important;
-                line-height: 1.1 !important;
-                margin-bottom: 0.01in !important;
+                font-size: 5.5pt !important;
+                line-height: 1 !important;
+                margin-bottom: 0.005in !important;
             }
 
             .course-credits {
-                font-size: 6pt !important;
+                font-size: 5pt !important;
             }
 
             .course.engineering {
@@ -1371,9 +1371,6 @@
             const containerRect = container.getBoundingClientRect();
             const wrapperRect = wrapper.getBoundingClientRect();
 
-            const scrollLeft = wrapper.scrollLeft;
-            const scrollTop = wrapper.scrollTop;
-
             const fromCourse = courseData[fromKey];
             const toCourse = courseData[toKey];
             const sameSemester = fromCourse.semester === toCourse.semester;
@@ -1384,15 +1381,15 @@
                 const fromIsAbove = fromRect.top < toRect.top;
 
                 if (fromIsAbove) {
-                    fromX = fromRect.left - wrapperRect.left + scrollLeft + fromRect.width / 2;
-                    fromY = fromRect.top - wrapperRect.top + scrollTop + fromRect.height;
-                    toX = toRect.left - wrapperRect.left + scrollLeft + toRect.width / 2;
-                    toY = toRect.top - wrapperRect.top + scrollTop;
+                    fromX = fromRect.left - containerRect.left + fromRect.width / 2;
+                    fromY = fromRect.top - containerRect.top + fromRect.height;
+                    toX = toRect.left - containerRect.left + toRect.width / 2;
+                    toY = toRect.top - containerRect.top;
                 } else {
-                    fromX = fromRect.left - wrapperRect.left + scrollLeft + fromRect.width / 2;
-                    fromY = fromRect.top - wrapperRect.top + scrollTop;
-                    toX = toRect.left - wrapperRect.left + scrollLeft + toRect.width / 2;
-                    toY = toRect.top - wrapperRect.top + scrollTop + toRect.height;
+                    fromX = fromRect.left - containerRect.left + fromRect.width / 2;
+                    fromY = fromRect.top - containerRect.top;
+                    toX = toRect.left - containerRect.left + toRect.width / 2;
+                    toY = toRect.top - containerRect.top + toRect.height;
                 }
             } else {
                 if (!sourceConnectionCounts[fromKey]) {
@@ -1422,11 +1419,11 @@
                     destVerticalOffset = (sourcePositionIndex * spacing) - (totalSpread / 2);
                 }
 
-                fromX = fromRect.left - wrapperRect.left + scrollLeft + fromRect.width;
-                fromY = fromRect.top - wrapperRect.top + scrollTop + fromRect.height / 2 + sourceVerticalOffset;
+                fromX = fromRect.left - containerRect.left + fromRect.width;
+                fromY = fromRect.top - containerRect.top + fromRect.height / 2 + sourceVerticalOffset;
 
-                toX = toRect.left - wrapperRect.left + scrollLeft;
-                toY = toRect.top - wrapperRect.top + scrollTop + toRect.height / 2 + destVerticalOffset;
+                toX = toRect.left - containerRect.left;
+                toY = toRect.top - containerRect.top + toRect.height / 2 + destVerticalOffset;
             }
             
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
