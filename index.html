@@ -470,17 +470,14 @@
             }
 
             /* Hide unnecessary legend sections in print */
-            .legend-section:first-child,  /* Course Types */
-            .legend-section:nth-child(2) { /* Course Relationships */
-                display: none !important;
-            }
-
+            .legend-section:nth-child(1),  /* Course Types */
+            .legend-section:nth-child(2),  /* Course Relationships */
             .legend-section:nth-child(4) { /* Keyboard Navigation */
                 display: none !important;
             }
 
-            /* Hide specific items from Additional Indicators - keep only notes, alternatives, and semesters */
-            .legend-section:nth-child(3) h4 {
+            /* Keep only the Additional Indicators section (3rd section) visible */
+            .legend-section:nth-child(3) {
                 display: block !important;
             }
 
@@ -497,7 +494,7 @@
                 display: flex !important;
                 flex-wrap: nowrap !important;
                 justify-content: space-between !important;
-                gap: 0.08in !important;
+                gap: 0.05in !important;
             }
 
             .semester-column {
@@ -2633,7 +2630,7 @@
 
                 currentView = 'visual';
 
-                // Move focus to the first course in visual view.
+                // Move focus to the first course in visual view
                 setTimeout(() => {
                     const firstCourse = visualView.querySelector('.course');
                     if (firstCourse) {
