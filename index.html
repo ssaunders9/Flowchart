@@ -538,8 +538,8 @@
             /* Compact course boxes */
             .course {
                 border: 1px solid #000 !important;
-                padding: 0.05in !important;
-                min-height: 0.45in !important;
+                padding: 0.03in 0.04in !important;
+                min-height: 0.4in !important;
                 page-break-inside: avoid;
                 box-shadow: none !important;
                 transform: none !important;
@@ -1368,7 +1368,6 @@
 
             const fromRect = fromDiv.getBoundingClientRect();
             const toRect = toDiv.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
             const wrapperRect = wrapper.getBoundingClientRect();
 
             const fromCourse = courseData[fromKey];
@@ -1381,15 +1380,15 @@
                 const fromIsAbove = fromRect.top < toRect.top;
 
                 if (fromIsAbove) {
-                    fromX = fromRect.left - containerRect.left + fromRect.width / 2;
-                    fromY = fromRect.top - containerRect.top + fromRect.height;
-                    toX = toRect.left - containerRect.left + toRect.width / 2;
-                    toY = toRect.top - containerRect.top;
+                    fromX = fromRect.left - wrapperRect.left + wrapper.scrollLeft + fromRect.width / 2;
+                    fromY = fromRect.top - wrapperRect.top + fromRect.height;
+                    toX = toRect.left - wrapperRect.left + wrapper.scrollLeft + toRect.width / 2;
+                    toY = toRect.top - wrapperRect.top;
                 } else {
-                    fromX = fromRect.left - containerRect.left + fromRect.width / 2;
-                    fromY = fromRect.top - containerRect.top;
-                    toX = toRect.left - containerRect.left + toRect.width / 2;
-                    toY = toRect.top - containerRect.top + toRect.height;
+                    fromX = fromRect.left - wrapperRect.left + wrapper.scrollLeft + fromRect.width / 2;
+                    fromY = fromRect.top - wrapperRect.top;
+                    toX = toRect.left - wrapperRect.left + wrapper.scrollLeft + toRect.width / 2;
+                    toY = toRect.top - wrapperRect.top + toRect.height;
                 }
             } else {
                 if (!sourceConnectionCounts[fromKey]) {
@@ -1419,11 +1418,11 @@
                     destVerticalOffset = (sourcePositionIndex * spacing) - (totalSpread / 2);
                 }
 
-                fromX = fromRect.left - containerRect.left + fromRect.width;
-                fromY = fromRect.top - containerRect.top + fromRect.height / 2 + sourceVerticalOffset;
+                fromX = fromRect.left - wrapperRect.left + wrapper.scrollLeft + fromRect.width;
+                fromY = fromRect.top - wrapperRect.top + fromRect.height / 2 + sourceVerticalOffset;
 
-                toX = toRect.left - containerRect.left;
-                toY = toRect.top - containerRect.top + toRect.height / 2 + destVerticalOffset;
+                toX = toRect.left - wrapperRect.left + wrapper.scrollLeft;
+                toY = toRect.top - wrapperRect.top + toRect.height / 2 + destVerticalOffset;
             }
             
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
