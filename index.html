@@ -469,6 +469,21 @@
                 font-weight: normal !important;
             }
 
+            /* Hide unnecessary legend sections in print */
+            .legend-section:first-child,  /* Course Types */
+            .legend-section:nth-child(2) { /* Course Relationships */
+                display: none !important;
+            }
+
+            .legend-section:nth-child(4) { /* Keyboard Navigation */
+                display: none !important;
+            }
+
+            /* Hide specific items from Additional Indicators - keep only notes, alternatives, and semesters */
+            .legend-section:nth-child(3) h4 {
+                display: block !important;
+            }
+
             /* Flowchart container - compact layout */
             .diagram-wrapper {
                 overflow: visible !important;
@@ -495,14 +510,19 @@
             }
 
             .semester-header {
-                background: white !important;
+                background: #e0e0e0 !important;
                 color: #000 !important;
-                border: 1px solid #000 !important;
-                padding: 0.08in !important;
-                font-size: 8pt !important;
-                margin-bottom: 0.08in !important;
+                border: 2px solid #000 !important;
+                border-top: 3px solid #000 !important;
+                border-bottom: 3px solid #000 !important;
+                padding: 0.1in !important;
+                font-size: 9pt !important;
+                font-weight: bold !important;
+                margin-bottom: 0.12in !important;
                 border-radius: 0 !important;
-                line-height: 1.4 !important;
+                line-height: 1.3 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5pt !important;
             }
 
             .semester-header .credits {
