@@ -370,8 +370,7 @@
             .program-selector,
             .scroll-indicators,
             .scroll-hint,
-            .legend button,
-            #guideToggle,
+            .legend,
             #toggleBtn,
             .modal-overlay,
             .notes-tooltip,
@@ -380,114 +379,157 @@
             }
 
             /* Reset body and container */
+            @page {
+                size: landscape;
+                margin: 0.3in;
+            }
+
             body {
                 padding: 0;
                 background: white;
+                font-size: 9pt;
             }
 
             header {
                 background: white !important;
                 color: #000 !important;
-                border: 2px solid #000;
-                page-break-after: avoid;
+                border: 1px solid #000;
+                padding: 0.3in !important;
+                margin-bottom: 0.1in !important;
+                border-radius: 0 !important;
             }
 
             h1 {
                 color: #000 !important;
+                font-size: 14pt !important;
+                margin-bottom: 0.05in !important;
             }
 
             .subtitle {
                 color: #333 !important;
+                font-size: 9pt !important;
             }
 
-            /* Expand legend */
-            .legend-content {
-                max-height: none !important;
-                opacity: 1 !important;
-            }
-
-            /* Flowchart container - show all semesters */
+            /* Flowchart container - compact layout */
             .diagram-wrapper {
                 overflow: visible !important;
                 box-shadow: none;
-                padding: 10px;
+                padding: 0 !important;
                 page-break-inside: avoid;
             }
 
             .diagram-container {
                 min-width: 100% !important;
-                flex-wrap: wrap;
-                justify-content: flex-start;
-                gap: 15px;
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                justify-content: space-between !important;
+                gap: 0.08in !important;
             }
 
             .semester-column {
-                flex: 0 0 auto;
-                width: 180px;
-                page-break-inside: avoid;
-            }
-
-            /* Course boxes - ensure good print contrast */
-            .course {
-                border: 2px solid #000 !important;
-                page-break-inside: avoid;
-                box-shadow: none !important;
-                transform: none !important;
-            }
-
-            .course.engineering {
-                background: #d6ebff !important;
-                color: #000 !important;
-            }
-
-            .course.science {
-                background: #d4f4d4 !important;
-                color: #000 !important;
-            }
-
-            .course.ucore {
-                background: #f0d4ff !important;
-                color: #000 !important;
-            }
-
-            .course.technical {
-                background: #e0e0e0 !important;
-                color: #000 !important;
+                flex: 1 1 auto !important;
+                width: auto !important;
+                min-width: 0 !important;
+                display: flex;
+                flex-direction: column;
+                gap: 0.04in !important;
             }
 
             .semester-header {
                 background: white !important;
                 color: #000 !important;
-                border: 2px solid #000;
+                border: 1px solid #000 !important;
+                padding: 0.03in !important;
+                font-size: 8pt !important;
+                margin-bottom: 0.02in !important;
+                border-radius: 0 !important;
             }
 
-            /* Hide SVG connections - they don't print well */
+            .semester-header .credits {
+                font-size: 7pt !important;
+            }
+
+            .semester-header br {
+                display: none;
+            }
+
+            /* Compact course boxes */
+            .course {
+                border: 1px solid #000 !important;
+                padding: 0.03in !important;
+                min-height: 0.4in !important;
+                page-break-inside: avoid;
+                box-shadow: none !important;
+                transform: none !important;
+                border-radius: 0 !important;
+                font-size: 7pt !important;
+            }
+
+            .course-code {
+                font-size: 7.5pt !important;
+                margin-bottom: 0.01in !important;
+            }
+
+            .course-name {
+                font-size: 6.5pt !important;
+                line-height: 1.1 !important;
+                margin-bottom: 0.01in !important;
+            }
+
+            .course-credits {
+                font-size: 6pt !important;
+            }
+
+            .course.engineering {
+                background: #e8f4ff !important;
+                color: #000 !important;
+            }
+
+            .course.science {
+                background: #e8ffe8 !important;
+                color: #000 !important;
+            }
+
+            .course.ucore {
+                background: #f8e8ff !important;
+                color: #000 !important;
+            }
+
+            .course.technical {
+                background: #f0f0f0 !important;
+                color: #000 !important;
+            }
+
+            /* Hide SVG connections */
             #connectionsSvg {
                 display: none !important;
             }
 
-            /* Show badges in print */
+            /* Make badges smaller */
             .notes-indicator,
-            .alternatives-indicator,
+            .alternatives-indicator {
+                width: 14px !important;
+                height: 14px !important;
+                font-size: 6pt !important;
+                border-width: 1px !important;
+            }
+
             .relationship-badge,
             .semester-restriction-badge {
-                border-color: #000 !important;
+                font-size: 5pt !important;
+                padding: 0.01in 0.02in !important;
+                border-width: 1px !important;
             }
 
-            /* Add page breaks between major sections */
-            main {
-                page-break-before: avoid;
-            }
-
-            /* Footer with generation date */
+            /* Footer */
             body::after {
                 content: "Generated: " attr(data-print-date);
                 display: block;
                 text-align: center;
-                font-size: 0.8em;
+                font-size: 7pt;
                 color: #666;
-                margin-top: 20px;
-                padding-top: 10px;
+                margin-top: 0.1in;
+                padding-top: 0.05in;
                 border-top: 1px solid #ccc;
             }
 
@@ -497,22 +539,9 @@
                 animation: none !important;
             }
 
-            /* Optimize link display */
+            /* Hide link URLs in print */
             a[href^="http"]::after {
-                content: " (" attr(href) ")";
-                font-size: 0.8em;
-                color: #666;
-            }
-        }
-
-        /* Print-specific layout for landscape */
-        @media print and (orientation: landscape) {
-            .diagram-container {
-                gap: 20px;
-            }
-
-            .semester-column {
-                width: 200px;
+                content: none !important;
             }
         }
     </style>
