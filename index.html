@@ -800,6 +800,54 @@
     </main>
 
     <script>
+        /*
+         * Browser Requirements:
+         * - Modern browsers (Chrome 80+, Firefox 75+, Safari 13.1+, Edge 80+)
+         * - Required features:
+         *   - ES6+ (const, let, arrow functions, template literals, destructuring)
+         *   - Array methods (forEach, map, filter, sort)
+         *   - requestAnimationFrame
+         *   - localStorage (optional - gracefully degrades)
+         *   - SVG support
+         *   - CSS Grid and Flexbox
+         *
+         * This application will not work in Internet Explorer.
+         */
+
+        // Feature detection
+        (function checkBrowserCompatibility() {
+            try {
+                const testArrow = () => true;
+                const testDestructure = { a: 1 };
+                const { a } = testDestructure;
+                const testTemplate = `test`;
+
+                const missingFeatures = [];
+
+                if (typeof requestAnimationFrame !== 'function') {
+                    missingFeatures.push('requestAnimationFrame');
+                }
+                if (typeof document.querySelector !== 'function') {
+                    missingFeatures.push('querySelector');
+                }
+                if (!('classList' in document.createElement('div'))) {
+                    missingFeatures.push('classList');
+                }
+                if (typeof Array.prototype.forEach !== 'function') {
+                    missingFeatures.push('Array.forEach');
+                }
+
+                if (missingFeatures.length > 0) {
+                    console.warn('Browser compatibility issue. Missing features:', missingFeatures.join(', '));
+                    console.warn('Please use a modern browser (Chrome 80+, Firefox 75+, Safari 13.1+, Edge 80+)');
+                    alert('This application requires a modern browser. Please update your browser or use Chrome, Firefox, Safari, or Edge.');
+                }
+            } catch (e) {
+                console.error('Browser compatibility check failed:', e);
+                alert('This application requires a modern browser. Please update your browser.');
+            }
+        })();
+
         // Master data structure containing all programs
         const programsData = {
             'CHE': {
@@ -904,7 +952,7 @@
                     'ELEC-COMM': { code: 'Elective', name: 'Communication or Writing Elective', shortName: '[COMM]/[WRTG]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose a UCORE [COMM] or [WRTG] course.<br><br>[COMM] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/comm/<br><br>[WRTG] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/wrtg/' },
                     'EE-261': { code: 'E E 261', name: 'Electrical Circuits I', shortName: 'Circuits I', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['PHYS-202', 'PHYS-212'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
 
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I', shortName: 'Capstone I', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
+                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
                     'BIOENG-420': { code: 'BIO ENG 420', name: 'Mechanics of Biological Materials', shortName: 'Bio Mechanics', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CE-211'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
                     'BIOENG-430': { code: 'BIO ENG 430', name: 'Bioinstrumentation', shortName: 'Bioinstrument', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['EE-261', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
                     'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
@@ -1027,7 +1075,7 @@
                     'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: ['ENGL-101'], coreqs: [], alternatives: ['ENGL 403 - Technical and Professional Writing ESL. Prereqs: ENGLISH 101 or 105; junior standing; pass University Writing Portfolio.'], notes: '' },
                     'EE-261': { code: 'E E 261', name: 'Electrical Circuits I', shortName: 'Circuits I', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['PHYS-202', 'PHYS-212'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
 
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I', shortName: 'Capstone I', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
+                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
                     'BIOENG-420': { code: 'BIO ENG 420', name: 'Mechanics of Biological Materials', shortName: 'Bio Mechanics', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CE-211'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
                     'BIOENG-430': { code: 'BIO ENG 430', name: 'Bioinstrumentation', shortName: 'Bioinstrument', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['EE-261', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
                     'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
@@ -1120,28 +1168,92 @@
         window.courseData = courseData;
         window.semesterOrder = semesterOrder;
 
+        // Cached DOM elements for performance
+        const domCache = {
+            flowchartContainer: null,
+            visualView: null,
+            textView: null,
+            textContent: null,
+            connectionsSvg: null,
+            scrollIndicators: null,
+            notesTooltip: null,
+            alternativesTooltip: null,
+            tooltipHeader: null,
+            tooltipContent: null,
+            alternativesHeader: null,
+            alternativesContent: null,
+            announcements: null,
+            guideToggle: null,
+            guideContent: null,
+            toggleBtn: null,
+            programSelect: null,
+            programTitle: null,
+            scrollControls: null,
+            disclaimerModal: null
+        };
+
+        // Initialize DOM cache
+        function initDOMCache() {
+            domCache.flowchartContainer = document.getElementById('flowchartContainer');
+            domCache.visualView = document.getElementById('visualView');
+            domCache.textView = document.getElementById('textView');
+            domCache.textContent = document.getElementById('textContent');
+            domCache.connectionsSvg = document.getElementById('connectionsSvg');
+            domCache.scrollIndicators = document.getElementById('scrollIndicators');
+            domCache.notesTooltip = document.getElementById('notesTooltip');
+            domCache.alternativesTooltip = document.getElementById('alternativesTooltip');
+            domCache.tooltipHeader = document.getElementById('tooltipHeader');
+            domCache.tooltipContent = document.getElementById('tooltipContent');
+            domCache.alternativesHeader = document.getElementById('alternativesHeader');
+            domCache.alternativesContent = document.getElementById('alternativesContent');
+            domCache.announcements = document.getElementById('announcements');
+            domCache.guideToggle = document.getElementById('guideToggle');
+            domCache.guideContent = document.getElementById('guideContent');
+            domCache.toggleBtn = document.getElementById('toggleBtn');
+            domCache.programSelect = document.getElementById('programSelect');
+            domCache.programTitle = document.getElementById('programTitle');
+            domCache.scrollControls = document.querySelector('.scroll-controls');
+            domCache.disclaimerModal = document.getElementById('disclaimerModal');
+        }
+
         function buildLeadsToMap() {
-            const leadsToMap = {};
-            
-            Object.keys(courseData).forEach(key => {
-                leadsToMap[key] = { asPrereq: [], asCoreq: [] };
-            });
-            
-            Object.entries(courseData).forEach(([courseKey, course]) => {
-                course.prereqs.forEach(prereqKey => {
-                    if (leadsToMap[prereqKey]) {
-                        leadsToMap[prereqKey].asPrereq.push(courseKey);
+            try {
+                const leadsToMap = {};
+
+                if (!courseData || typeof courseData !== 'object') {
+                    console.error('Invalid courseData');
+                    return {};
+                }
+
+                Object.keys(courseData).forEach(key => {
+                    leadsToMap[key] = { asPrereq: [], asCoreq: [] };
+                });
+
+                Object.entries(courseData).forEach(([courseKey, course]) => {
+                    if (!course) return;
+
+                    if (Array.isArray(course.prereqs)) {
+                        course.prereqs.forEach(prereqKey => {
+                            if (leadsToMap[prereqKey]) {
+                                leadsToMap[prereqKey].asPrereq.push(courseKey);
+                            }
+                        });
+                    }
+
+                    if (Array.isArray(course.coreqs)) {
+                        course.coreqs.forEach(coreqKey => {
+                            if (leadsToMap[coreqKey]) {
+                                leadsToMap[coreqKey].asCoreq.push(courseKey);
+                            }
+                        });
                     }
                 });
-                
-                course.coreqs.forEach(coreqKey => {
-                    if (leadsToMap[coreqKey]) {
-                        leadsToMap[coreqKey].asCoreq.push(courseKey);
-                    }
-                });
-            });
-            
-            return leadsToMap;
+
+                return leadsToMap;
+            } catch (error) {
+                console.error('Error building leads-to map:', error);
+                return {};
+            }
         }
         
         let leadsToMap = {};
@@ -1149,7 +1261,72 @@
         let connectionCounts = {};
         let sourceConnectionCounts = {};
         let currentNotesIndicator = null;
-        
+
+        // Course element cache for performance optimization
+        let courseElementCache = new Map();
+
+        // Helper function: Get course element from cache or DOM
+        function getCourseElement(courseKey) {
+            if (!courseElementCache.has(courseKey)) {
+                const element = document.querySelector(`[data-course-key="${courseKey}"]`);
+                if (element) {
+                    courseElementCache.set(courseKey, element);
+                }
+                return element;
+            }
+            return courseElementCache.get(courseKey);
+        }
+
+        // Helper function: Clear course element cache
+        function clearCourseElementCache() {
+            courseElementCache.clear();
+        }
+
+        // Utility function to safely create links from text
+        function createSafeLinksFromText(text) {
+            // Clear the container
+            const container = document.createElement('div');
+
+            // Split text by URL pattern
+            const urlPattern = /(https?:\/\/[^\s<]+)/g;
+            const parts = text.split(urlPattern);
+
+            parts.forEach((part, index) => {
+                if (index % 2 === 0) {
+                    // Text part - use textContent for safety
+                    if (part) {
+                        const textNode = document.createTextNode(part);
+                        container.appendChild(textNode);
+                    }
+                } else {
+                    // URL part - validate and create link
+                    try {
+                        const url = new URL(part);
+                        // Only allow http and https protocols
+                        if (url.protocol === 'http:' || url.protocol === 'https:') {
+                            const link = document.createElement('a');
+                            link.href = url.href;
+                            link.textContent = url.href; // Use textContent, not innerHTML
+                            link.target = '_blank';
+                            link.rel = 'noopener noreferrer';
+                            link.setAttribute('aria-label', `${url.href} (opens in new window)`);
+                            link.style.color = '#A60F2D';
+                            link.style.textDecoration = 'underline';
+                            container.appendChild(link);
+                        } else {
+                            // Invalid protocol - treat as text
+                            container.appendChild(document.createTextNode(part));
+                        }
+                    } catch (e) {
+                        // Invalid URL - treat as text
+                        container.appendChild(document.createTextNode(part));
+                    }
+                }
+            });
+
+            return container;
+        }
+
         function showNotesTooltip(courseKey, event, indicatorElement) {
             event.stopPropagation();
 
@@ -1159,19 +1336,20 @@
             const course = courseData[courseKey];
             if (!course || !course.notes || course.notes.trim() === '') return;
 
-            const tooltip = document.getElementById('notesTooltip');
-            const header = document.getElementById('tooltipHeader');
-            const content = document.getElementById('tooltipContent');
-            const announcer = document.getElementById('announcements');
+            // Use cached DOM elements
+            const tooltip = domCache.notesTooltip;
+            const header = domCache.tooltipHeader;
+            const content = domCache.tooltipContent;
+            const announcer = domCache.announcements;
+
+            if (!tooltip || !header || !content) return;
 
             header.textContent = `${course.code} - ${course.name}`;
 
-            // Convert URLs in notes to clickable links
-            const notesWithLinks = course.notes.replace(
-                /(https?:\/\/[^\s<]+)/g,
-                '<a href="$1" target="_blank" rel="noopener noreferrer" aria-label="$1 (opens in new window)" style="color: #A60F2D; text-decoration: underline;">$1</a>'
-            );
-            content.innerHTML = notesWithLinks;
+            // Safely create links from notes text
+            content.textContent = ''; // Clear existing content
+            const safeContent = createSafeLinksFromText(course.notes);
+            content.appendChild(safeContent);
 
             const x = event.clientX;
             const y = event.clientY;
@@ -1213,8 +1391,10 @@
         let notesTooltipTrigger = null;
 
         window.closeNotesTooltip = function() {
-            const tooltip = document.getElementById('notesTooltip');
-            tooltip.classList.remove('visible');
+            const tooltip = domCache.notesTooltip;
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+            }
 
             if (currentNotesIndicator) {
                 currentNotesIndicator.removeAttribute('aria-describedby');
@@ -1239,19 +1419,36 @@
             const course = courseData[courseKey];
             if (!course || !course.alternatives || course.alternatives.length === 0) return;
 
-            const tooltip = document.getElementById('alternativesTooltip');
-            const header = document.getElementById('alternativesHeader');
-            const content = document.getElementById('alternativesContent');
-            const announcer = document.getElementById('announcements');
+            // Use cached DOM elements
+            const tooltip = domCache.alternativesTooltip;
+            const header = domCache.alternativesHeader;
+            const content = domCache.alternativesContent;
+            const announcer = domCache.announcements;
+
+            if (!tooltip || !header || !content) return;
 
             header.textContent = `${course.code} - Alternative Courses`;
+
+            // Clear existing content
+            content.textContent = '';
 
             if (course.alternatives.length === 1) {
                 content.textContent = course.alternatives[0];
             } else {
-                content.innerHTML = course.alternatives.map((alt, index) => {
-                    return `<strong>Option ${index + 1}:</strong> ${alt}`;
-                }).join('<br><br>');
+                // Safely build alternatives list using DOM manipulation
+                course.alternatives.forEach((alt, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.style.marginBottom = '10px';
+
+                    const strong = document.createElement('strong');
+                    strong.textContent = `Option ${index + 1}: `;
+                    optionDiv.appendChild(strong);
+
+                    const textNode = document.createTextNode(alt);
+                    optionDiv.appendChild(textNode);
+
+                    content.appendChild(optionDiv);
+                });
             }
 
             const x = event.clientX;
@@ -1301,8 +1498,10 @@
         let alternativesTooltipTrigger = null;
 
         window.closeAlternativesTooltip = function() {
-            const tooltip = document.getElementById('alternativesTooltip');
-            tooltip.classList.remove('visible');
+            const tooltip = domCache.alternativesTooltip;
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+            }
 
             if (currentAlternativesIndicator) {
                 currentAlternativesIndicator.removeAttribute('aria-describedby');
@@ -1317,39 +1516,47 @@
         };
         
         window.clearHighlights = function() {
-            document.querySelectorAll('.course').forEach(courseDiv => {
-                courseDiv.classList.remove('selected', 'highlighted-prereq', 'highlighted-coreq', 'highlighted-leadsto', 'dimmed');
-                courseDiv.style.border = '';
-                courseDiv.style.boxShadow = '';
-                courseDiv.style.opacity = '';
-                courseDiv.style.filter = '';
-                courseDiv.style.transform = '';
-                courseDiv.style.zIndex = '';
-                
+            // Batch DOM reads and writes for better performance
+            // Query once and reuse
+            const courses = document.querySelectorAll('.course');
+
+            // Remove all badges and reset styles in a single loop
+            courses.forEach(courseDiv => {
+                // Remove badge
                 const badge = courseDiv.querySelector('.relationship-badge');
                 if (badge) badge.remove();
+
+                // Reset classes and styles
+                courseDiv.classList.remove('selected', 'highlighted-prereq', 'highlighted-coreq', 'highlighted-leadsto', 'dimmed');
+                courseDiv.style.cssText = ''; // Clear all inline styles at once
             });
-            
-            const svg = document.getElementById('connectionsSvg');
-            if (svg) svg.innerHTML = '';
-            
+
+            // Clear SVG efficiently
+            const svg = domCache.connectionsSvg;
+            if (svg) {
+                // More efficient than innerHTML = ''
+                while (svg.firstChild) {
+                    svg.removeChild(svg.firstChild);
+                }
+            }
+
             connectionCounts = {};
             sourceConnectionCounts = {};
-            
+
             if (selectedCourseKey) {
-                const announcer = document.getElementById('announcements');
+                const announcer = domCache.announcements;
                 if (announcer) {
                     announcer.textContent = 'Course selection cleared.';
                 }
             }
-            
+
             selectedCourseKey = null;
         };
         
         function updateSVGSize() {
-            const svg = document.getElementById('connectionsSvg');
-            const container = document.getElementById('flowchartContainer');
-            const wrapper = document.getElementById('visualView');
+            const svg = domCache.connectionsSvg;
+            const container = domCache.flowchartContainer;
+            const wrapper = domCache.visualView;
 
             if (!svg || !container || !wrapper) return;
 
@@ -1383,11 +1590,11 @@
         }
         
         function drawConnection(fromKey, toKey, color, type, sourcePositionIndex) {
-            const fromDiv = document.querySelector(`[data-course-key="${fromKey}"]`);
-            const toDiv = document.querySelector(`[data-course-key="${toKey}"]`);
-            const svg = document.getElementById('connectionsSvg');
-            const wrapper = document.getElementById('visualView');
-            const container = document.getElementById('flowchartContainer');
+            const fromDiv = getCourseElement(fromKey);
+            const toDiv = getCourseElement(toKey);
+            const svg = domCache.connectionsSvg;
+            const wrapper = domCache.visualView;
+            const container = domCache.flowchartContainer;
 
             if (!fromDiv || !toDiv || !svg || !wrapper || !container) return;
 
@@ -1465,248 +1672,304 @@
         function createArrowMarkers() {
             // Arrow markers removed - not currently used
         }
-        
-        window.highlightRelatedCourses = function(courseKey) {
-            window.clearHighlights();
-            
-            const course = courseData[courseKey];
-            const leadsTo = leadsToMap[courseKey];
-            
-            if (!course || !leadsTo) return;
-            
-            requestAnimationFrame(() => {
-                const selectedDiv = document.querySelector(`[data-course-key="${courseKey}"]`);
-                if (selectedDiv) {
-                    selectedDiv.classList.add('selected');
-                    selectedDiv.style.border = '5px solid #000';
-                    selectedDiv.style.boxShadow = '0 0 0 4px #A60F2D, 0 0 20px rgba(166, 15, 45, 0.5)';
-                    selectedDiv.style.zIndex = '100';
-                    selectedDiv.style.opacity = '1';
-                    selectedDiv.style.filter = 'none';
+
+        // Helper function: Highlight selected course
+        function highlightSelectedCourse(courseKey) {
+            const selectedDiv = getCourseElement(courseKey);
+            if (selectedDiv) {
+                selectedDiv.classList.add('selected');
+                selectedDiv.style.border = '5px solid #000';
+                selectedDiv.style.boxShadow = '0 0 0 4px #A60F2D, 0 0 20px rgba(166, 15, 45, 0.5)';
+                selectedDiv.style.zIndex = '100';
+                selectedDiv.style.opacity = '1';
+                selectedDiv.style.filter = 'none';
+            }
+            return selectedDiv;
+        }
+
+        // Helper function: Dim all other courses
+        function dimOtherCourses(courseKey, coursesCache = null) {
+            // Use cached courses if provided, otherwise query
+            const courses = coursesCache || document.querySelectorAll('.course');
+            courses.forEach(courseDiv => {
+                if (courseDiv.getAttribute('data-course-key') !== courseKey) {
+                    courseDiv.classList.add('dimmed');
+                    courseDiv.style.opacity = '0.25';
+                    courseDiv.style.filter = 'grayscale(80%)';
                 }
-                
-                document.querySelectorAll('.course').forEach(courseDiv => {
-                    if (courseDiv.getAttribute('data-course-key') !== courseKey) {
-                        courseDiv.classList.add('dimmed');
-                        courseDiv.style.opacity = '0.25';
-                        courseDiv.style.filter = 'grayscale(80%)';
-                    }
-                });
-                
-                course.prereqs.forEach(prereqKey => {
-                    const prereqDiv = document.querySelector(`[data-course-key="${prereqKey}"]`);
-                    if (prereqDiv) {
-                        prereqDiv.classList.remove('dimmed');
-                        prereqDiv.classList.add('highlighted-prereq');
-                        prereqDiv.style.border = '5px solid #ff9800';
-                        prereqDiv.style.boxShadow = '0 0 15px rgba(255, 152, 0, 0.8)';
-                        prereqDiv.style.opacity = '1';
-                        prereqDiv.style.filter = 'none';
-                        
-                        const badge = document.createElement('div');
-                        badge.className = 'relationship-badge prereq';
-                        badge.textContent = 'PR';
-                        badge.setAttribute('aria-hidden', 'true');
-                        prereqDiv.appendChild(badge);
-                    }
-                });
-                
-                course.coreqs.forEach(coreqKey => {
-                    const coreqDiv = document.querySelector(`[data-course-key="${coreqKey}"]`);
-                    if (coreqDiv) {
-                        coreqDiv.classList.remove('dimmed');
-                        coreqDiv.classList.add('highlighted-coreq');
-                        coreqDiv.style.border = '5px solid #2196f3';
-                        coreqDiv.style.boxShadow = '0 0 15px rgba(33, 150, 243, 0.8)';
-                        coreqDiv.style.opacity = '1';
-                        coreqDiv.style.filter = 'none';
-                        
-                        const badge = document.createElement('div');
-                        badge.className = 'relationship-badge coreq';
-                        badge.textContent = 'CO';
-                        badge.setAttribute('aria-hidden', 'true');
-                        coreqDiv.appendChild(badge);
-                    }
-                });
-                
-                // Filter out courses that are already shown as corequisites
-                const allLeadsTo = [...leadsTo.asPrereq, ...leadsTo.asCoreq].filter(
-                    key => !course.coreqs.includes(key)
-                );
-                allLeadsTo.forEach(leadsToKey => {
-                    const leadsToDiv = document.querySelector(`[data-course-key="${leadsToKey}"]`);
-                    if (leadsToDiv) {
-                        leadsToDiv.classList.remove('dimmed');
-                        leadsToDiv.classList.add('highlighted-leadsto');
-                        leadsToDiv.style.border = '5px solid #4caf50';
-                        leadsToDiv.style.boxShadow = '0 0 15px rgba(76, 175, 80, 0.8)';
-                        leadsToDiv.style.opacity = '1';
-                        leadsToDiv.style.filter = 'none';
-                        
-                        const badge = document.createElement('div');
-                        badge.className = 'relationship-badge leadsto';
-                        badge.textContent = '→';
-                        badge.setAttribute('aria-hidden', 'true');
-                        leadsToDiv.appendChild(badge);
-                    }
-                });
-                
-                requestAnimationFrame(() => {
-                    const destConnectionCounts = {};
-                    const srcConnectionCounts = {};
-                    
-                    const prereqsSorted = [...course.prereqs].sort((a, b) => {
-                        const divA = document.querySelector(`[data-course-key="${a}"]`);
-                        const divB = document.querySelector(`[data-course-key="${b}"]`);
-                        if (!divA || !divB) return 0;
-                        return divA.getBoundingClientRect().top - divB.getBoundingClientRect().top;
-                    });
-                    
-                    const coreqsSorted = [...course.coreqs].sort((a, b) => {
-                        const divA = document.querySelector(`[data-course-key="${a}"]`);
-                        const divB = document.querySelector(`[data-course-key="${b}"]`);
-                        if (!divA || !divB) return 0;
-                        return divA.getBoundingClientRect().top - divB.getBoundingClientRect().top;
-                    });
-                    
-                    const allLeadsTo = [...leadsTo.asPrereq, ...leadsTo.asCoreq];
-                    const leadsToSorted = allLeadsTo.sort((a, b) => {
-                        const divA = document.querySelector(`[data-course-key="${a}"]`);
-                        const divB = document.querySelector(`[data-course-key="${b}"]`);
-                        if (!divA || !divB) return 0;
-                        return divA.getBoundingClientRect().top - divB.getBoundingClientRect().top;
-                    });
-                    
-                    prereqsSorted.forEach(prereqKey => {
-                        if (!destConnectionCounts[courseKey]) destConnectionCounts[courseKey] = 0;
-                        destConnectionCounts[courseKey]++;
-                        
-                        if (!srcConnectionCounts[prereqKey]) srcConnectionCounts[prereqKey] = 0;
-                        srcConnectionCounts[prereqKey]++;
-                    });
-                    
-                    coreqsSorted.forEach(coreqKey => {
-                        if (!destConnectionCounts[courseKey]) destConnectionCounts[courseKey] = 0;
-                        destConnectionCounts[courseKey]++;
-                        
-                        if (!srcConnectionCounts[coreqKey]) srcConnectionCounts[coreqKey] = 0;
-                        srcConnectionCounts[coreqKey]++;
-                    });
-                    
-                    leadsToSorted.forEach(leadsToKey => {
-                        if (!destConnectionCounts[leadsToKey]) destConnectionCounts[leadsToKey] = 0;
-                        destConnectionCounts[leadsToKey]++;
-                        
-                        if (!srcConnectionCounts[courseKey]) srcConnectionCounts[courseKey] = 0;
-                        srcConnectionCounts[courseKey]++;
-                    });
-                    
-                    window.destTotalConnections = destConnectionCounts;
-                    window.srcTotalConnections = srcConnectionCounts;
-                    
-                    // Combine prereqs and coreqs with their types and calculate angles
-                    const courseDiv = document.querySelector(`[data-course-key="${courseKey}"]`);
-                    const courseRect = courseDiv ? courseDiv.getBoundingClientRect() : null;
-
-                    // Filter out coreqs in same semester (they use vertical connections without offsets)
-                    const coreqsDifferentSemester = coreqsSorted.filter(key => {
-                        const coreqCourse = courseData[key];
-                        return coreqCourse && coreqCourse.semester !== course.semester;
-                    });
-
-                    const incomingConnections = [
-                        ...prereqsSorted.map(key => ({key, type: 'prereq', color: '#ff9800'})),
-                        ...coreqsDifferentSemester.map(key => ({key, type: 'coreq', color: '#2196f3'}))
-                    ];
-
-                    // Calculate position and angle from each source to destination
-                    incomingConnections.forEach(conn => {
-                        const sourceDiv = document.querySelector(`[data-course-key="${conn.key}"]`);
-                        if (sourceDiv && courseRect) {
-                            const sourceRect = sourceDiv.getBoundingClientRect();
-                            conn.verticalPos = sourceRect.top + sourceRect.height / 2;
-                            const dx = courseRect.left - (sourceRect.left + sourceRect.width);
-                            const dy = (courseRect.top + courseRect.height / 2) - (sourceRect.top + sourceRect.height / 2);
-                            conn.angle = Math.atan2(dy, dx);
-                        } else {
-                            conn.verticalPos = 0;
-                            conn.angle = 0;
-                        }
-                    });
-
-                    // Sort primarily by vertical position, secondarily by angle
-                    incomingConnections.sort((a, b) => {
-                        const verticalDiff = a.verticalPos - b.verticalPos;
-                        // If vertical positions are significantly different (>20px), use that
-                        if (Math.abs(verticalDiff) > 20) {
-                            return verticalDiff;
-                        }
-                        // Otherwise use angle to break ties
-                        return a.angle - b.angle;
-                    });
-
-                    // Draw all incoming connections with continuous indexing based on angle
-                    incomingConnections.forEach((conn, index) => {
-                        drawConnection(conn.key, courseKey, conn.color, conn.type, index);
-                    });
-
-                    // Draw coreqs in same semester (they don't use the offset system)
-                    const coreqsSameSemester = coreqsSorted.filter(key => {
-                        const coreqCourse = courseData[key];
-                        return coreqCourse && coreqCourse.semester === course.semester;
-                    });
-                    coreqsSameSemester.forEach(coreqKey => {
-                        drawConnection(coreqKey, courseKey, '#2196f3', 'coreq', undefined);
-                    });
-
-                    // Calculate angles for outgoing connections
-                    const outgoingConnections = leadsToSorted.map(key => ({
-                        key,
-                        type: 'leadsto',
-                        color: '#4caf50'
-                    }));
-
-                    outgoingConnections.forEach(conn => {
-                        const destDiv = document.querySelector(`[data-course-key="${conn.key}"]`);
-                        if (destDiv && courseRect) {
-                            const destRect = destDiv.getBoundingClientRect();
-                            conn.verticalPos = destRect.top + destRect.height / 2;
-                            const dx = destRect.left - (courseRect.left + courseRect.width);
-                            const dy = (destRect.top + destRect.height / 2) - (courseRect.top + courseRect.height / 2);
-                            conn.angle = Math.atan2(dy, dx);
-                        } else {
-                            conn.verticalPos = 0;
-                            conn.angle = 0;
-                        }
-                    });
-
-                    // Sort primarily by vertical position, secondarily by angle
-                    outgoingConnections.sort((a, b) => {
-                        const verticalDiff = a.verticalPos - b.verticalPos;
-                        // If vertical positions are significantly different (>20px), use that
-                        if (Math.abs(verticalDiff) > 20) {
-                            return verticalDiff;
-                        }
-                        // Otherwise use angle to break ties
-                        return a.angle - b.angle;
-                    });
-
-                    // Draw outgoing connections with angle-based indexing
-                    outgoingConnections.forEach((conn, index) => {
-                        drawConnection(courseKey, conn.key, conn.color, conn.type, index);
-                    });
-                    
-                    announceSelection(courseKey, course, leadsToSorted);
-                    
-                    updateSVGSize();
-                });
             });
-            
-            selectedCourseKey = courseKey;
+        }
+
+        // Helper function: Apply relationship styling to a course
+        function applyRelationshipStyle(courseDiv, type, badgeText) {
+            if (!courseDiv) return;
+
+            const styles = {
+                prereq: { border: '5px solid #ff9800', boxShadow: '0 0 15px rgba(255, 152, 0, 0.8)', class: 'highlighted-prereq' },
+                coreq: { border: '5px solid #2196f3', boxShadow: '0 0 15px rgba(33, 150, 243, 0.8)', class: 'highlighted-coreq' },
+                leadsto: { border: '5px solid #4caf50', boxShadow: '0 0 15px rgba(76, 175, 80, 0.8)', class: 'highlighted-leadsto' }
+            };
+
+            const style = styles[type];
+            if (!style) return;
+
+            courseDiv.classList.remove('dimmed');
+            courseDiv.classList.add(style.class);
+            courseDiv.style.border = style.border;
+            courseDiv.style.boxShadow = style.boxShadow;
+            courseDiv.style.opacity = '1';
+            courseDiv.style.filter = 'none';
+
+            const badge = document.createElement('div');
+            badge.className = `relationship-badge ${type}`;
+            badge.textContent = badgeText;
+            badge.setAttribute('aria-hidden', 'true');
+            courseDiv.appendChild(badge);
+        }
+
+        // Helper function: Highlight prerequisites
+        function highlightPrerequisites(prereqKeys) {
+            prereqKeys.forEach(prereqKey => {
+                const prereqDiv = getCourseElement(prereqKey);
+                applyRelationshipStyle(prereqDiv, 'prereq', 'PR');
+            });
+        }
+
+        // Helper function: Highlight corequisites
+        function highlightCorequisites(coreqKeys) {
+            coreqKeys.forEach(coreqKey => {
+                const coreqDiv = getCourseElement(coreqKey);
+                applyRelationshipStyle(coreqDiv, 'coreq', 'CO');
+            });
+        }
+
+        // Helper function: Highlight courses this leads to
+        function highlightLeadsTo(leadsToKeys) {
+            leadsToKeys.forEach(leadsToKey => {
+                const leadsToDiv = getCourseElement(leadsToKey);
+                applyRelationshipStyle(leadsToDiv, 'leadsto', '▶');
+            });
+        }
+
+        // Helper function: Sort course keys by vertical position
+        function sortCoursesByPosition(courseKeys) {
+            // Pre-calculate all bounding rectangles to avoid repeated layout calculations
+            const positions = new Map();
+            courseKeys.forEach(key => {
+                const div = getCourseElement(key);
+                if (div) {
+                    positions.set(key, div.getBoundingClientRect().top);
+                }
+            });
+
+            return [...courseKeys].sort((a, b) => {
+                const posA = positions.get(a);
+                const posB = positions.get(b);
+                if (posA === undefined || posB === undefined) return 0;
+                return posA - posB;
+            });
+        }
+
+        // Helper function: Calculate connection counts
+        function calculateConnectionCounts(courseKey, prereqsSorted, coreqsSorted, leadsToSorted) {
+            const destConnectionCounts = {};
+            const srcConnectionCounts = {};
+
+            prereqsSorted.forEach(prereqKey => {
+                if (!destConnectionCounts[courseKey]) destConnectionCounts[courseKey] = 0;
+                destConnectionCounts[courseKey]++;
+
+                if (!srcConnectionCounts[prereqKey]) srcConnectionCounts[prereqKey] = 0;
+                srcConnectionCounts[prereqKey]++;
+            });
+
+            coreqsSorted.forEach(coreqKey => {
+                if (!destConnectionCounts[courseKey]) destConnectionCounts[courseKey] = 0;
+                destConnectionCounts[courseKey]++;
+
+                if (!srcConnectionCounts[coreqKey]) srcConnectionCounts[coreqKey] = 0;
+                srcConnectionCounts[coreqKey]++;
+            });
+
+            leadsToSorted.forEach(leadsToKey => {
+                if (!destConnectionCounts[leadsToKey]) destConnectionCounts[leadsToKey] = 0;
+                destConnectionCounts[leadsToKey]++;
+
+                if (!srcConnectionCounts[courseKey]) srcConnectionCounts[courseKey] = 0;
+                srcConnectionCounts[courseKey]++;
+            });
+
+            return { destConnectionCounts, srcConnectionCounts };
+        }
+
+        // Helper function: Draw all connection lines
+        function drawAllConnections(courseKey, course, prereqsSorted, coreqsSorted, leadsToSorted, destConnectionCounts, srcConnectionCounts) {
+            const courseDiv = getCourseElement(courseKey);
+            const courseRect = courseDiv ? courseDiv.getBoundingClientRect() : null;
+
+            // Filter out coreqs in same semester (they use vertical connections without offsets)
+            const coreqsDifferentSemester = coreqsSorted.filter(key => {
+                const coreqCourse = courseData[key];
+                return coreqCourse && coreqCourse.semester !== course.semester;
+            });
+
+            const incomingConnections = [
+                ...prereqsSorted.map(key => ({ key, type: 'prereq', color: '#ff9800' })),
+                ...coreqsDifferentSemester.map(key => ({ key, type: 'coreq', color: '#2196f3' }))
+            ];
+
+            // Calculate position and angle from each source to destination
+            incomingConnections.forEach(conn => {
+                const sourceDiv = getCourseElement(conn.key);
+                if (sourceDiv && courseRect) {
+                    const sourceRect = sourceDiv.getBoundingClientRect();
+                    conn.verticalPos = sourceRect.top + sourceRect.height / 2;
+                    const dx = courseRect.left - (sourceRect.left + sourceRect.width);
+                    const dy = (courseRect.top + courseRect.height / 2) - (sourceRect.top + sourceRect.height / 2);
+                    conn.angle = Math.atan2(dy, dx);
+                } else {
+                    conn.verticalPos = 0;
+                    conn.angle = 0;
+                }
+            });
+
+            // Sort primarily by vertical position, secondarily by angle
+            incomingConnections.sort((a, b) => {
+                const verticalDiff = a.verticalPos - b.verticalPos;
+                if (Math.abs(verticalDiff) > 20) {
+                    return verticalDiff;
+                }
+                return a.angle - b.angle;
+            });
+
+            // Draw all incoming connections
+            incomingConnections.forEach((conn, index) => {
+                drawConnection(conn.key, courseKey, conn.color, conn.type, index);
+            });
+
+            // Draw coreqs in same semester
+            const coreqsSameSemester = coreqsSorted.filter(key => {
+                const coreqCourse = courseData[key];
+                return coreqCourse && coreqCourse.semester === course.semester;
+            });
+            coreqsSameSemester.forEach(coreqKey => {
+                drawConnection(coreqKey, courseKey, '#2196f3', 'coreq', undefined);
+            });
+
+            // Calculate and draw outgoing connections
+            const outgoingConnections = leadsToSorted.map(key => ({
+                key,
+                type: 'leadsto',
+                color: '#4caf50'
+            }));
+
+            outgoingConnections.forEach(conn => {
+                const destDiv = getCourseElement(conn.key);
+                if (destDiv && courseRect) {
+                    const destRect = destDiv.getBoundingClientRect();
+                    conn.verticalPos = destRect.top + destRect.height / 2;
+                    const dx = destRect.left - (courseRect.left + courseRect.width);
+                    const dy = (destRect.top + destRect.height / 2) - (courseRect.top + courseRect.height / 2);
+                    conn.angle = Math.atan2(dy, dx);
+                } else {
+                    conn.verticalPos = 0;
+                    conn.angle = 0;
+                }
+            });
+
+            outgoingConnections.sort((a, b) => {
+                const verticalDiff = a.verticalPos - b.verticalPos;
+                if (Math.abs(verticalDiff) > 20) {
+                    return verticalDiff;
+                }
+                return a.angle - b.angle;
+            });
+
+            outgoingConnections.forEach((conn, index) => {
+                drawConnection(courseKey, conn.key, conn.color, conn.type, index);
+            });
+        }
+
+        window.highlightRelatedCourses = function(courseKey) {
+            try {
+                window.clearHighlights();
+
+                const course = courseData[courseKey];
+                const leadsTo = leadsToMap[courseKey];
+
+                if (!course || !leadsTo) return;
+
+            // Combine highlighting and drawing in a single requestAnimationFrame
+            requestAnimationFrame(() => {
+                    try {
+                        // Highlight the selected course
+                        highlightSelectedCourse(courseKey);
+
+                        // Dim all other courses
+                        dimOtherCourses(courseKey);
+
+                        // Highlight prerequisites
+                        highlightPrerequisites(course.prereqs);
+
+                        // Highlight corequisites
+                        highlightCorequisites(course.coreqs);
+
+                        // Sort courses by position (now in same frame)
+                        const prereqsSorted = sortCoursesByPosition(course.prereqs);
+                        const coreqsSorted = sortCoursesByPosition(course.coreqs);
+
+                        // Combine leads-to arrays once and reuse
+                        const allLeadsToKeys = [...leadsTo.asPrereq, ...leadsTo.asCoreq];
+                        const leadsToSorted = sortCoursesByPosition(allLeadsToKeys);
+
+                        // Highlight courses this leads to (filter out duplicates)
+                        const allLeadsTo = allLeadsToKeys.filter(
+                            key => !course.coreqs.includes(key)
+                        );
+                        highlightLeadsTo(allLeadsTo);
+
+                        // Calculate connection counts
+                        const { destConnectionCounts, srcConnectionCounts } = calculateConnectionCounts(
+                            courseKey,
+                            prereqsSorted,
+                            coreqsSorted,
+                            leadsToSorted
+                        );
+
+                        window.destTotalConnections = destConnectionCounts;
+                        window.srcTotalConnections = srcConnectionCounts;
+
+                        // Draw all connection lines
+                        drawAllConnections(
+                            courseKey,
+                            course,
+                            prereqsSorted,
+                            coreqsSorted,
+                            leadsToSorted,
+                            destConnectionCounts,
+                            srcConnectionCounts
+                        );
+
+                        // Announce the selection
+                        announceSelection(courseKey, course, leadsToSorted);
+
+                        // Update SVG size
+                        updateSVGSize();
+                    } catch (error) {
+                        console.error('Error highlighting and drawing connections:', error);
+                    }
+                });
+
+                selectedCourseKey = courseKey;
+            } catch (error) {
+                console.error('Error in highlightRelatedCourses:', error);
+                // Clean up on error
+                window.clearHighlights();
+            }
         };
         
         function announceSelection(courseKey, course, leadsTo) {
-            const announcer = document.getElementById('announcements');
+            const announcer = domCache.announcements;
             if (!announcer) return;
             
             const courseInfo = courseData[courseKey];
@@ -1744,8 +2007,12 @@
             announcer.textContent = message;
         }
         
-        function buildFlowchart() {
-            const container = document.getElementById('flowchartContainer');
+        // Store event handlers for cleanup
+        const eventHandlers = new WeakMap();
+
+        function buildFlowchart(isProgramSwitch = false) {
+            const container = domCache.flowchartContainer;
+            if (!container) return;
             
             const courseBySemester = {};
             semesterOrder.forEach(sem => courseBySemester[sem] = []);
@@ -1753,27 +2020,36 @@
             Object.entries(courseData).forEach(([key, course]) => {
                 courseBySemester[course.semester].push({key, ...course});
             });
-            
+
+            // Sort priority map for efficient course ordering
+            const sortPriorityPrefixes = [
+                ['CHE-', 1],
+                ['BIOENG-', 1],
+                ['ELEC-CHE', 2],
+                ['ELEC-BIOENG', 2],
+                ['ENGR-', 3],
+                ['EE-', 3],  // Electrical Engineering
+                ['CE-', 3],  // Civil Engineering
+                ['ELEC-TECH', 4],
+                ['CHEM-', 5],
+                ['MBIOS-', 5],  // Treat MBIOS like chemistry
+                ['MATH-', 6],
+                ['PHYS-', 7],
+                ['BIOLOGY-', 8],
+                ['ENGL-', 9],
+                ['HIST-', 10],
+                ['ECONS-', 11],
+                ['ELEC-', 12],
+                ['STAT-', 13]
+            ];
+
             function getSortPriority(courseCode) {
-                if (courseCode.startsWith('CHE-')) return 1;
-                if (courseCode.startsWith('BIOENG-')) return 1;
-                if (courseCode.startsWith('ELEC-CHE')) return 2;
-                if (courseCode.startsWith('ELEC-BIOENG')) return 2;
-                if (courseCode.startsWith('ENGR-')) return 3;
-                if (courseCode.startsWith('EE-')) return 3;  // Electrical Engineering
-                if (courseCode.startsWith('CE-')) return 3;  // Civil Engineering
-                if (courseCode.startsWith('ELEC-TECH')) return 4;
-                if (courseCode.startsWith('CHEM-')) return 5;
-                if (courseCode.startsWith('MBIOS-')) return 5;  // Treat MBIOS like chemistry
-                if (courseCode.startsWith('MATH-')) return 6;
-                if (courseCode.startsWith('PHYS-')) return 7;
-                if (courseCode.startsWith('BIOLOGY-')) return 8;
-                if (courseCode.startsWith('ENGL-')) return 9;
-                if (courseCode.startsWith('HIST-')) return 10;
-                if (courseCode.startsWith('ECONS-')) return 11;
-                if (courseCode.startsWith('ELEC-')) return 12;
-                if (courseCode.startsWith('STAT-')) return 13;
-                return 14;
+                for (const [prefix, priority] of sortPriorityPrefixes) {
+                    if (courseCode.startsWith(prefix)) {
+                        return priority;
+                    }
+                }
+                return 14;  // Default priority
             }
             
             semesterOrder.forEach(semester => {
@@ -1843,7 +2119,7 @@
                             e.stopPropagation();
 
                             // Check if clicking the same indicator to toggle off
-                            const tooltip = document.getElementById('notesTooltip');
+                            const tooltip = domCache.notesTooltip;
                             if (tooltip && tooltip.classList.contains('visible') && currentNotesIndicator === courseDiv) {
                                 closeNotesTooltip();
                                 return;
@@ -1897,7 +2173,7 @@
                             e.stopPropagation();
 
                             // Check if clicking the same indicator to toggle off
-                            const tooltip = document.getElementById('alternativesTooltip');
+                            const tooltip = domCache.alternativesTooltip;
                             if (tooltip && tooltip.classList.contains('visible') && currentAlternativesIndicator === alternativesIndicator) {
                                 closeAlternativesTooltip();
                                 return;
@@ -1918,8 +2194,8 @@
                     
                     courseDiv.addEventListener('click', (e) => {
                         // Close any open tooltips first
-                        const notesTooltip = document.getElementById('notesTooltip');
-                        const alternativesTooltip = document.getElementById('alternativesTooltip');
+                        const notesTooltip = domCache.notesTooltip;
+                        const alternativesTooltip = domCache.alternativesTooltip;
 
                         if (!e.target.closest('.notes-indicator')) {
                             if (notesTooltip && notesTooltip.classList.contains('visible')) {
@@ -1981,14 +2257,16 @@
                 container.appendChild(column);
             });
 
-            // Center flowchart on large screens, otherwise start at left
-            setTimeout(() => {
-                centerFlowchartOnInit();
-            }, 0);
+            // Only reset scroll position on initial load, not on program switch
+            if (!isProgramSwitch) {
+                setTimeout(() => {
+                    centerFlowchartOnInit();
+                }, 0);
+            }
         }
 
         function centerFlowchartOnInit() {
-            const wrapper = document.getElementById('visualView');
+            const wrapper = domCache.visualView;
             if (!wrapper) return;
 
             // Always start with Year 1 Fall visible (leftmost position)
@@ -1996,10 +2274,16 @@
         }
 
         window.switchProgram = function() {
-            const select = document.getElementById('programSelect');
+            const select = domCache.programSelect;
+            if (!select) return;
+
             const newProgram = select.value;
 
             if (newProgram === currentProgram) return;
+
+            // Save current scroll position before switching
+            const wrapper = domCache.visualView;
+            const savedScrollLeft = wrapper ? wrapper.scrollLeft : 0;
 
             // Close any open tooltips
             closeNotesTooltip();
@@ -2018,43 +2302,59 @@
             window.semesterOrder = semesterOrder;
 
             // Update page title
-            const programTitle = document.getElementById('programTitle');
+            const programTitle = domCache.programTitle;
             if (programTitle) {
                 programTitle.textContent = programsData[currentProgram].fullTitle;
             }
 
-            // Clear existing flowchart and text view
-            const flowchartContainer = document.getElementById('flowchartContainer');
-            const textContent = document.getElementById('textContent');
-            const svg = document.getElementById('connectionsSvg');
+            // Clear existing flowchart and text view efficiently
+            const flowchartContainer = domCache.flowchartContainer;
+            const textContent = domCache.textContent;
+            const svg = domCache.connectionsSvg;
+
+            // Clear course element cache since DOM is being rebuilt
+            clearCourseElementCache();
 
             // Preserve the SVG element before clearing
             const svgElement = svg ? svg.cloneNode(false) : null;
 
-            if (flowchartContainer) flowchartContainer.innerHTML = '';
-            if (textContent) textContent.innerHTML = '';
+            // Clear containers efficiently
+            if (flowchartContainer) {
+                while (flowchartContainer.firstChild) {
+                    flowchartContainer.removeChild(flowchartContainer.firstChild);
+                }
+            }
+            if (textContent) {
+                while (textContent.firstChild) {
+                    textContent.removeChild(textContent.firstChild);
+                }
+            }
 
             // Re-add the SVG element to the container
             if (svgElement && flowchartContainer) {
-                svgElement.innerHTML = ''; // Clear any paths
+                // Update cache reference
+                domCache.connectionsSvg = svgElement;
                 flowchartContainer.appendChild(svgElement);
             }
 
-            // Rebuild everything
+            // Rebuild everything (with scroll preservation flag)
             leadsToMap = buildLeadsToMap();
-            buildFlowchart();
+            buildFlowchart(true); // Pass true to indicate program switch
             buildTextView();
             setupScrollIndicators();
             createArrowMarkers();
             updateSVGSize();
 
-            // Initialize dot states after program change
-            setTimeout(() => {
-                updateActiveIndicator();
-            }, 100);
+            // Restore scroll position after rebuild
+            if (wrapper) {
+                setTimeout(() => {
+                    wrapper.scrollLeft = savedScrollLeft;
+                    updateActiveIndicator();
+                }, 10);
+            }
 
             // Announce the change
-            const announcer = document.getElementById('announcements');
+            const announcer = domCache.announcements;
             if (announcer) {
                 announcer.textContent = `Switched to ${programsData[currentProgram].name} program.`;
             }
@@ -2063,19 +2363,58 @@
         // Disclaimer Modal Functions
         let modalPreviousFocus = null;
 
+        // Utility function to safely write to localStorage
+        function safeLocalStorageSet(key, value) {
+            // Validate key to prevent prototype pollution
+            if (typeof key !== 'string' || key.includes('__proto__') || key.includes('constructor') || key.includes('prototype')) {
+                console.warn('Invalid localStorage key');
+                return false;
+            }
+
+            try {
+                // Only store boolean true as string 'true'
+                const sanitizedValue = value === true ? 'true' : 'false';
+                localStorage.setItem(key, sanitizedValue);
+                return true;
+            } catch (e) {
+                // localStorage might be disabled or full
+                console.warn('Could not save to localStorage');
+                return false;
+            }
+        }
+
+        // Utility function to safely read from localStorage
+        function safeLocalStorageGet(key) {
+            // Validate key
+            if (typeof key !== 'string' || key.includes('__proto__') || key.includes('constructor') || key.includes('prototype')) {
+                console.warn('Invalid localStorage key');
+                return null;
+            }
+
+            try {
+                const value = localStorage.getItem(key);
+                // Validate that value is exactly 'true' or 'false'
+                if (value === 'true') {
+                    return true;
+                } else if (value === 'false') {
+                    return false;
+                }
+                return null;
+            } catch (e) {
+                // localStorage might be disabled
+                console.warn('Could not read from localStorage');
+                return null;
+            }
+        }
+
         window.closeDisclaimerModal = function() {
-            const modal = document.getElementById('disclaimerModal');
+            const modal = domCache.disclaimerModal;
             if (modal) {
                 modal.classList.add('hidden');
                 // Remove focus trap
                 removeFocusTrap(modal);
                 // Store that user has seen the disclaimer
-                try {
-                    localStorage.setItem('flowchartDisclaimerShown', 'true');
-                } catch (e) {
-                    // localStorage might be disabled, continue anyway
-                    console.warn('Could not save disclaimer preference:', e);
-                }
+                safeLocalStorageSet('flowchartDisclaimerShown', true);
                 // Return focus to previously focused element
                 if (modalPreviousFocus && modalPreviousFocus.focus) {
                     modalPreviousFocus.focus();
@@ -2126,18 +2465,13 @@
         }
 
         function checkAndShowDisclaimer() {
-            let hasSeenDisclaimer = false;
+            // Use safe localStorage getter
+            const hasSeenDisclaimer = safeLocalStorageGet('flowchartDisclaimerShown');
 
-            try {
-                hasSeenDisclaimer = localStorage.getItem('flowchartDisclaimerShown') === 'true';
-            } catch (e) {
-                // localStorage might be disabled, show disclaimer to be safe
-                console.warn('Could not check disclaimer preference:', e);
-            }
-
-            const modal = document.getElementById('disclaimerModal');
+            const modal = domCache.disclaimerModal;
             if (modal) {
-                if (hasSeenDisclaimer) {
+                // Show modal if user hasn't seen it (null or false)
+                if (hasSeenDisclaimer === true) {
                     modal.classList.add('hidden');
                 } else {
                     modal.classList.remove('hidden');
@@ -2157,7 +2491,7 @@
         // Allow Escape key to close modal
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                const modal = document.getElementById('disclaimerModal');
+                const modal = domCache.disclaimerModal;
                 if (modal && !modal.classList.contains('hidden')) {
                     closeDisclaimerModal();
                     return;
@@ -2166,8 +2500,8 @@
 
             const focusedElement = document.activeElement;
 
-            const notesTooltip = document.getElementById('notesTooltip');
-            const alternativesTooltip = document.getElementById('alternativesTooltip');
+            const notesTooltip = domCache.notesTooltip;
+            const alternativesTooltip = domCache.alternativesTooltip;
 
             if (e.key === 'Escape') {
                 if (notesTooltip && notesTooltip.classList.contains('visible')) {
@@ -2240,11 +2574,13 @@
 
         // Function to populate program selector dynamically
         function populateProgramSelector() {
-            const select = document.getElementById('programSelect');
+            const select = domCache.programSelect;
             if (!select) return;
 
-            // Clear existing options
-            select.innerHTML = '';
+            // Clear existing options efficiently
+            while (select.firstChild) {
+                select.removeChild(select.firstChild);
+            }
 
             // Get all programs and sort them
             const programs = Object.keys(programsData).map(key => ({
@@ -2269,120 +2605,175 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Set print date for footer
-            const printDate = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            document.body.setAttribute('data-print-date', printDate);
+            try {
+                // Initialize DOM cache first
+                initDOMCache();
 
-            // Populate program selector from programsData
-            populateProgramSelector();
-
-            // Check and show disclaimer if needed
-            checkAndShowDisclaimer();
-
-            // Check for URL parameter to set initial program
-            const urlParams = new URLSearchParams(window.location.search);
-            const programParam = urlParams.get('program');
-            if (programParam && programsData[programParam]) {
-                currentProgram = programParam;
-                courseData = programsData[currentProgram].courseData;
-                semesterOrder = programsData[currentProgram].semesterOrder;
-                window.courseData = courseData;
-                window.semesterOrder = semesterOrder;
-
-                // Update dropdown
-                const select = document.getElementById('programSelect');
-                if (select) select.value = currentProgram;
-
-                // Update title
-                const programTitle = document.getElementById('programTitle');
-                if (programTitle) {
-                    programTitle.textContent = programsData[currentProgram].fullTitle;
+                // Set print date for footer
+                try {
+                    const printDate = new Date().toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    document.body.setAttribute('data-print-date', printDate);
+                } catch (error) {
+                    console.error('Error setting print date:', error);
                 }
-            }
 
-            leadsToMap = buildLeadsToMap();
-            buildFlowchart();
-            buildTextView();
-            setupScrollIndicators();
-            createArrowMarkers();
+                // Populate program selector from programsData
+                try {
+                    populateProgramSelector();
+                } catch (error) {
+                    console.error('Error populating program selector:', error);
+                }
 
-            updateSVGSize();
+                // Check and show disclaimer if needed
+                try {
+                    checkAndShowDisclaimer();
+                } catch (error) {
+                    console.error('Error checking disclaimer:', error);
+                }
 
-            // Initialize dot states after everything is rendered
-            setTimeout(() => {
-                updateActiveIndicator();
-            }, 100);
+                // Check for URL parameter to set initial program
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const programParam = urlParams.get('program');
 
-            window.addEventListener('resize', updateSVGSize);
+                    // Validate program parameter against whitelist
+                    if (programParam) {
+                        // Sanitize input - only allow alphanumeric, hyphens, and underscores
+                        const sanitizedParam = programParam.replace(/[^a-zA-Z0-9\-_]/g, '');
 
-            // Add event listeners for buttons
-            const disclaimerButton = document.getElementById('disclaimerButton');
-            if (disclaimerButton) {
-                disclaimerButton.addEventListener('click', closeDisclaimerModal);
-            }
+                        // Check if sanitized param exists in programsData
+                        if (sanitizedParam && Object.prototype.hasOwnProperty.call(programsData, sanitizedParam)) {
+                            currentProgram = sanitizedParam;
+                            courseData = programsData[currentProgram].courseData;
+                            semesterOrder = programsData[currentProgram].semesterOrder;
+                            window.courseData = courseData;
+                            window.semesterOrder = semesterOrder;
 
-            const guideToggle = document.getElementById('guideToggle');
-            if (guideToggle) {
-                guideToggle.addEventListener('click', toggleGuide);
-            }
+                            // Update dropdown
+                            const select = domCache.programSelect;
+                            if (select) select.value = currentProgram;
 
-            const toggleBtn = document.getElementById('toggleBtn');
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', toggleView);
-            }
-
-            const closeNotesBtn = document.getElementById('closeNotesBtn');
-            if (closeNotesBtn) {
-                closeNotesBtn.addEventListener('click', closeNotesTooltip);
-            }
-
-            const closeAlternativesBtn = document.getElementById('closeAlternativesBtn');
-            if (closeAlternativesBtn) {
-                closeAlternativesBtn.addEventListener('click', closeAlternativesTooltip);
-            }
-
-            const programSelect = document.getElementById('programSelect');
-            if (programSelect) {
-                programSelect.addEventListener('change', switchProgram);
-            }
-
-            document.addEventListener('click', (e) => {
-                // Close tooltips if clicking outside
-                const notesTooltip = document.getElementById('notesTooltip');
-                const alternativesTooltip = document.getElementById('alternativesTooltip');
-
-                if (notesTooltip && notesTooltip.classList.contains('visible')) {
-                    if (!e.target.closest('#notesTooltip') && !e.target.closest('.notes-indicator')) {
-                        closeNotesTooltip();
+                            // Update title
+                            const programTitle = domCache.programTitle;
+                            if (programTitle) {
+                                programTitle.textContent = programsData[currentProgram].fullTitle;
+                            }
+                        } else {
+                            // Invalid program parameter - log but continue with default
+                            console.warn('Invalid program parameter provided');
+                        }
                     }
+                } catch (error) {
+                    console.error('Error processing URL parameters:', error);
                 }
 
-                if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
-                    if (!e.target.closest('#alternativesTooltip') && !e.target.closest('.alternatives-indicator')) {
-                        closeAlternativesTooltip();
+                // Build and render flowchart
+                try {
+                    leadsToMap = buildLeadsToMap();
+                    buildFlowchart();
+                    buildTextView();
+                    setupScrollIndicators();
+                    createArrowMarkers();
+                    updateSVGSize();
+                } catch (error) {
+                    console.error('Error building flowchart:', error);
+                    alert('Error loading flowchart. Please refresh the page.');
+                }
+
+                // Initialize dot states after everything is rendered
+                try {
+                    setTimeout(() => {
+                        updateActiveIndicator();
+                    }, 100);
+                } catch (error) {
+                    console.error('Error initializing scroll indicators:', error);
+                }
+
+                // Add resize listener
+                try {
+                    window.addEventListener('resize', updateSVGSize);
+                } catch (error) {
+                    console.error('Error adding resize listener:', error);
+                }
+
+                // Add event listeners for buttons
+                try {
+                    const disclaimerButton = domCache.disclaimerModal?.querySelector('.modal-button');
+                    if (disclaimerButton) {
+                        disclaimerButton.addEventListener('click', closeDisclaimerModal);
                     }
-                }
 
-                // Clear course highlights if clicking outside
-                if (!e.target.closest('.course') && selectedCourseKey) {
-                    window.clearHighlights();
+                    const guideToggle = domCache.guideToggle;
+                    if (guideToggle) {
+                        guideToggle.addEventListener('click', toggleGuide);
+                    }
+
+                    const toggleBtn = domCache.toggleBtn;
+                    if (toggleBtn) {
+                        toggleBtn.addEventListener('click', toggleView);
+                    }
+
+                    const closeNotesBtn = domCache.notesTooltip?.querySelector('#closeNotesBtn');
+                    if (closeNotesBtn) {
+                        closeNotesBtn.addEventListener('click', closeNotesTooltip);
+                    }
+
+                    const closeAlternativesBtn = domCache.alternativesTooltip?.querySelector('#closeAlternativesBtn');
+                    if (closeAlternativesBtn) {
+                        closeAlternativesBtn.addEventListener('click', closeAlternativesTooltip);
+                    }
+
+                    const programSelect = domCache.programSelect;
+                    if (programSelect) {
+                        programSelect.addEventListener('change', switchProgram);
+                    }
+
+                    document.addEventListener('click', (e) => {
+                        // Close tooltips if clicking outside
+                        const notesTooltip = domCache.notesTooltip;
+                        const alternativesTooltip = domCache.alternativesTooltip;
+
+                        if (notesTooltip && notesTooltip.classList.contains('visible')) {
+                            if (!e.target.closest('#notesTooltip') && !e.target.closest('.notes-indicator')) {
+                                closeNotesTooltip();
+                            }
+                        }
+
+                        if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
+                            if (!e.target.closest('#alternativesTooltip') && !e.target.closest('.alternatives-indicator')) {
+                                closeAlternativesTooltip();
+                            }
+                        }
+
+                        // Clear course highlights if clicking outside
+                        if (!e.target.closest('.course') && selectedCourseKey) {
+                            window.clearHighlights();
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error setting up event listeners:', error);
                 }
-            });
+            } catch (error) {
+                console.error('Critical error during initialization:', error);
+                alert('An error occurred while loading the application. Please refresh the page.');
+            }
         });
         
         function setupScrollIndicators() {
-            const container = document.getElementById('flowchartContainer');
-            const indicatorsDiv = document.getElementById('scrollIndicators');
-            const wrapper = document.getElementById('visualView');
+            const container = domCache.flowchartContainer;
+            const indicatorsDiv = domCache.scrollIndicators;
+            const wrapper = domCache.visualView;
 
             if (!container || !indicatorsDiv || !wrapper) return;
 
-            // Clear existing indicators
-            indicatorsDiv.innerHTML = '';
+            // Clear existing indicators efficiently
+            while (indicatorsDiv.firstChild) {
+                indicatorsDiv.removeChild(indicatorsDiv.firstChild);
+            }
 
             semesterOrder.forEach((semester, index) => {
                 const dot = document.createElement('button');
@@ -2427,10 +2818,10 @@
         }
         
         function updateActiveIndicator() {
-            const wrapper = document.getElementById('visualView');
-            const container = document.getElementById('flowchartContainer');
+            const wrapper = domCache.visualView;
+            const container = domCache.flowchartContainer;
             const dots = document.querySelectorAll('.scroll-dot');
-            
+
             if (!wrapper || !container || dots.length === 0) return;
             
             const scrollLeft = wrapper.scrollLeft;
@@ -2528,7 +2919,8 @@
         }
         
         function buildTextView() {
-            const container = document.getElementById('textContent');
+            const container = domCache.textContent;
+            if (!container) return;
 
             const courseBySemester = {};
             semesterOrder.forEach(sem => courseBySemester[sem] = []);
@@ -2592,14 +2984,18 @@
 
                     if (course.notes && course.notes.trim() !== '') {
                         const notesP = document.createElement('p');
-                        // Convert URLs in notes to clickable links
-                        const notesWithLinks = course.notes.replace(
-                            /(https?:\/\/[^\s<]+)/g,
-                            '<a href="$1" target="_blank" rel="noopener noreferrer" aria-label="$1 (opens in new window)" style="color: #A60F2D; text-decoration: underline;">$1</a>'
-                        );
-                        notesP.innerHTML = `<strong>Notes:</strong> ${notesWithLinks}`;
                         notesP.style.fontStyle = 'italic';
                         notesP.style.color = '#444';
+
+                        // Add "Notes:" label
+                        const strong = document.createElement('strong');
+                        strong.textContent = 'Notes: ';
+                        notesP.appendChild(strong);
+
+                        // Safely create links from notes text
+                        const safeContent = createSafeLinksFromText(course.notes);
+                        notesP.appendChild(safeContent);
+
                         courseDiv.appendChild(notesP);
                     }
 
@@ -2611,8 +3007,10 @@
         }
 
         window.toggleGuide = function() {
-            const heading = document.getElementById('guideToggle');
-            const content = document.getElementById('guideContent');
+            const heading = domCache.guideToggle;
+            const content = domCache.guideContent;
+
+            if (!heading || !content) return;
 
             const isCollapsed = heading.classList.toggle('collapsed');
             content.classList.toggle('hidden');
@@ -2622,11 +3020,13 @@
 
         let currentView = 'visual';
         window.toggleView = function() {
-            const visualView = document.getElementById('visualView');
-            const textView = document.getElementById('textView');
-            const scrollControls = document.querySelector('.scroll-controls');
-            const btn = document.getElementById('toggleBtn');
-            const announcer = document.getElementById('announcements');
+            const visualView = domCache.visualView;
+            const textView = domCache.textView;
+            const scrollControls = domCache.scrollControls;
+            const btn = domCache.toggleBtn;
+            const announcer = domCache.announcements;
+
+            if (!visualView || !textView || !btn) return;
 
             if (currentView === 'visual') {
                 visualView.style.display = 'none';
