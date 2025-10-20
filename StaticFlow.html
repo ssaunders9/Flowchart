@@ -577,9 +577,13 @@
                 color: #000 !important;
             }
 
-            /* Hide SVG connections */
+            /* SVG connections - make visible in print */
             #connectionsSvg {
-                display: none !important;
+                display: block !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                pointer-events: none;
             }
 
             /* Make badges smaller */
@@ -2566,8 +2570,8 @@ function drawAllConnections() {
 
         if (record.isPrereqForCount > 0) {
             // Single output stub at center-right of course
-            // All output stubs set to 10% from the top of the course box
-            const outputStubY = rect.top + (rect.height * 0.10);
+            // All output stubs set to 9% from the top of the course box
+            const outputStubY = rect.top + (rect.height * 0.09);
             record.rightStubs.push({
                 x: rect.right,
                 y: outputStubY,
@@ -2909,18 +2913,18 @@ function drawAllConnections() {
         const lanes = horizontalLanesBySemester[semester];
         if (!lanes || lanes.length === 0) return null;
 
-        // Only log for MATH-172
-        if (debugCourse === 'MATH-172') {
-            console.log(`  findLane for ${semester}, preferTopLane=${preferTopLane}, targetY=${targetY}`);
-            console.log(`  Total lanes:`, lanes.length, lanes.map(l => ({ y: l.y, isAboveAll: l.isAboveAll })));
-        }
+        // Only log for MATH-172 (commented out for production)
+        // if (debugCourse === 'MATH-172') {
+        //     console.log(`  findLane for ${semester}, preferTopLane=${preferTopLane}, targetY=${targetY}`);
+        //     console.log(`  Total lanes:`, lanes.length, lanes.map(l => ({ y: l.y, isAboveAll: l.isAboveAll })));
+        // }
 
         // Filter to available lanes (checking X-range availability)
         let availableLanes = lanes.filter(lane => isHorizontalLaneAvailable(lane, x1, x2));
         
-        if (debugCourse === 'MATH-172') {
-            console.log(`  After X-range filter:`, availableLanes.length);
-        }
+        // if (debugCourse === 'MATH-172') {
+        //     console.log(`  After X-range filter:`, availableLanes.length);
+        // }
         if (availableLanes.length === 0) return null;
 
         // ADDITIONAL FILTER: Avoid Y-positions that conflict with vertical lanes AND stubs
@@ -3023,9 +3027,9 @@ function drawAllConnections() {
             return !hasConflict;
         });
 
-        if (debugCourse === 'MATH-172') {
-            console.log(`  After conflict filter:`, availableLanes.length, availableLanes.map(l => ({ y: l.y.toFixed(2), isAboveAll: l.isAboveAll })));
-        }
+        // if (debugCourse === 'MATH-172') {
+        //     console.log(`  After conflict filter:`, availableLanes.length, availableLanes.map(l => ({ y: l.y.toFixed(2), isAboveAll: l.isAboveAll })));
+        // }
         if (availableLanes.length === 0) return null;
 
         // Sort all available lanes by distance to targetY, considering lane type
@@ -3056,9 +3060,9 @@ function drawAllConnections() {
             return distA - distB;
         });
 
-        if (debugCourse === 'MATH-172') {
-            console.log(`  After sorting (preferTopLane=${preferTopLane}):`, availableLanes.map(l => ({ y: l.y.toFixed(2), isAboveAll: l.isAboveAll, dist: Math.abs(l.y - targetY).toFixed(2) })));
-        }
+        // if (debugCourse === 'MATH-172') {
+        //     console.log(`  After sorting (preferTopLane=${preferTopLane}):`, availableLanes.map(l => ({ y: l.y.toFixed(2), isAboveAll: l.isAboveAll, dist: Math.abs(l.y - targetY).toFixed(2) })));
+        // }
 
         // Return the best lane
         return availableLanes[0];
@@ -3476,39 +3480,34 @@ function drawAllConnections() {
             const isEarlierA = toSemIdxA < fromSemIdx;
             const isEarlierB = toSemIdxB < fromSemIdx;
 
-            // Same semester connections first
-            if (isSameSemA && !isSameSemB) return -1;
-            if (!isSameSemA && isSameSemB) return 1;
+            // NEW PRIORITY ORDER:
+            // 1. Cross-semester connections (non-adjacent) - highest priority
+            // 2. Same semester connections (adjacent)
+            // 3. Within each group, by position
+
+            // Cross-semester (not same semester) gets priority
+            if (!isSameSemA && isSameSemB) return -1;  // A is cross-semester, B is same
+            if (isSameSemA && !isSameSemB) return 1;   // B is cross-semester, A is same
 
             // If both same semester, sort by position in semester (higher courses first)
             if (isSameSemA && isSameSemB) {
                 return connA.toRecord.rect.top - connB.toRecord.rect.top;
             }
 
-            // For cross-semester connections, sort by output stub Y position
-            // This ensures connections with higher output stubs (which will use higher horizontal lanes)
-            // are processed first and get higher input stubs
+            // If both cross-semester, earlier semesters get priority
             if (!isSameSemA && !isSameSemB) {
-                // Get output stub Y positions
-                const outputStubA = fromRecord.rightStubs[0];
-                const outputStubB = fromRecord.rightStubs[0];
-                if (outputStubA && outputStubB) {
-                    // Lower Y = higher on page = processed first
-                    return outputStubA.y - outputStubB.y;
-                }
-            }
-
-            // Earlier semester connections next
-            if (isEarlierA && !isEarlierB) return -1;
-            if (!isEarlierA && isEarlierB) return 1;
-
-            // If both earlier, sort by semester (earliest first), then by position
-            if (isEarlierA && isEarlierB) {
+                // Earlier semester connections first
+                if (isEarlierA && !isEarlierB) return -1;
+                if (!isEarlierA && isEarlierB) return 1;
+                
+                // If both earlier or both later, sort by semester distance
                 if (toSemIdxA !== toSemIdxB) return toSemIdxA - toSemIdxB;
+                
+                // Same semester, sort by position
                 return connA.toRecord.rect.top - connB.toRecord.rect.top;
             }
 
-            // Both are later semesters - sort by position (higher first)
+            // Fallback
             return connA.toRecord.rect.top - connB.toRecord.rect.top;
         });
 
@@ -3523,44 +3522,29 @@ function drawAllConnections() {
                 return;
             }
 
-            // Prioritize input stubs based on connection source semester
-            // Priority order:
-            // 1. Same semester, highest stub (top of target course)
-            // 2. Same semester, lower stubs (top to bottom)
-            // 3. Earlier semesters, earliest to latest (top to bottom)
-            // 4. Later semesters (top to bottom)
+            // Prioritize input stubs based on connection type
+            // NEW Priority order:
+            // 1. Cross-semester (highest cross semester output gets highest stub)
+            // 2. Adjacent same semester (highest stub)
+            // 3. Adjacent same semester (lower stubs)
 
             const fromSemester = fromRecord.semester;
             const toSemester = toRecord.semester;
             const fromSemIdx = semesterOrder.indexOf(fromSemester);
             const toSemIdx = semesterOrder.indexOf(toSemester);
+            const isSameSemester = fromSemIdx === toSemIdx;
 
-            // For cross-semester connections, sort by the direction of flow
-            // If output is above input (going down), prefer lower input stubs
-            // If output is below input (going up), prefer higher input stubs
+            // Sort available input stubs based on priority
             availableInputStubs.sort((a, b) => {
-                if (fromSemIdx === toSemIdx) {
-                    // Same semester: prefer higher stubs (lower Y value = higher on page)
+                if (!isSameSemester) {
+                    // Cross-semester connection
+                    // Priority 1: Highest cross semester output gets highest stub (lowest Y value)
+                    // Simply assign top to bottom for cross-semester
                     return a.y - b.y;
                 } else {
-                    // Cross-semester: determine flow direction based on output stub
-                    const outputStub = fromRecord.rightStubs[0];
-                    if (outputStub) {
-                        // Calculate if connection will go up or down
-                        const outputY = outputStub.y;
-                        const avgInputY = (a.y + b.y) / 2;
-                        
-                        // If output is above the input stubs (going down), prefer lower stubs (higher Y)
-                        // If output is below the input stubs (going up), prefer higher stubs (lower Y)
-                        if (outputY < avgInputY) {
-                            // Going down - prefer lower stubs (higher Y values first)
-                            return b.y - a.y;
-                        } else {
-                            // Going up - prefer higher stubs (lower Y values first)
-                            return a.y - b.y;
-                        }
-                    }
-                    // Fallback: use ascending Y (top to bottom)
+                    // Same semester (adjacent) connection
+                    // Priority 2: Highest stub first (lowest Y)
+                    // Priority 3: Then lower stubs (higher Y)
                     return a.y - b.y;
                 }
             });
@@ -3814,7 +3798,7 @@ function drawAllConnections() {
                     // Add visual indicators at entry and exit points
                     // Entry indicator (filled circle) at output stub
                     const entryIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    entryIndicator.setAttribute('cx', outputStub.x);
+                    entryIndicator.setAttribute('cx', outputStub.x - 3);
                     entryIndicator.setAttribute('cy', outputStub.y);
                     entryIndicator.setAttribute('r', '4');
                     entryIndicator.setAttribute('fill', courseColor);
@@ -3892,17 +3876,17 @@ function drawAllConnections() {
                                     shouldPreferTopLane = false;
                                 }
 
-                                // Only log for MATH-172
-                                if (fromCourseKey === 'MATH-172') {
-                                    console.log(`[${fromCourseKey}] Lane assignment (gap ${semIdx - fromSemIdx + 1}):`, {
-                                        isInUpperHalf,
-                                        isFirstGap,
-                                        selectedHorizontalY,
-                                        laneTargetY,
-                                        shouldPreferTopLane,
-                                        nextSemester
-                                    });
-                                }
+                                // Only log for MATH-172 (commented out for production)
+                                // if (fromCourseKey === 'MATH-172') {
+                                //     console.log(`[${fromCourseKey}] Lane assignment (gap ${semIdx - fromSemIdx + 1}):`, {
+                                //         isInUpperHalf,
+                                //         isFirstGap,
+                                //         selectedHorizontalY,
+                                //         laneTargetY,
+                                //         shouldPreferTopLane,
+                                //         nextSemester
+                                //     });
+                                // }
 
                                 horizLane = findClosestAvailableHorizontalLane(
                                     nextSemester,
@@ -3913,9 +3897,9 @@ function drawAllConnections() {
                                     fromCourseKey
                                 );
 
-                                if (fromCourseKey === 'MATH-172') {
-                                    console.log(`[${fromCourseKey}] Selected lane:`, horizLane ? { y: horizLane.y, isAboveAll: horizLane.isAboveAll } : 'NONE');
-                                }
+                                // if (fromCourseKey === 'MATH-172') {
+                                //     console.log(`[${fromCourseKey}] Selected lane:`, horizLane ? { y: horizLane.y, isAboveAll: horizLane.isAboveAll } : 'NONE');
+                                // }
 
                                 if (!horizLane) {
                                     console.warn('No horizontal lane in', nextSemester, 'for', conn.from, '->', conn.to);
@@ -4005,7 +3989,7 @@ function drawAllConnections() {
                     // Add visual indicators at entry and exit points
                     // Entry indicator (filled circle) at output stub
                     const entryIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    entryIndicator.setAttribute('cx', outputStub.x);
+                    entryIndicator.setAttribute('cx', outputStub.x - 3);
                     entryIndicator.setAttribute('cy', outputStub.y);
                     entryIndicator.setAttribute('r', '4');
                     entryIndicator.setAttribute('fill', courseColor);
