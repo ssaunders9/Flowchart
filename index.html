@@ -804,6 +804,13 @@
             <div class="notes-tooltip-header" id="alternativesHeader"></div>
             <div class="notes-tooltip-content" id="alternativesContent"></div>
         </div>
+        
+        <!-- Link to Static Flow -->
+        <footer style="text-align: center; padding: 2rem 1rem; margin-top: 3rem; border-top: 2px solid #ddd;">
+            <a href="StaticFlow.html" id="staticFlowLink" style="display: inline-block; padding: 0.75rem 1.5rem; background: #A60F2D; color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#8B0C24'" onmouseout="this.style.background='#A60F2D'" aria-label="View Static Flowchart with all connections visible. Note: The static flowchart is a visual-only reference and is unfortunately not accessible with screen readers.">
+                📊 View Static Flowchart (All Connections Visible)
+            </a>
+        </footer>
     </main>
 
     <script>
@@ -2365,7 +2372,18 @@
             if (announcer) {
                 announcer.textContent = `Switched to ${programsData[currentProgram].name} program.`;
             }
+            
+            // Update the Static Flow link with current program
+            updateStaticFlowLink();
         };
+        
+        // Update Static Flow link to maintain program selection
+        function updateStaticFlowLink() {
+            const staticFlowLink = document.getElementById('staticFlowLink');
+            if (staticFlowLink && currentProgram) {
+                staticFlowLink.href = `StaticFlow.html?program=${encodeURIComponent(currentProgram)}`;
+            }
+        }
 
         // Disclaimer Modal Functions
         let modalPreviousFocus = null;
@@ -2686,6 +2704,8 @@
                     setupScrollIndicators();
                     createArrowMarkers();
                     updateSVGSize();
+                    // Update Static Flow link with current program
+                    updateStaticFlowLink();
                 } catch (error) {
                     console.error('Error building flowchart:', error);
                     alert('Error loading flowchart. Please refresh the page.');
