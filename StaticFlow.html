@@ -443,8 +443,8 @@
     
         /* Lane routing styles for static flowchart */
         .diagram-wrapper {
-            padding-top: 150px !important;
-            padding-bottom: 150px !important;
+            padding-top: 30px !important;
+            padding-bottom: 30px !important;
         }
 
         .routing-lane {
@@ -521,106 +521,6 @@
         <h2 class="visually-hidden">Curriculum Flowchart</h2>
         <div id="announcements" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" aria-live="polite" aria-atomic="true"></div>
 
-        <div class="legend">
-            <button id="guideToggle" class="collapsed" aria-expanded="false"><span><span aria-hidden="true">📖</span> How to Use This Tool</span></button>
-
-            <div class="legend-content hidden" id="guideContent">
-            <h3 class="visually-hidden">User Guide</h3>
-            <div class="legend-section">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Course Types:</h4>
-                <div class="legend-items">
-                    <div class="legend-item">
-                        <div class="legend-box engineering"></div>
-                        <span class="legend-label">Engineering</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box science"></div>
-                        <span class="legend-label">Science/Math</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box ucore"></div>
-                        <span class="legend-label">UCORE</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box technical"></div>
-                        <span class="legend-label">Technical Elective</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="legend-section">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Course Relationships (click any course to see):</h4>
-                <div class="legend-items">
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 5px solid #000; background: #fff; box-shadow: 0 0 0 3px #A60F2D; border-radius: 4px; margin: 8px;"></div>
-                        <span class="legend-label">Selected Course</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 5px solid #ff9800; background: #fff3e0; box-shadow: 0 0 10px rgba(255, 152, 0, 0.6); border-radius: 4px; margin: 8px; position: relative;">
-                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #c44100; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">PRE</div>
-                        </div>
-                        <span class="legend-label">Prerequisites (must take first)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 5px solid #2196f3; background: #e3f2fd; box-shadow: 0 0 10px rgba(33, 150, 243, 0.6); border-radius: 4px; margin: 8px; position: relative;">
-                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #0d47a1; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">CO</div>
-                        </div>
-                        <span class="legend-label">Co-requisites (take together)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 5px solid #4caf50; background: #e8f5e9; box-shadow: 0 0 10px rgba(76, 175, 80, 0.6); border-radius: 4px; margin: 8px; position: relative;">
-                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #1b5e20; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">▶</div>
-                        </div>
-                        <span class="legend-label">Leads to (unlocks these courses)</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="legend-section">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Additional Indicators:</h4>
-                <div class="legend-items">
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
-                            <div style="position: absolute; top: -8px; left: -8px; background: #757575; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; border: 2px solid white;">i</div>
-                        </div>
-                        <span class="legend-label">Course has notes (click to view)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
-                            <div style="position: absolute; bottom: -8px; left: -8px; background: #616161; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; font-weight: bold; border: 2px solid white;">OR</div>
-                        </div>
-                        <span class="legend-label">Course has alternatives (click to view)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
-                            <div style="position: absolute; bottom: -8px; right: -8px; background: #8B4513; color: white; border-radius: 4px; padding: 3px 6px; font-size: 0.7em; font-weight: bold; border: 2px solid white;">F</div>
-                        </div>
-                        <span class="legend-label">Fall only</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
-                            <div style="position: absolute; bottom: -8px; right: -8px; background: #1b5e20; color: white; border-radius: 4px; padding: 3px 6px; font-size: 0.7em; font-weight: bold; border: 2px solid white;">Sp</div>
-                        </div>
-                        <span class="legend-label">Spring only</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="legend-section" style="display: none;">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Keyboard Navigation:</h4>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><kbd>Tab</kbd> - Navigate between courses and buttons</li>
-                    <li><kbd>Enter</kbd> or <kbd>Space</kbd> - Select course to view prerequisites</li>
-                    <li><kbd>I</kbd> - View notes for the focused course (if it has notes)</li>
-                    <li><kbd>A</kbd> - View alternatives for the focused course (if it has alternatives)</li>
-                    <li><kbd>Arrow Keys</kbd> - Move between courses in the grid (NVDA users: press <kbd>Insert+Space</kbd> to enable Focus Mode)</li>
-                    <li><kbd>Escape</kbd> - Close tooltips or clear selection</li>
-                    <li><kbd>V</kbd> - Toggle visual/text views</li>
-                </ul>
-            </div>
-            </div>
-        </div>
-        
         <div style="text-align: center; margin-bottom: 20px;">
             <button id="toggleBtn" style="display: none;" style="padding: 12px 24px; font-size: 1em; font-weight: bold; background: #A60F2D; color: white; border: 2px solid #A60F2D; border-radius: 6px; cursor: pointer;">
                 Switch to Text-Only View
