@@ -814,7 +814,13 @@
         </footer>
     </main>
 
+    <!-- Load external course data (with cache busting timestamp) -->
+    <script src="programsData.js?v=20251021"></script>
+
     <script>
+        // Debug: Log when programsData loads
+        console.log('programsData loaded:', typeof programsData !== 'undefined' ? Object.keys(programsData) : 'NOT LOADED');
+        
         /*
          * Browser Requirements:
          * - Modern browsers (Chrome 80+, Firefox 75+, Safari 13.1+, Edge 80+)
@@ -863,316 +869,7 @@
             }
         })();
 
-        // Master data structure containing all programs
-        const programsData = {
-            'CHE': {
-                name: 'Chemical Engineering',
-                fullTitle: 'Bachelor of Science - Chemical Engineering (4 Year Plan)',
-                courseData: {
-            'CHE-101': { code: 'CHE 101', name: 'Overview of Chemical Engineering', shortName: 'CHE Overview', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: ['MATH-171'], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-            'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-            'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-            'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-            'CHE-110': { code: 'CHE 110', name: 'Introduction to Chemical Engineering', shortName: 'Intro to CHE', credits: 2, type: 'engineering', semester: 'Year 1 Spring', prereqs: ['CHE-101', 'MATH-171'], coreqs: ['CHEM-105'], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-            'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-            'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-            'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-
-            'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['CHE-110', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: CHE 110 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-            'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-            'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I [PSCI]', shortName: 'Physics I (PSCI)', credits: 3, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I [PSCI]. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-            'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers [PSCI]', shortName: 'Phys Lab I (PSCI)', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-            'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-            'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 2 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-            'CHE-211': { code: 'CHE 211', name: 'Process Simulation', shortName: 'Proc Sim', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-            'CHEM-348': { code: 'CHEM 348', name: 'Organic Chemistry II and Problem Solving', shortName: 'Org Chem II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['CHEM-345'], coreqs: [], alternatives: ['MBIOS 303 - Introductory Biochemistry. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.'], notes: '' },
-            'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-            'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-            'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-            'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-
-            'CHE-301': { code: 'CHE 301', name: 'Chemical Engineering Thermodynamics', shortName: 'Thermo I', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-101', 'PHYS-202', 'PHYS-212'], coreqs: ['CHE-211', 'CHEM-345'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-310': { code: 'CHE 310', name: 'Introduction to Transport Processes', shortName: 'Transport', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['CHE-211', 'MATH-315'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-498': { code: 'CHE 498', name: 'Seminar', shortName: 'Seminar', credits: 1, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Fall', prereqs: ['ENGL-101'], coreqs: [], alternatives: ['ENGL 403 - Technical and Professional Writing ESL. Prereqs: ENGLISH 101 or 105; junior standing; pass University Writing Portfolio.'], notes: '' },
-            'ELEC-TECH-1': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'MSE 201 or any 300-400-level BIO ENG, CHEM, CHE, CE, E E, ENGR, MATH, ME, MSE, PHYSICS, or STAT course as approved by advisor.' },
-            'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-            'CHE-302': { code: 'CHE 302', name: 'Chemical Engineering Thermodynamics II', shortName: 'Thermo II', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-301'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHE-321': { code: 'CHE 321', name: 'Kinetics and Reactor Design', shortName: 'Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310'], coreqs: ['CHE-302'], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHE-332': { code: 'CHE 332', name: 'Fluid Mechanics and Heat Transfer', shortName: 'Fluids/Heat', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310'], coreqs: ['CHE-302'], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHE-334': { code: 'CHE 334', name: 'Chemical Engineering Separations', shortName: 'Separations', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310', 'CHEM-345'], coreqs: ['CHE-302'], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-
-            'CHE-432': { code: 'CHE 432', name: 'Chemical Engineering Lab I [M]', shortName: 'Lab I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: ['CHE-352', 'ENGL-402'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-441': { code: 'CHE 441', name: 'Process Control', shortName: 'Process Control', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-450': { code: 'CHE 450', name: 'Chemical Process Analysis and Design I', shortName: 'Design I', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: ['CHE-352', 'ENGL-402'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-352': { code: 'CHE 352', name: 'Chemical Process Safety', shortName: 'Process Safety', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-321', 'CHE-332'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-
-            'CHE-433': { code: 'CHE 433', name: 'Chemical Engineering Lab II [M]', shortName: 'Lab II [M]', credits: 2, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['CHE-432'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHE-451': { code: 'CHE 451', name: 'Chemical Process Analysis and Design II [M] [CAPS]', shortName: 'Design II [M] [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['CHE-450'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'ELEC-CHE-1': { code: 'Elective', name: 'Chemical Engineering Elective', shortName: 'CHE Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level CHE course not used to fulfill major requirements. A maximum of 3 credits is allowed in CHE 488, 495, and 499 combined.' },
-            'ELEC-CHE-2': { code: 'Elective', name: 'Chemical Engineering Elective', shortName: 'CHE Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level CHE course not used to fulfill major requirements. A maximum of 3 credits is allowed in CHE 488, 495, and 499 combined.' },
-            'ELEC-TECH-2': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'MSE 201 or any 300-400-level BIO ENG, CHEM, CHE, CE, E E, ENGR, MATH, ME, MSE, PHYSICS, or STAT course as approved by advisor.' }
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            },
-            'BIOENG-BMSE': {
-                name: 'Bioengineering: Biomedical Systems',
-                fullTitle: 'Bachelor of Science - Bioengineering: Biomedical Systems (4 Year Plan)',
-                courseData: {
-                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/<br><br>Note: This INQUIRY elective is recommended in Year 1 Spring (rather than Year 2 Spring as shown in the catalog) to balance the credit load across semesters.' },
-
-                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-
-                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-
-                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instru [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CE-211': { code: 'C E 211', name: 'Statics', shortName: 'Statics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: ['MATH-172', 'PHYS-201'], alternatives: [], notes: '' },
-                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
-
-                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ELEC-COMM': { code: 'Elective', name: 'Communication or Writing Elective', shortName: '[COMM]/[WRTG]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose a UCORE [COMM] or [WRTG] course.<br><br>[COMM] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/comm/<br><br>[WRTG] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/wrtg/' },
-                    'EE-261': { code: 'E E 261', name: 'Electrical Circuits I', shortName: 'Circuits I', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['PHYS-202', 'PHYS-212'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-420': { code: 'BIO ENG 420', name: 'Mechanics of Biological Materials', shortName: 'Bio Mechanics', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CE-211'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-430': { code: 'BIO ENG 430', name: 'Bioinstrumentation', shortName: 'Bioinstrument', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['EE-261', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-440': { code: 'BIO ENG 440', name: 'Physiological Control Systems', shortName: 'Phys Control Sys', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-360'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ELEC-BIOENG': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined.' },
-                    'ELEC-TECH': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Approved courses include BIOLOGY 106, 251, CPT S 121, E E 214, 262, ME 116, 212, 216, MSE 201, any 300-400 level BIO ENG, BIOLOGY, CE, CHE, CHEM, CPT S, E E, MATH, MBIOS, ME, MSE, NEUROSCI, PHYSICS, or STAT course as approved, or other courses as approved by advisor.' },
-                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' }
-
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            },
-            'BIOENG-CMBE': {
-                name: 'Bioengineering: Cellular/Molecular Bioengineering',
-                fullTitle: 'Bachelor of Science - Bioengineering: Cellular/Molecular Bioengineering (4 Year Plan)',
-                courseData: {
-                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/<br><br>Note: This INQUIRY elective is recommended in Year 1 Spring (rather than Year 2 Spring as shown in the catalog) to balance the credit load across semesters.' },
-
-                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-
-                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-
-                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instru [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'MBIOS-ELEC': { code: 'MBIOS Elective', name: 'MBIOS 301, 305, or 413', shortName: 'MBIOS Elec', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose one of the following:<br><br>MBIOS 301 - General Genetics. Prereqs: BIOLOGY 106 or 120; BIOLOGY 107.<br><br>MBIOS 305 - General Microbiology. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.<br><br>MBIOS 413 - General Biochemistry. Prereqs: MBIOS 303 and junior standing.' },
-                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
-
-                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ELEC-BIOENG-1': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined.' },
-                    'ELEC-COMM': { code: 'Elective', name: 'Communication or Writing Elective', shortName: '[COMM]/[WRTG]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose a UCORE [COMM] or [WRTG] course.<br><br>[COMM] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/comm/<br><br>[WRTG] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/wrtg/' },
-
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-456', 'BIOENG-475'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-456': { code: 'BIO ENG 456', name: 'Protein Bioengineering', shortName: 'Protein Bioeng', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-350'], coreqs: ['BIOENG-475'], alternatives: [], notes: 'Prereqs: BIO ENG 350 with C or better, or BIO ENG 475 with C or better or concurrent enrollment.' },
-                    'BIOENG-475': { code: 'BIO ENG 475', name: 'Biochemical Engineering', shortName: 'Biochem Eng', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-310', 'BIOENG-350'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-476': { code: 'BIO ENG 476', name: 'Applied Molecular and Cellular Bioengineering', shortName: 'Applied Mol & Cell', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-350'], coreqs: [], alternatives: [], notes: '' },
-                    'ELEC-BIOENG-2': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined.' },
-                    'ELEC-TECH': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Approved courses include BIOLOGY 106, 251, CPT S 121, E E 214, 262, ME 116, 212, 216, MSE 201, any 300-400 level BIO ENG, BIOLOGY, CE, CHE, CHEM, CPT S, E E, MATH, MBIOS, ME, MSE, NEUROSCI, PHYSICS, or STAT course as approved, or other courses as approved by advisor.' },
-                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' }
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            },
-            'BIOENG-PREMED-BMSE': {
-                name: 'Bioengineering: Pre-Med Biomedical Systems',
-                fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Biomedical Systems (4 Year Plan)',
-                courseData: {
-                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-
-                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-                     'CHEM-348': { code: 'CHEM 348', name: 'Organic Chemistry II and Problem Solving', shortName: 'Org Chem II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-
-                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instru [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOLOGY-106': { code: 'BIOLOGY 106', name: 'Introductory Biology: Organisms [BSCI]', shortName: 'Organisms (BSCI)', credits: 4, type: 'science', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CE-211': { code: 'C E 211', name: 'Statics', shortName: 'Statics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: ['MATH-172', 'PHYS-201'], alternatives: [], notes: '' },
-                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
-
-                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: ['ENGL-101'], coreqs: [], alternatives: ['ENGL 403 - Technical and Professional Writing ESL. Prereqs: ENGLISH 101 or 105; junior standing; pass University Writing Portfolio.'], notes: '' },
-                    'EE-261': { code: 'E E 261', name: 'Electrical Circuits I', shortName: 'Circuits I', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['PHYS-202', 'PHYS-212'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-420': { code: 'BIO ENG 420', name: 'Mechanics of Biological Materials', shortName: 'Bio Mechanics', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CE-211'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-430': { code: 'BIO ENG 430', name: 'Bioinstrumentation', shortName: 'Bioinstrument', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['EE-261', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-440': { code: 'BIO ENG 440', name: 'Physiological Control Systems', shortName: 'Phys Control Sys', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-360'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ELEC-BIOENG': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined.' },
-                    'MBIOS-PREMED': { code: 'MBIOS Elective', name: 'MBIOS 301, 305, 401, or 413', shortName: 'MBIOS Elec', credits: 3, type: 'science', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose one of the following:<br><br>MBIOS 301 - General Genetics. Prereqs: BIOLOGY 106 or 120; BIOLOGY 107.<br><br>MBIOS 305 - General Microbiology. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.<br><br>MBIOS 401 - Immunology. Prereqs: BIOLOGY 107; MBIOS 303.<br><br>MBIOS 413 - General Biochemistry. Prereqs: MBIOS 303 and junior standing.' },
-                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' }
-
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            },
-            'BIOENG-PREMED-CMBE': {
-                name: 'Bioengineering: Pre-Med Cellular/Molecular',
-                fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Cellular/Molecular (4 Year Plan)',
-                courseData: {
-                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-
-                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-                    'CHEM-348': { code: 'CHEM 348', name: 'Organic Chemistry II and Problem Solving', shortName: 'Org Chem II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-
-                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instru [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOLOGY-106': { code: 'BIOLOGY 106', name: 'Introductory Biology: Organisms [BSCI]', shortName: 'Organisms (BSCI)', credits: 4, type: 'science', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MBIOS-PREMED-1': { code: 'MBIOS Elective', name: 'MBIOS 301, 305, 401, or 413', shortName: 'MBIOS Elec', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose one of the following:<br><br>MBIOS 301 - General Genetics. Prereqs: BIOLOGY 106 or 120; BIOLOGY 107.<br><br>MBIOS 305 - General Microbiology. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.<br><br>MBIOS 401 - Immunology. Prereqs: BIOLOGY 107; MBIOS 303.<br><br>MBIOS 413 - General Biochemistry. Prereqs: MBIOS 303 and junior standing.' },
-                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
-
-                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: ['ENGL-101'], coreqs: [], alternatives: ['ENGL 403 - Technical and Professional Writing ESL. Prereqs: ENGLISH 101 or 105; junior standing; pass University Writing Portfolio.'], notes: '' },
-                    'ELEC-TECH': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Approved courses include BIOLOGY 251, C E 211, CPT S 121, E E 214, 261, 262, ME 116, 212, 216, MSE 201, any 300-400 level BIO ENG, BIOLOGY, CE, CHE, CHEM, CPT S, E E, MATH, MBIOS, ME, MSE, NEUROSCI, PHYSICS, or STAT course, or other courses as approved by advisor.' },
-
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-456', 'BIOENG-475'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-456': { code: 'BIO ENG 456', name: 'Protein Bioengineering', shortName: 'Protein Bioeng', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-350'], coreqs: ['BIOENG-475'], alternatives: [], notes: 'Prereqs: BIO ENG 350 with C or better, or BIO ENG 475 with C or better or concurrent enrollment.' },
-                    'BIOENG-475': { code: 'BIO ENG 475', name: 'Biochemical Engineering', shortName: 'Biochem Eng', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-310', 'BIOENG-350'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-476': { code: 'BIO ENG 476', name: 'Applied Molecular and Cellular Bioengineering', shortName: 'Applied Mol & Cell', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-350'], coreqs: [], alternatives: [], notes: '' },
-                    'ELEC-BIOENG-1': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined. Students may replace three credits with three credits of a 300-400-level CHE course or an additional MBIOS 301, 305, 401, or 413 with advisor approval.' },
-                    'ELEC-BIOENG-2': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined. Students may replace three credits with three credits of a 300-400-level CHE course or an additional MBIOS 301, 305, 401, or 413 with advisor approval.' },
-                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' }
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            }
-        };
+        // Program data loaded from external file: programsData.js
 
         // Current program state
         let currentProgram = 'CHE';
@@ -2600,34 +2297,98 @@
 
         // Function to populate program selector dynamically
         function populateProgramSelector() {
+            console.log('populateProgramSelector called');
             const select = domCache.programSelect;
+            console.log('select element:', select);
             if (!select) return;
+            
+            // Safety check: ensure programsData is loaded
+            if (typeof programsData === 'undefined' || !programsData) {
+                console.warn('programsData not loaded yet, retrying...');
+                setTimeout(populateProgramSelector, 100);
+                return;
+            }
+            
+            console.log('programsData available, keys:', Object.keys(programsData));
 
             // Clear existing options efficiently
             while (select.firstChild) {
                 select.removeChild(select.firstChild);
             }
 
-            // Get all programs and sort them
-            const programs = Object.keys(programsData).map(key => ({
-                key: key,
-                name: programsData[key].name
-            }));
+            // Get all programs and add version metadata
+            const programs = Object.keys(programsData).map(key => {
+                const program = programsData[key];
+                console.log(`Processing ${key}:`, program);
+                let displayLabel = program.name || 'Unknown Program';
+                
+                // Get status with fallback
+                const status = program.status || 'current';
+                const version = program.version || '1.0';
+                const effectiveDate = program.effectiveDate || '';
+                const effectiveUntil = program.effectiveUntil || '';
+                
+                console.log(`  - Status: ${status}, EffectiveDate: "${effectiveDate}", effectiveUntil: "${effectiveUntil}"`);
+                
+                // Debug logging (remove in production if needed)
+                if (!effectiveDate && status === 'current') {
+                    console.warn(`Missing effectiveDate for ${key}:`, program);
+                }
+                
+                // Add version information to label based on status
+                if (status === 'current') {
+                    displayLabel += ` (Current - Effective ${effectiveDate})`;
+                } else if (status === 'proposed') {
+                    displayLabel += ` (Proposed - Effective ${effectiveDate})`;
+                } else if (status === 'archived') {
+                    if (effectiveUntil) {
+                        displayLabel += ` (Archived - Effective Until ${effectiveUntil})`;
+                    } else {
+                        displayLabel += ` (Archived - v${version})`;
+                    }
+                }
+                
+                console.log(`  - Final label: "${displayLabel}"`);
+                
+                return {
+                    key: key,
+                    name: program.name || 'Unknown',
+                    displayLabel: displayLabel,
+                    status: status,
+                    effectiveDate: effectiveDate,
+                    sortOrder: status === 'current' ? 1 : status === 'proposed' ? 2 : 3
+                };
+            });
 
-            // Sort: CHE first, then alphabetically
+            console.log('Programs array:', programs);
+
+            // Sort: Current first, then proposed, then archived. CHE always first within each group
             programs.sort((a, b) => {
-                if (a.key === 'CHE') return -1;
-                if (b.key === 'CHE') return 1;
+                // Sort by status first (current < proposed < archived)
+                if (a.sortOrder !== b.sortOrder) {
+                    return a.sortOrder - b.sortOrder;
+                }
+                
+                // Within same status, CHE always first
+                if (a.key === 'CHE' || a.key.startsWith('CHE-')) return -1;
+                if (b.key === 'CHE' || b.key.startsWith('CHE-')) return 1;
+                
+                // Otherwise sort alphabetically by name
                 return a.name.localeCompare(b.name);
             });
 
+            console.log('Sorted programs:', programs);
+
             // Add all programs as individual options
             programs.forEach(program => {
+                console.log(`Adding option: ${program.displayLabel}`);
                 const option = document.createElement('option');
                 option.value = program.key;
-                option.textContent = program.name;
+                option.textContent = program.displayLabel;
                 select.appendChild(option);
             });
+            
+            console.log('Dropdown populated with', programs.length, 'options');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
