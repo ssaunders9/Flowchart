@@ -560,22 +560,10 @@
         </div>
     </main>
 
-    <script>
-        /*
-         * Browser Requirements:
-         * - Modern browsers (Chrome 80+, Firefox 75+, Safari 13.1+, Edge 80+)
-         * - Required features:
-         *   - ES6+ (const, let, arrow functions, template literals, destructuring)
-         *   - Array methods (forEach, map, filter, sort)
-         *   - requestAnimationFrame
-         *   - localStorage (optional - gracefully degrades)
-         *   - SVG support
-         *   - CSS Grid and Flexbox
-         *
-         * This application will not work in Internet Explorer.
-         */
+    <!-- Load external course data (with cache busting timestamp) -->
+    <script src="programsData.js?v=20251021"></script>
 
-        // Feature detection
+    <script>
         (function checkBrowserCompatibility() {
             try {
                 const testArrow = () => true;
@@ -609,316 +597,7 @@
             }
         })();
 
-        // Master data structure containing all programs
-        const programsData = {
-            'CHE': {
-                name: 'Chemical Engineering',
-                fullTitle: 'Bachelor of Science - Chemical Engineering (4 Year Plan)',
-                courseData: {
-            'CHE-101': { code: 'CHE 101', name: 'Overview of Chemical Engineering', shortName: 'CHE Overview', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: ['MATH-171'], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-            'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-            'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-            'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-            'CHE-110': { code: 'CHE 110', name: 'Introduction to Chemical Engineering', shortName: 'Intro to CHE', credits: 2, type: 'engineering', semester: 'Year 1 Spring', prereqs: ['CHE-101', 'MATH-171'], coreqs: ['CHEM-105'], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-            'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-            'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-            'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-
-            'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['CHE-110', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: CHE 110 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-            'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-            'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I [PSCI]', shortName: 'Physics I (PSCI)', credits: 3, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I [PSCI]. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-            'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers [PSCI]', shortName: 'Phys Lab I (PSCI)', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-            'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-            'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 2 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-            'CHE-211': { code: 'CHE 211', name: 'Process Simulation', shortName: 'Proc Sim', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-            'CHEM-348': { code: 'CHEM 348', name: 'Organic Chemistry II and Problem Solving', shortName: 'Org Chem II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['CHEM-345'], coreqs: [], alternatives: ['MBIOS 303 - Introductory Biochemistry. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.'], notes: '' },
-            'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-            'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-            'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-            'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-
-            'CHE-301': { code: 'CHE 301', name: 'Chemical Engineering Thermodynamics', shortName: 'Thermo I', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-101', 'PHYS-202', 'PHYS-212'], coreqs: ['CHE-211', 'CHEM-345'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-310': { code: 'CHE 310', name: 'Introduction to Transport Processes', shortName: 'Transport', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['CHE-211', 'MATH-315'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-498': { code: 'CHE 498', name: 'Seminar', shortName: 'Seminar', credits: 1, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Fall', prereqs: ['ENGL-101'], coreqs: [], alternatives: ['ENGL 403 - Technical and Professional Writing ESL. Prereqs: ENGLISH 101 or 105; junior standing; pass University Writing Portfolio.'], notes: '' },
-            'ELEC-TECH-1': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'MSE 201 or any 300-400-level BIO ENG, CHEM, CHE, CE, E E, ENGR, MATH, ME, MSE, PHYSICS, or STAT course as approved by advisor.' },
-            'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-            'CHE-302': { code: 'CHE 302', name: 'Chemical Engineering Thermodynamics II', shortName: 'Thermo II', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-301'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHE-321': { code: 'CHE 321', name: 'Kinetics and Reactor Design', shortName: 'Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310'], coreqs: ['CHE-302'], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHE-332': { code: 'CHE 332', name: 'Fluid Mechanics and Heat Transfer', shortName: 'Fluids/Heat', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310'], coreqs: ['CHE-302'], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHE-334': { code: 'CHE 334', name: 'Chemical Engineering Separations', shortName: 'Separations', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310', 'CHEM-345'], coreqs: ['CHE-302'], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-
-            'CHE-432': { code: 'CHE 432', name: 'Chemical Engineering Lab I [M]', shortName: 'Lab I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: ['CHE-352', 'ENGL-402'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-441': { code: 'CHE 441', name: 'Process Control', shortName: 'Process Control', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-450': { code: 'CHE 450', name: 'Chemical Process Analysis and Design I', shortName: 'Design I', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: ['CHE-352', 'ENGL-402'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'CHE-352': { code: 'CHE 352', name: 'Chemical Process Safety', shortName: 'Process Safety', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-321', 'CHE-332'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-            'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-
-            'CHE-433': { code: 'CHE 433', name: 'Chemical Engineering Lab II [M]', shortName: 'Lab II [M]', credits: 2, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['CHE-432'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'CHE-451': { code: 'CHE 451', name: 'Chemical Process Analysis and Design II [M] [CAPS]', shortName: 'Design II [M] [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['CHE-450'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-            'ELEC-CHE-1': { code: 'Elective', name: 'Chemical Engineering Elective', shortName: 'CHE Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level CHE course not used to fulfill major requirements. A maximum of 3 credits is allowed in CHE 488, 495, and 499 combined.' },
-            'ELEC-CHE-2': { code: 'Elective', name: 'Chemical Engineering Elective', shortName: 'CHE Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level CHE course not used to fulfill major requirements. A maximum of 3 credits is allowed in CHE 488, 495, and 499 combined.' },
-            'ELEC-TECH-2': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'MSE 201 or any 300-400-level BIO ENG, CHEM, CHE, CE, E E, ENGR, MATH, ME, MSE, PHYSICS, or STAT course as approved by advisor.' }
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            },
-            'BIOENG-BMSE': {
-                name: 'Bioengineering: Biomedical Systems',
-                fullTitle: 'Bachelor of Science - Bioengineering: Biomedical Systems (4 Year Plan)',
-                courseData: {
-                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/<br><br>Note: This INQUIRY elective is recommended in Year 1 Spring (rather than Year 2 Spring as shown in the catalog) to balance the credit load across semesters.' },
-
-                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-
-                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-
-                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instru [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CE-211': { code: 'C E 211', name: 'Statics', shortName: 'Statics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: ['MATH-172', 'PHYS-201'], alternatives: [], notes: '' },
-                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
-
-                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ELEC-COMM': { code: 'Elective', name: 'Communication or Writing Elective', shortName: '[COMM]/[WRTG]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose a UCORE [COMM] or [WRTG] course.<br><br>[COMM] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/comm/<br><br>[WRTG] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/wrtg/' },
-                    'EE-261': { code: 'E E 261', name: 'Electrical Circuits I', shortName: 'Circuits I', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['PHYS-202', 'PHYS-212'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-420': { code: 'BIO ENG 420', name: 'Mechanics of Biological Materials', shortName: 'Bio Mechanics', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CE-211'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-430': { code: 'BIO ENG 430', name: 'Bioinstrumentation', shortName: 'Bioinstrument', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['EE-261', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-440': { code: 'BIO ENG 440', name: 'Physiological Control Systems', shortName: 'Phys Control Sys', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-360'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ELEC-BIOENG': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined.' },
-                    'ELEC-TECH': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Approved courses include BIOLOGY 106, 251, CPT S 121, E E 214, 262, ME 116, 212, 216, MSE 201, any 300-400 level BIO ENG, BIOLOGY, CE, CHE, CHEM, CPT S, E E, MATH, MBIOS, ME, MSE, NEUROSCI, PHYSICS, or STAT course as approved, or other courses as approved by advisor.' },
-                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' }
-
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            },
-            'BIOENG-CMBE': {
-                name: 'Bioengineering: Cellular/Molecular Bioengineering',
-                fullTitle: 'Bachelor of Science - Bioengineering: Cellular/Molecular Bioengineering (4 Year Plan)',
-                courseData: {
-                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/<br><br>Note: This INQUIRY elective is recommended in Year 1 Spring (rather than Year 2 Spring as shown in the catalog) to balance the credit load across semesters.' },
-
-                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-
-                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-
-                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instru [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'MBIOS-ELEC': { code: 'MBIOS Elective', name: 'MBIOS 301, 305, or 413', shortName: 'MBIOS Elec', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose one of the following:<br><br>MBIOS 301 - General Genetics. Prereqs: BIOLOGY 106 or 120; BIOLOGY 107.<br><br>MBIOS 305 - General Microbiology. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.<br><br>MBIOS 413 - General Biochemistry. Prereqs: MBIOS 303 and junior standing.' },
-                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
-
-                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ELEC-BIOENG-1': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined.' },
-                    'ELEC-COMM': { code: 'Elective', name: 'Communication or Writing Elective', shortName: '[COMM]/[WRTG]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose a UCORE [COMM] or [WRTG] course.<br><br>[COMM] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/comm/<br><br>[WRTG] course list:<br>https://ucore.wsu.edu/students/courses-and-learning-outcomes/wrtg/' },
-
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-456', 'BIOENG-475'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-456': { code: 'BIO ENG 456', name: 'Protein Bioengineering', shortName: 'Protein Bioeng', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-350'], coreqs: ['BIOENG-475'], alternatives: [], notes: 'Prereqs: BIO ENG 350 with C or better, or BIO ENG 475 with C or better or concurrent enrollment.' },
-                    'BIOENG-475': { code: 'BIO ENG 475', name: 'Biochemical Engineering', shortName: 'Biochem Eng', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-310', 'BIOENG-350'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-476': { code: 'BIO ENG 476', name: 'Applied Molecular and Cellular Bioengineering', shortName: 'Applied Mol & Cell', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-350'], coreqs: [], alternatives: [], notes: '' },
-                    'ELEC-BIOENG-2': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined.' },
-                    'ELEC-TECH': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Approved courses include BIOLOGY 106, 251, CPT S 121, E E 214, 262, ME 116, 212, 216, MSE 201, any 300-400 level BIO ENG, BIOLOGY, CE, CHE, CHEM, CPT S, E E, MATH, MBIOS, ME, MSE, NEUROSCI, PHYSICS, or STAT course as approved, or other courses as approved by advisor.' },
-                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' }
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            },
-            'BIOENG-PREMED-BMSE': {
-                name: 'Bioengineering: Pre-Med Biomedical Systems',
-                fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Biomedical Systems (4 Year Plan)',
-                courseData: {
-                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-
-                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-                     'CHEM-348': { code: 'CHEM 348', name: 'Organic Chemistry II and Problem Solving', shortName: 'Org Chem II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-
-                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instru [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOLOGY-106': { code: 'BIOLOGY 106', name: 'Introductory Biology: Organisms [BSCI]', shortName: 'Organisms (BSCI)', credits: 4, type: 'science', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CE-211': { code: 'C E 211', name: 'Statics', shortName: 'Statics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: ['MATH-172', 'PHYS-201'], alternatives: [], notes: '' },
-                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
-
-                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: ['ENGL-101'], coreqs: [], alternatives: ['ENGL 403 - Technical and Professional Writing ESL. Prereqs: ENGLISH 101 or 105; junior standing; pass University Writing Portfolio.'], notes: '' },
-                    'EE-261': { code: 'E E 261', name: 'Electrical Circuits I', shortName: 'Circuits I', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['PHYS-202', 'PHYS-212'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-420', 'BIOENG-430'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-420': { code: 'BIO ENG 420', name: 'Mechanics of Biological Materials', shortName: 'Bio Mechanics', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CE-211'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-430': { code: 'BIO ENG 430', name: 'Bioinstrumentation', shortName: 'Bioinstrument', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['EE-261', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-440': { code: 'BIO ENG 440', name: 'Physiological Control Systems', shortName: 'Phys Control Sys', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-360'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ELEC-BIOENG': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined.' },
-                    'MBIOS-PREMED': { code: 'MBIOS Elective', name: 'MBIOS 301, 305, 401, or 413', shortName: 'MBIOS Elec', credits: 3, type: 'science', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose one of the following:<br><br>MBIOS 301 - General Genetics. Prereqs: BIOLOGY 106 or 120; BIOLOGY 107.<br><br>MBIOS 305 - General Microbiology. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.<br><br>MBIOS 401 - Immunology. Prereqs: BIOLOGY 107; MBIOS 303.<br><br>MBIOS 413 - General Biochemistry. Prereqs: MBIOS 303 and junior standing.' },
-                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' }
-
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            },
-            'BIOENG-PREMED-CMBE': {
-                name: 'Bioengineering: Pre-Med Cellular/Molecular',
-                fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Cellular/Molecular (4 Year Plan)',
-                courseData: {
-                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '' },
-                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: ['HIST 305 - Roots of Contemporary Issues For Transfer Students [ROOT]. Prereqs: Junior standing.'], notes: '' },
-                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-
-                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: ['CHEM 116 - Honors General Chemistry II. Prereqs: CHEM 105 with C or better; admitted to Honors College.'], notes: '' },
-                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: ['MATH 182 - Honors Calculus II. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['BIOENG-140', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: 'Prerequisite: BIO ENG 140 or Junior standing.<br><br>Only offered in the Fall and Summer.' },
-                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 230 - Matrices and Linear Algebra. 3 credits. Prereqs: MATH 172 with C or better.'], notes: '' },
-                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['MATH 283 - Honors Calculus III. Prereqs: MATH 172 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I', shortName: 'Physics I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: ['PHYS 205 - Honors Physics I. 5 credits. Prereqs: MATH 171 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers I', shortName: 'Phys Lab I', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
-
-                    'BIOENG-210': { code: 'BIO ENG 210', name: 'Bioengineering Problem Solving', shortName: 'BIOENG Prob Solving', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
-                    'CHEM-348': { code: 'CHEM 348', name: 'Organic Chemistry II and Problem Solving', shortName: 'Org Chem II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
-                    'MBIOS-303': { code: 'MBIOS 303', name: 'Introductory Biochemistry', shortName: 'Biochem', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['BIOLOGY-107', 'CHEM-345'], coreqs: [], alternatives: [], notes: '' },
-                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: ['PHYS 206 - Honors Physics II. 5 credits. Prereqs: PHYS 201 or 205 with C or better; admitted to Honors College.'], notes: '' },
-                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
-
-                    'BIOENG-310': { code: 'BIO ENG 310', name: 'Bioengineering Transport Phenomena', shortName: 'Transport Phenom', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201', 'MATH-315'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-315': { code: 'BIO ENG 315', name: 'Thermodynamics and Kinetics in Biological Systems', shortName: 'Thermo & Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['BIOENG-210'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-325': { code: 'BIO ENG 325', name: 'Introduction to Bioengineering Research and Clinical Instrumentation [M]', shortName: 'Research & Instru [M]', credits: 2, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['MATH-315', 'PHYS-202', 'PHYS-212'], coreqs: ['MBIOS-303'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOLOGY-106': { code: 'BIOLOGY 106', name: 'Introductory Biology: Organisms [BSCI]', shortName: 'Organisms (BSCI)', credits: 4, type: 'science', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
-                    'MBIOS-PREMED-1': { code: 'MBIOS Elective', name: 'MBIOS 301, 305, 401, or 413', shortName: 'MBIOS Elec', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Choose one of the following:<br><br>MBIOS 301 - General Genetics. Prereqs: BIOLOGY 106 or 120; BIOLOGY 107.<br><br>MBIOS 305 - General Microbiology. Prereqs: BIOLOGY 107 with C or better; CHEM 102 or 345 with C or better.<br><br>MBIOS 401 - Immunology. Prereqs: BIOLOGY 107; MBIOS 303.<br><br>MBIOS 413 - General Biochemistry. Prereqs: MBIOS 303 and junior standing.' },
-                    'STAT-370': { code: 'STAT 370', name: 'Introductory Statistics for Engineers', shortName: 'Stats', credits: 3, type: 'science', semester: 'Year 3 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: ['STAT 423 - Statistical Methods for Engineers and Scientists. Prereqs: MATH 172 with C or better.'], notes: '' },
-
-                    'BIOENG-305': { code: 'BIO ENG 305', name: 'Bioengineering Ethics and Professional Development', shortName: 'Ethics & Prof Dev', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-350': { code: 'BIO ENG 350', name: 'Introduction to Cellular Bioengineering', shortName: 'Cellular BIOENG', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-315', 'BIOENG-325'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-360': { code: 'BIO ENG 360', name: 'Quantitative Physiology', shortName: 'Quant Physio', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['BIOENG-310'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Spring', prereqs: ['ENGL-101'], coreqs: [], alternatives: ['ENGL 403 - Technical and Professional Writing ESL. Prereqs: ENGLISH 101 or 105; junior standing; pass University Writing Portfolio.'], notes: '' },
-                    'ELEC-TECH': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 3 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Approved courses include BIOLOGY 251, C E 211, CPT S 121, E E 214, 261, 262, ME 116, 212, 216, MSE 201, any 300-400 level BIO ENG, BIOLOGY, CE, CHE, CHEM, CPT S, E E, MATH, MBIOS, ME, MSE, NEUROSCI, PHYSICS, or STAT course, or other courses as approved by advisor.' },
-
-                    'BIOENG-410': { code: 'BIO ENG 410', name: 'Bioengineering Capstone Project I [M]', shortName: 'Capstone I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-305', 'BIOENG-350', 'BIOENG-360'], coreqs: ['BIOENG-456', 'BIOENG-475'], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'BIOENG-456': { code: 'BIO ENG 456', name: 'Protein Bioengineering', shortName: 'Protein Bioeng', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-350'], coreqs: ['BIOENG-475'], alternatives: [], notes: 'Prereqs: BIO ENG 350 with C or better, or BIO ENG 475 with C or better or concurrent enrollment.' },
-                    'BIOENG-475': { code: 'BIO ENG 475', name: 'Biochemical Engineering', shortName: 'Biochem Eng', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['BIOENG-310', 'BIOENG-350'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
-                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: ['ECONS 102 - Fundamentals of Macroeconomics [SSCI]. Prereqs: MATH 101, MATH 103 or higher, or concurrent enrollment; or minimum ALEKS score of 40%.', 'ECONS 198 - Economics Honors. Prereqs: Admitted to Honors College.'], notes: '' },
-                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' },
-
-                    'BIOENG-411': { code: 'BIO ENG 411', name: 'Bioengineering Capstone Project II [CAPS]', shortName: 'Capstone II [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-410'], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Spring' },
-                    'BIOENG-476': { code: 'BIO ENG 476', name: 'Applied Molecular and Cellular Bioengineering', shortName: 'Applied Mol & Cell', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['BIOENG-350'], coreqs: [], alternatives: [], notes: '' },
-                    'ELEC-BIOENG-1': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined. Students may replace three credits with three credits of a 300-400-level CHE course or an additional MBIOS 301, 305, 401, or 413 with advisor approval.' },
-                    'ELEC-BIOENG-2': { code: 'Elective', name: 'Bioengineering Elective', shortName: 'BIOENG Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Any 400-level BIO ENG course not used to fulfill major requirements. A maximum of 3 credits is allowed in BIO ENG 488, 495, and 499 combined. Students may replace three credits with three credits of a 300-400-level CHE course or an additional MBIOS 301, 305, 401, or 413 with advisor approval.' },
-                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: 'Must complete 3 of these 4 UCORE designations: ARTS, DIVR, EQJS, HUM. Reference the UCORE Inquiry course list: https://ucore.wsu.edu/faculty/curriculum/inquiry/' }
-                },
-                semesterOrder: [
-                    'Year 1 Fall', 'Year 1 Spring',
-                    'Year 2 Fall', 'Year 2 Spring',
-                    'Year 3 Fall', 'Year 3 Spring',
-                    'Year 4 Fall', 'Year 4 Spring'
-                ]
-            }
-        };
+        // Program data loaded from external file: programsData.js
 
         // Current program state
         let currentProgram = 'CHE';
@@ -1042,515 +721,6 @@
         function clearCourseElementCache() {
             courseElementCache.clear();
         }
-
-        
-// Lane Routing Functions for Static Flowchart
-// Insert after getCourseElement function
-
-// Calculate semester gap between two courses
-function calculateSemesterGap(sourceSemester, targetSemester, semesterOrder) {
-    const sourceIdx = semesterOrder.indexOf(sourceSemester);
-    const targetIdx = semesterOrder.indexOf(targetSemester);
-    return targetIdx - sourceIdx;
-}
-
-// Categorize all connections by semester gap
-function categorizeConnectionsBySemesterGap(courseData, semesterOrder) {
-    const categories = {
-        adjacent: [],      // 1 semester gap
-        mediumJump: [],    // 2 semester gap
-        longJump: []       // 3+ semester gap
-    };
-
-    for (const [key, course] of Object.entries(courseData)) {
-        // Process prerequisites
-        for (const prereqKey of course.prereqs) {
-            if (!courseData[prereqKey]) continue;
-            const prereq = courseData[prereqKey];
-            const gap = calculateSemesterGap(prereq.semester, course.semester, semesterOrder);
-
-            const connection = {
-                from: prereqKey,
-                to: key,
-                gap: gap,
-                type: 'prereq',
-                color: '#ff9800'
-            };
-
-            if (gap === 1) {
-                categories.adjacent.push(connection);
-            } else if (gap === 2) {
-                categories.mediumJump.push(connection);
-            } else if (gap >= 3) {
-                categories.longJump.push(connection);
-            }
-        }
-
-        // Process corequisites (should all be gap 0 or 1)
-        for (const coreqKey of course.coreqs) {
-            if (!courseData[coreqKey]) continue;
-            const coreq = courseData[coreqKey];
-            const gap = calculateSemesterGap(coreq.semester, course.semester, semesterOrder);
-
-            categories.adjacent.push({
-                from: coreqKey,
-                to: key,
-                gap: gap,
-                type: 'coreq',
-                color: '#2196f3'
-            });
-        }
-    }
-
-    return categories;
-}
-
-// Find merge opportunities within a category
-function findMergeGroups(connections, courseData) {
-    const mergeGroups = [];
-    const processed = new Set();
-
-    // Build map: source → [targets]
-    const sourceTargetMap = new Map();
-    for (const conn of connections) {
-        if (!sourceTargetMap.has(conn.from)) {
-            sourceTargetMap.set(conn.from, []);
-        }
-        sourceTargetMap.get(conn.from).push({ target: conn.to, type: conn.type, color: conn.color });
-    }
-
-
-    // Find sources with overlapping targets (same semester)
-    const sources = Array.from(sourceTargetMap.keys());
-
-    for (let i = 0; i < sources.length; i++) {
-        for (let j = i + 1; j < sources.length; j++) {
-            const source1 = sources[i];
-            const source2 = sources[j];
-
-            if (!courseData[source1] || !courseData[source2]) continue;
-
-            // Must be in same semester to merge
-            if (courseData[source1].semester !== courseData[source2].semester) continue;
-
-            const targets1 = sourceTargetMap.get(source1).map(t => t.target);
-            const targets2 = sourceTargetMap.get(source2).map(t => t.target);
-
-            const commonTargets = targets1.filter(t => targets2.includes(t));
-
-            if (commonTargets.length >= 2 && !processed.has(source1) && !processed.has(source2)) {
-                const group = {
-                    sources: [source1, source2],
-                    targets: commonTargets,
-                    color: sourceTargetMap.get(source1)[0].color,
-                    type: sourceTargetMap.get(source1)[0].type
-                };
-
-                // Try to add more sources with same targets
-                for (let k = j + 1; k < sources.length; k++) {
-                    const sourceK = sources[k];
-                    if (!courseData[sourceK] || processed.has(sourceK)) continue;
-                    if (courseData[sourceK].semester !== courseData[source1].semester) continue;
-
-                    const targetsK = sourceTargetMap.get(sourceK).map(t => t.target);
-                    const commonK = commonTargets.filter(t => targetsK.includes(t));
-
-                    if (commonK.length === commonTargets.length) {
-                        group.sources.push(sourceK);
-                    }
-                }
-
-                group.sources.forEach(s => processed.add(s));
-                mergeGroups.push(group);
-            }
-        }
-    }
-
-    return { mergeGroups, processed };
-}
-
-// Draw merged trunk connection in a lane
-function drawMergedTrunkInLane(group, laneY, courseData) {
-    const sourceElements = group.sources.map(s => getCourseElement(s)).filter(el => el !== null);
-    const targetElements = group.targets.map(t => getCourseElement(t)).filter(el => el !== null);
-
-    if (sourceElements.length === 0 || targetElements.length === 0) return;
-
-    const svg = document.getElementById('connectionsSvg');
-    const svgRect = svg.getBoundingClientRect();
-
-    // Calculate merge point
-    const sourceRects = sourceElements.map(el => el.getBoundingClientRect());
-    const avgSourceX = sourceRects.reduce((sum, r) => sum + r.right, 0) / sourceRects.length;
-    const mergeX = avgSourceX + 30 - svgRect.left;
-
-    // Calculate split point
-    const targetRects = targetElements.map(el => el.getBoundingClientRect());
-    const avgTargetX = targetRects.reduce((sum, r) => sum + r.left, 0) / targetRects.length;
-    const splitX = avgTargetX - 30 - svgRect.left;
-
-    // Draw on-ramps
-    sourceElements.forEach((el, idx) => {
-        const rect = sourceRects[idx];
-        const startX = rect.right - svgRect.left;
-        const startY = rect.top + rect.height / 2 - svgRect.top;
-
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        // Route: horizontal out, then vertical to lane
-        path.setAttribute('d', `M ${startX} ${startY} L ${startX + 20} ${startY} L ${startX + 20} ${laneY} L ${mergeX} ${laneY}`);
-        path.setAttribute('stroke', group.color);
-        path.setAttribute('stroke-width', '2');
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke-opacity', '0.7');
-        if (group.type === 'coreq') path.setAttribute('stroke-dasharray', '8,4');
-        svg.appendChild(path);
-    });
-
-    // Draw trunk
-    const trunkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    trunkPath.setAttribute('d', `M ${mergeX} ${laneY} L ${splitX} ${laneY}`);
-    trunkPath.setAttribute('stroke', group.color);
-    trunkPath.setAttribute('stroke-width', '5');
-    trunkPath.setAttribute('fill', 'none');
-    trunkPath.setAttribute('stroke-opacity', '0.9');
-    svg.appendChild(trunkPath);
-
-    // Draw off-ramps
-    targetElements.forEach((el, idx) => {
-        const rect = targetRects[idx];
-        const endX = rect.left - svgRect.left;
-        const endY = rect.top + rect.height / 2 - svgRect.top;
-
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        // Route: horizontal from lane, then vertical down, then horizontal to target
-        path.setAttribute('d', `M ${splitX} ${laneY} L ${endX - 20} ${laneY} L ${endX - 20} ${endY} L ${endX} ${endY}`);
-        path.setAttribute('stroke', group.color);
-        path.setAttribute('stroke-width', '2');
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke-opacity', '0.7');
-        if (group.type === 'coreq') path.setAttribute('stroke-dasharray', '8,4');
-        svg.appendChild(path);
-    });
-
-    // Add merge indicators
-    const mergeCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    mergeCircle.setAttribute('cx', mergeX);
-    mergeCircle.setAttribute('cy', laneY);
-    mergeCircle.setAttribute('r', 6);
-    mergeCircle.setAttribute('fill', group.color);
-    mergeCircle.setAttribute('stroke', 'white');
-    mergeCircle.setAttribute('stroke-width', '2');
-    svg.appendChild(mergeCircle);
-
-    const splitCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    splitCircle.setAttribute('cx', splitX);
-    splitCircle.setAttribute('cy', laneY);
-    splitCircle.setAttribute('r', 6);
-    splitCircle.setAttribute('fill', group.color);
-    splitCircle.setAttribute('stroke', 'white');
-    splitCircle.setAttribute('stroke-width', '2');
-    svg.appendChild(splitCircle);
-}
-
-// Draw merged trunk in main grid (for adjacent connections)
-function drawMergedTrunkInGrid(group, courseData) {
-    const sourceElements = group.sources.map(s => getCourseElement(s)).filter(el => el !== null);
-    const targetElements = group.targets.map(t => getCourseElement(t)).filter(el => el !== null);
-
-    if (sourceElements.length === 0 || targetElements.length === 0) {
-        return;
-    }
-
-    const svg = document.getElementById('connectionsSvg');
-    const svgRect = svg.getBoundingClientRect();
-
-    const sourceRects = sourceElements.map(el => el.getBoundingClientRect());
-    const avgSourceX = sourceRects.reduce((sum, r) => sum + r.right, 0) / sourceRects.length;
-    const avgSourceY = sourceRects.reduce((sum, r) => sum + r.top + r.height/2, 0) / sourceRects.length;
-    const mergeX = avgSourceX + 30 - svgRect.left;
-    const mergeY = avgSourceY - svgRect.top;
-
-    const targetRects = targetElements.map(el => el.getBoundingClientRect());
-    const avgTargetX = targetRects.reduce((sum, r) => sum + r.left, 0) / targetRects.length;
-    const avgTargetY = targetRects.reduce((sum, r) => sum + r.top + r.height/2, 0) / targetRects.length;
-    const splitX = avgTargetX - 30 - svgRect.left;
-    const splitY = avgTargetY - svgRect.top;
-
-    // Draw source convergence lines
-    sourceElements.forEach((el, idx) => {
-        const rect = sourceRects[idx];
-        const startX = rect.right - svgRect.left;
-        const startY = rect.top + rect.height / 2 - svgRect.top;
-
-        // Route with right angles: horizontal then vertical
-        const midX = startX + (mergeX - startX) * 0.6;
-
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${mergeY} L ${mergeX} ${mergeY}`);
-        path.setAttribute('stroke', group.color);
-        path.setAttribute('stroke-width', '2');
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke-opacity', '0.7');
-        if (group.type === 'coreq') path.setAttribute('stroke-dasharray', '8,4');
-        svg.appendChild(path);
-    });
-
-    // Draw trunk
-    const trunkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    trunkPath.setAttribute('d', `M ${mergeX} ${mergeY} L ${splitX} ${splitY}`);
-    trunkPath.setAttribute('stroke', group.color);
-    trunkPath.setAttribute('stroke-width', '4');
-    trunkPath.setAttribute('fill', 'none');
-    trunkPath.setAttribute('stroke-opacity', '0.8');
-    svg.appendChild(trunkPath);
-
-    // Draw target split lines
-    targetElements.forEach((el, idx) => {
-        const rect = targetRects[idx];
-        const endX = rect.left - svgRect.left;
-        const endY = rect.top + rect.height / 2 - svgRect.top;
-
-        // Route with right angles: horizontal then vertical
-        const midX = splitX + (endX - splitX) * 0.4;
-
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M ${splitX} ${splitY} L ${midX} ${splitY} L ${midX} ${endY} L ${endX} ${endY}`);
-        path.setAttribute('stroke', group.color);
-        path.setAttribute('stroke-width', '2');
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke-opacity', '0.7');
-        if (group.type === 'coreq') path.setAttribute('stroke-dasharray', '8,4');
-        svg.appendChild(path);
-    });
-}
-
-// Draw a single connection in a lane (for unmerged connections)
-function drawSingleConnectionInLane(fromKey, toKey, laneY, color, type) {
-    const fromEl = getCourseElement(fromKey);
-    const toEl = getCourseElement(toKey);
-
-    if (!fromEl || !toEl) return;
-
-    const svg = document.getElementById('connectionsSvg');
-    const svgRect = svg.getBoundingClientRect();
-
-    const fromRect = fromEl.getBoundingClientRect();
-    const toRect = toEl.getBoundingClientRect();
-
-    const startX = fromRect.right - svgRect.left;
-    const startY = fromRect.top + fromRect.height / 2 - svgRect.top;
-    const endX = toRect.left - svgRect.left;
-    const endY = toRect.top + toRect.height / 2 - svgRect.top;
-
-    // On-ramp - right angle routing
-    const onRamp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    onRamp.setAttribute('d', `M ${startX} ${startY} L ${startX + 20} ${startY} L ${startX + 20} ${laneY} L ${startX + 30} ${laneY}`);
-    onRamp.setAttribute('stroke', color);
-    onRamp.setAttribute('stroke-width', '2');
-    onRamp.setAttribute('fill', 'none');
-    onRamp.setAttribute('stroke-opacity', '0.7');
-    if (type === 'coreq') onRamp.setAttribute('stroke-dasharray', '8,4');
-    svg.appendChild(onRamp);
-
-    // Trunk in lane
-    const trunk = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    trunk.setAttribute('d', `M ${startX + 30} ${laneY} L ${endX - 30} ${laneY}`);
-    trunk.setAttribute('stroke', color);
-    trunk.setAttribute('stroke-width', '3');
-    trunk.setAttribute('fill', 'none');
-    trunk.setAttribute('stroke-opacity', '0.8');
-    if (type === 'coreq') trunk.setAttribute('stroke-dasharray', '8,4');
-    svg.appendChild(trunk);
-
-    // Off-ramp - right angle routing
-    const offRamp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    offRamp.setAttribute('d', `M ${endX - 30} ${laneY} L ${endX - 20} ${laneY} L ${endX - 20} ${endY} L ${endX} ${endY}`);
-    offRamp.setAttribute('stroke', color);
-    offRamp.setAttribute('stroke-width', '2');
-    offRamp.setAttribute('fill', 'none');
-    offRamp.setAttribute('stroke-opacity', '0.7');
-    if (type === 'coreq') offRamp.setAttribute('stroke-dasharray', '8,4');
-    svg.appendChild(offRamp);
-}
-
-// Draw a simple connection in the grid (for adjacent connections)
-function drawSimpleConnection(fromKey, toKey, color, type, targetPosition = 0.5) {
-    const fromEl = getCourseElement(fromKey);
-    const toEl = getCourseElement(toKey);
-
-    if (!fromEl || !toEl) return;
-
-    const svg = document.getElementById('connectionsSvg');
-    const svgRect = svg.getBoundingClientRect();
-
-    const fromRect = fromEl.getBoundingClientRect();
-    const toRect = toEl.getBoundingClientRect();
-
-    const startX = fromRect.right - svgRect.left;
-    const startY = fromRect.top + fromRect.height / 2 - svgRect.top;
-    const endX = toRect.left - svgRect.left;
-
-    // Use target position to distribute connections vertically (0-1 range)
-    const targetTop = toRect.top - svgRect.top;
-    const targetHeight = toRect.height;
-    const endY = targetTop + (targetHeight * targetPosition);
-
-    // Get unique color for this course
-    const courseColor = getCourseColor(fromKey);
-
-    // Create path with horizontal-then-vertical routing
-    const midX = startX + (endX - startX) / 2;
-
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    // Route: horizontal from source, then vertical, then horizontal to target
-    path.setAttribute('d', `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`);
-    path.setAttribute('stroke', courseColor);
-    path.setAttribute('stroke-width', '3');
-    path.setAttribute('fill', 'none');
-    path.setAttribute('stroke-opacity', '0.8');
-    if (type === 'coreq') path.setAttribute('stroke-dasharray', '8,4');
-    svg.appendChild(path);
-}
-
-// Generate a unique color for a course lane based on course key
-function getCourseColor(courseKey) {
-    // Create a hash from the course key
-    let hash = 0;
-    for (let i = 0; i < courseKey.length; i++) {
-        hash = courseKey.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    // Generate HSL color with good saturation and lightness for visibility
-    const hue = Math.abs(hash % 360);
-    const saturation = 65 + (Math.abs(hash >> 8) % 20); // 65-85%
-    const lightness = 45 + (Math.abs(hash >> 16) % 15); // 45-60%
-
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-}
-
-// Draw one-to-many connection (source splits to multiple targets)
-function drawOneToManyConnection(sourceKey, targets, connectionPositions) {
-    const sourceEl = getCourseElement(sourceKey);
-    if (!sourceEl) return;
-
-    const svg = document.getElementById('connectionsSvg');
-    const svgRect = svg.getBoundingClientRect();
-
-    // Get unique color for this course's lane
-    const laneColor = getCourseColor(sourceKey);
-
-    const sourceRect = sourceEl.getBoundingClientRect();
-    const startX = sourceRect.right - svgRect.left;
-    const startY = sourceRect.top + sourceRect.height / 2 - svgRect.top;
-
-    // Find average target position to determine split point
-    const targetElements = targets.map(t => getCourseElement(t.to)).filter(el => el !== null);
-    if (targetElements.length === 0) return;
-
-    const targetRects = targetElements.map(el => el.getBoundingClientRect());
-    const avgTargetX = targetRects.reduce((sum, r) => sum + r.left, 0) / targetRects.length;
-
-    // Split point at 35% of horizontal distance
-    const horizontalDist = avgTargetX - sourceRect.right;
-    const splitX = startX + (horizontalDist * 0.35);
-
-    // Draw trunk from source to split point
-    const trunkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    trunkPath.setAttribute('d', `M ${startX} ${startY} L ${splitX} ${startY}`);
-    trunkPath.setAttribute('stroke', laneColor);
-    trunkPath.setAttribute('stroke-width', '4');
-    trunkPath.setAttribute('fill', 'none');
-    trunkPath.setAttribute('stroke-opacity', '0.9');
-    svg.appendChild(trunkPath);
-
-    // Single vertical lane for all branches (like a highway)
-    const laneX = splitX + 20; // Offset from split point
-
-    // Sort targets by Y position for clean sequential splits
-    const sortedTargets = targets.map((target, index) => {
-        const targetEl = getCourseElement(target.to);
-        const targetRect = targetEl ? targetEl.getBoundingClientRect() : null;
-        return {
-            ...target,
-            index,
-            element: targetEl,
-            y: targetRect ? targetRect.top + targetRect.height / 2 - svgRect.top : 0
-        };
-    }).filter(t => t.element).sort((a, b) => a.y - b.y);
-
-    // Draw main vertical trunk in the lane
-    if (sortedTargets.length > 0) {
-        const firstY = Math.min(startY, sortedTargets[0].y);
-        const lastY = Math.max(startY, sortedTargets[sortedTargets.length - 1].y);
-
-        // Horizontal from source to lane
-        const horizPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        horizPath.setAttribute('d', `M ${splitX} ${startY} L ${laneX} ${startY}`);
-        horizPath.setAttribute('stroke', laneColor);
-        horizPath.setAttribute('stroke-width', '3');
-        horizPath.setAttribute('fill', 'none');
-        horizPath.setAttribute('stroke-opacity', '0.9');
-        svg.appendChild(horizPath);
-
-        // Main vertical trunk in lane
-        const trunkVert = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        trunkVert.setAttribute('d', `M ${laneX} ${firstY} L ${laneX} ${lastY}`);
-        trunkVert.setAttribute('stroke', laneColor);
-        trunkVert.setAttribute('stroke-width', '3');
-        trunkVert.setAttribute('fill', 'none');
-        trunkVert.setAttribute('stroke-opacity', '0.9');
-        svg.appendChild(trunkVert);
-    }
-
-    // Draw split-offs (exit ramps) to each target with horizontal lane reservation
-    sortedTargets.forEach((target) => {
-        const targetRect = target.element.getBoundingClientRect();
-
-        // Get the vertical position for this specific connection (distributed on target)
-        const posKey = `${sourceKey}-${target.to}`;
-        const targetPosition = connectionPositions.get(posKey) || 0.5; // default to center
-
-        // Calculate target Y using the distributed position
-        const targetTop = targetRect.top - svgRect.top;
-        const targetHeight = targetRect.height;
-        const targetY = targetTop + (targetHeight * targetPosition);
-
-        const endX = targetRect.left - svgRect.left;
-        const midX = laneX + (endX - laneX) / 2;
-
-        // Exit ramp from lane to target (with two-segment routing)
-        const exitPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        // First go to lane Y level, then horizontally to target
-        const laneExitY = sortedTargets[0].y; // Use first target's Y as the lane Y where we exit
-        exitPath.setAttribute('d', `M ${laneX} ${laneExitY} L ${laneX} ${targetY} L ${midX} ${targetY} L ${endX} ${targetY}`);
-        exitPath.setAttribute('stroke', laneColor);
-        exitPath.setAttribute('stroke-width', '2');
-        exitPath.setAttribute('fill', 'none');
-        exitPath.setAttribute('stroke-opacity', '0.8');
-        if (target.type === 'coreq') exitPath.setAttribute('stroke-dasharray', '8,4');
-        svg.appendChild(exitPath);
-
-        // Small circle at split point on the lane
-        const splitDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        splitDot.setAttribute('cx', laneX);
-        splitDot.setAttribute('cy', laneExitY);
-        splitDot.setAttribute('r', 3);
-        splitDot.setAttribute('fill', laneColor);
-        splitDot.setAttribute('stroke', 'white');
-        splitDot.setAttribute('stroke-width', '1');
-        svg.appendChild(splitDot);
-    });
-
-    // Add split indicator circle at lane entry
-    const splitCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    splitCircle.setAttribute('cx', laneX);
-    splitCircle.setAttribute('cy', startY);
-    splitCircle.setAttribute('r', 5);
-    splitCircle.setAttribute('fill', laneColor);
-    splitCircle.setAttribute('stroke', 'white');
-    splitCircle.setAttribute('stroke-width', '2');
-    svg.appendChild(splitCircle);
-}
 
 
         // Utility function to safely create links from text
@@ -2215,6 +1385,16 @@ function drawAllConnections() {
         };
     }
 
+    // PERFORMANCE OPTIMIZATION: Convert prerequisite/corequisite arrays to Sets for O(1) lookup
+    // Pre-compute sets once to avoid repeated .includes() calls which are O(n)
+    const prereqSetsByKey = {};
+    const coreqSetsByKey = {};
+    Object.keys(courseData).forEach(courseKey => {
+        const course = courseData[courseKey];
+        prereqSetsByKey[courseKey] = new Set(course.prereqs || []);
+        coreqSetsByKey[courseKey] = new Set(course.coreqs || []);
+    });
+
     // Build course records
     Object.keys(courseData).forEach(courseKey => {
         const course = courseData[courseKey];
@@ -2225,10 +1405,11 @@ function drawAllConnections() {
         const isPrereqForWithType = []; // Track type (prereq vs coreq)
         Object.keys(courseData).forEach(otherKey => {
             const other = courseData[otherKey];
-            if (other.prereqs?.includes(courseKey)) {
+            // Use pre-computed Sets for O(1) lookup instead of array .includes()
+            if (prereqSetsByKey[otherKey].has(courseKey)) {
                 isPrereqFor.push(otherKey);
                 isPrereqForWithType.push({ courseKey: otherKey, type: 'prereq' });
-            } else if (other.coreqs?.includes(courseKey)) {
+            } else if (coreqSetsByKey[otherKey].has(courseKey)) {
                 isPrereqFor.push(otherKey);
                 isPrereqForWithType.push({ courseKey: otherKey, type: 'coreq' });
             }
@@ -2251,6 +1432,36 @@ function drawAllConnections() {
     // Get actual positions for all courses
     Object.keys(courseRecords).forEach(key => {
         courseRecords[key].rect = getCourseRect(key);
+    });
+
+    // PERFORMANCE OPTIMIZATION: Cache all bounding rects once to avoid repeated reflow triggers
+    const boundingRectCache = new Map();
+    const svgElement = document.getElementById('connectionsSvg');
+    const svgRect = svgElement.getBoundingClientRect();
+    boundingRectCache.set('svg', svgRect);
+    
+    // Cache all course element bounding rects
+    Object.keys(courseRecords).forEach(key => {
+        const element = getCourseElement(key);
+        if (element) {
+            boundingRectCache.set(key, element.getBoundingClientRect());
+        }
+    });
+
+    // PERFORMANCE OPTIMIZATION: Pre-compute sorted course lists by semester
+    // These are used in conflict detection and bounding box calculations - avoid rebuilding for each connection
+    const courseListBySemester = {};
+    semesterOrder.forEach(semester => {
+        courseListBySemester[semester] = Object.keys(courseData)
+            .filter(k => courseData[k].semester === semester)
+            .sort((a, b) => a.localeCompare(b));
+    });
+
+    // PERFORMANCE OPTIMIZATION: Build semester index map for O(1) lookups
+    // Replace expensive indexOf() calls with O(1) Map.get() operations
+    const semesterIndexMap = new Map();
+    semesterOrder.forEach((semester, index) => {
+        semesterIndexMap.set(semester, index);
     });
 
     // Filter out courses without positions (not visible)
@@ -2284,8 +1495,7 @@ function drawAllConnections() {
         const rect = record.rect;
 
         if (record.isPrereqForCount > 0) {
-            // Single output stub at center-right of course
-            // All output stubs set to 9% from the top of the course box
+            // Single output stub at center-right, positioned at 9% from top of course box
             const outputStubY = rect.top + (rect.height * 0.09);
             record.rightStubs.push({
                 x: rect.right,
@@ -2322,10 +1532,13 @@ function drawAllConnections() {
         const coursesInSemester = visibleCourses.filter(k => courseRecords[k].semester === semester);
         if (coursesInSemester.length > 0) {
             const rects = coursesInSemester.map(k => courseRecords[k].rect);
-            const leftMost = Math.min(...rects.map(r => r.left));
-            const rightMost = Math.max(...rects.map(r => r.right));
-            const topMost = Math.min(...rects.map(r => r.top));
-            const bottomMost = Math.max(...rects.map(r => r.bottom));
+            let leftMost = Infinity, rightMost = -Infinity, topMost = Infinity, bottomMost = -Infinity;
+            for (const rect of rects) {
+                leftMost = Math.min(leftMost, rect.left);
+                rightMost = Math.max(rightMost, rect.right);
+                topMost = Math.min(topMost, rect.top);
+                bottomMost = Math.max(bottomMost, rect.bottom);
+            }
 
             semesterPositions[semester] = {
                 index: idx,
@@ -2433,9 +1646,8 @@ function drawAllConnections() {
             const nextRect = courseRects[i + 1];
             const gap = nextRect.top - currentRect.bottom;
 
-            // Always create 2 lanes: primary (closer to top course) and secondary (backup)
-            // Primary lane is used by default, secondary only when primary has conflicts
-            const spacing = gap / 3; // Divide gap into 3 parts for 2 lanes
+            // Create 2 lanes: primary (closer to top, default) and secondary (backup)
+            const spacing = gap / 3;
 
             // Primary lane (closer to top course, used by default)
             horizontalLanesBySemester[semester].push({
@@ -2511,8 +1723,7 @@ function drawAllConnections() {
         const BUFFER = 60; // Minimum vertical separation between horizontal segments (increased for better spacing)
 
         return !lane.reservations.some(res => {
-            // Rule 1: Same source can share lane ONLY if same routing type (adjacent vs multi-semester)
-            // Rule 2: Same target CANNOT share lane (must use different lanes)
+            // Rule 1: Same source can share if same routing type. Rule 2: Same target cannot share
             if (fromCourse && res.fromCourse === fromCourse) {
                 // Same source course - check if different routing types
                 if (isAdjacentSemester !== res.isAdjacentSemester) {
@@ -2580,30 +1791,17 @@ function drawAllConnections() {
             // We need to check if these conflict with existing horizontal segments in this lane
             let horizontalConflict = false;
 
-            if (startY !== null && res.startY !== null) {
-                // Both have starting horizontal segments - check if they're too close
-                if (Math.abs(startY - res.startY) < BUFFER) {
+            // Check all combinations of start/end positions more efficiently
+            if (startY !== null && (res.startY !== null || res.endY !== null)) {
+                if ((res.startY !== null && Math.abs(startY - res.startY) < BUFFER) ||
+                    (res.endY !== null && Math.abs(startY - res.endY) < BUFFER)) {
                     horizontalConflict = true;
                 }
             }
 
-            if (startY !== null && res.endY !== null) {
-                // This connection's start conflicts with existing connection's end
-                if (Math.abs(startY - res.endY) < BUFFER) {
-                    horizontalConflict = true;
-                }
-            }
-
-            if (endY !== null && res.startY !== null) {
-                // This connection's end conflicts with existing connection's start
-                if (Math.abs(endY - res.startY) < BUFFER) {
-                    horizontalConflict = true;
-                }
-            }
-
-            if (endY !== null && res.endY !== null) {
-                // Both have ending horizontal segments - check if they're too close
-                if (Math.abs(endY - res.endY) < BUFFER) {
+            if (!horizontalConflict && endY !== null && (res.startY !== null || res.endY !== null)) {
+                if ((res.startY !== null && Math.abs(endY - res.startY) < BUFFER) ||
+                    (res.endY !== null && Math.abs(endY - res.endY) < BUFFER)) {
                     horizontalConflict = true;
                 }
             }
@@ -2628,23 +1826,12 @@ function drawAllConnections() {
         const lanes = horizontalLanesBySemester[semester];
         if (!lanes || lanes.length === 0) return null;
 
-        // Only log for MATH-172 (commented out for production)
-        // if (debugCourse === 'MATH-172') {
-        //     console.log(`  findLane for ${semester}, preferTopLane=${preferTopLane}, targetY=${targetY}`);
-        //     console.log(`  Total lanes:`, lanes.length, lanes.map(l => ({ y: l.y, isAboveAll: l.isAboveAll })));
-        // }
-
-        // Filter to available lanes (checking X-range availability)
         let availableLanes = lanes.filter(lane => isHorizontalLaneAvailable(lane, x1, x2));
-        
-        // if (debugCourse === 'MATH-172') {
-        //     console.log(`  After X-range filter:`, availableLanes.length);
-        // }
         if (availableLanes.length === 0) return null;
 
         // ADDITIONAL FILTER: Avoid Y-positions that conflict with vertical lanes AND stubs
         // Check all gaps adjacent to this semester
-        const semIdx = semesterOrder.indexOf(semester);
+        const semIdx = semesterIndexMap.get(semester);
         // Reduce conflict buffer when not preferring top lane - allows more flexibility for bottom courses
         const conflictBuffer = preferTopLane ? 30 : 15;
         const stubBuffer = 20; // Buffer to avoid overlapping with stubs
@@ -2742,48 +1929,29 @@ function drawAllConnections() {
             return !hasConflict;
         });
 
-        // if (debugCourse === 'MATH-172') {
-        //     console.log(`  After conflict filter:`, availableLanes.length, availableLanes.map(l => ({ y: l.y.toFixed(2), isAboveAll: l.isAboveAll })));
-        // }
         if (availableLanes.length === 0) return null;
 
-        // Sort all available lanes by distance to targetY, considering lane type
         availableLanes.sort((a, b) => {
             const distA = Math.abs(a.y - targetY);
             const distB = Math.abs(b.y - targetY);
 
-            // When preferTopLane is true, prefer top lane only if it's reasonably close
-            // "Reasonably close" means within 80px of the target (tightened from 150px)
             if (preferTopLane) {
                 const topLaneDistanceThreshold = 80;
-                
-                // If A is top lane and close enough, prefer it
                 if (a.isAboveAll && distA <= topLaneDistanceThreshold && !b.isAboveAll) return -1;
-                // If B is top lane and close enough, prefer it
                 if (b.isAboveAll && distB <= topLaneDistanceThreshold && !a.isAboveAll) return 1;
-                // If both are top lanes or both are not, fall through to distance sorting
             }
 
-            // If both are top lane or both are not, use distance and type
             if (Math.abs(distA - distB) < 50) {
-                // Primary lanes preferred over secondary when distances similar
                 if ((a.isPrimary && !a.isAboveAll) && !(b.isPrimary && !b.isAboveAll)) return -1;
                 if (!(a.isPrimary && !a.isAboveAll) && (b.isPrimary && !b.isAboveAll)) return 1;
             }
 
-            // Otherwise, prefer closer lanes
             return distA - distB;
         });
 
-        // if (debugCourse === 'MATH-172') {
-        //     console.log(`  After sorting (preferTopLane=${preferTopLane}):`, availableLanes.map(l => ({ y: l.y.toFixed(2), isAboveAll: l.isAboveAll, dist: Math.abs(l.y - targetY).toFixed(2) })));
-        // }
-
-        // Return the best lane
         return availableLanes[0];
     }
 
-    // Helper: Reserve horizontal lane segment
     function reserveHorizontalLane(lane, x1, x2, fromCourse) {
         lane.reservations.push({ x1, x2, fromCourse });
     }
@@ -2821,24 +1989,26 @@ function drawAllConnections() {
         return null; // No available lane
     }
 
+    // 10 distinct high-contrast colors ordered to maximize contrast between adjacent colors
+    // Order alternates between warm/cool and light/dark hues for maximum visual separation
+    // Pre-computed outside function to avoid array recreation on every call
+    const DISTINCT_COLORS = [
+        '#e6194b', // Bright Red (warm, saturated)
+        '#0891b2', // Cyan (cool, medium)
+        '#d4a017', // Golden Yellow (warm, medium-dark)
+        '#911eb4', // Purple (cool, dark)
+        '#f58231', // Orange (warm, bright)
+        '#008080', // Teal (cool, dark)
+        '#f032e6', // Magenta (warm-cool, bright)
+        '#3cb44b', // Bright Green (cool, saturated)
+        '#9a6324', // Brown (warm, dark)
+        '#4363d8'  // Bright Blue (cool, saturated)
+    ];
+
     // Helper: Generate a unique color for each course
     function getCourseColor(courseKey, index) {
-        // 10 distinct high-contrast colors optimized for visual separation
-        const distinctColors = [
-            '#e6194b', // Bright Red
-            '#3cb44b', // Bright Green
-            '#4363d8', // Bright Blue
-            '#f58231', // Orange
-            '#911eb4', // Purple
-            '#46f0f0', // Cyan
-            '#f032e6', // Magenta
-            '#ffe119', // Yellow
-            '#008080', // Teal
-            '#9a6324'  // Brown
-        ];
-
         // Use modulo to cycle through the 10 colors
-        return distinctColors[index % distinctColors.length];
+        return DISTINCT_COLORS[index % DISTINCT_COLORS.length];
     }
 
     // Assign colors to courses using graph coloring algorithm
@@ -2859,24 +2029,21 @@ function drawAllConnections() {
         const fromSem = courseData[conn.from].semester;
         const toSem = courseData[conn.to].semester;
 
-        // Get all courses in the from and to semesters to calculate positions
-        const fromSemesterCourses = Object.keys(courseData)
-            .filter(k => courseData[k].semester === fromSem)
-            .sort((a, b) => {
-                // Sort to maintain consistent ordering
-                return a.localeCompare(b);
-            });
-        const toSemesterCourses = Object.keys(courseData)
-            .filter(k => courseData[k].semester === toSem)
-            .sort((a, b) => a.localeCompare(b));
+        // Get pre-computed sorted course lists by semester (avoid rebuilding for each call)
+        const fromSemesterCourses = courseListBySemester[fromSem];
+        const toSemesterCourses = courseListBySemester[toSem];
 
         const fromIndex = fromSemesterCourses.indexOf(conn.from);
         const toIndex = toSemesterCourses.indexOf(conn.to);
 
+        // Get semester indices for proper numeric comparison
+        const fromSemIdx = semesterIndexMap.get(fromSem);
+        const toSemIdx = semesterIndexMap.get(toSem);
+
         // Return bounding box: min/max semester and min/max vertical position
         return {
-            semMin: Math.min(fromSem, toSem),
-            semMax: Math.max(fromSem, toSem),
+            semMin: Math.min(fromSemIdx, toSemIdx),
+            semMax: Math.max(fromSemIdx, toSemIdx),
             posMin: Math.min(fromIndex, toIndex),
             posMax: Math.max(fromIndex, toIndex),
             fromSem: fromSem,
@@ -2942,6 +2109,17 @@ function drawAllConnections() {
         return verticalDistance <= 1;
     };
 
+    // PERFORMANCE OPTIMIZATION: Pre-compute all bounding boxes before conflict detection
+    // Build a Map to cache bounding boxes for each connection to avoid recalculation in triple-nested loop
+    const connectionBoundingBoxes = new Map();
+    
+    // Pre-compute bounding boxes for all connections in all courses
+    Object.keys(connectionsByCourse).forEach(courseKey => {
+        connectionsByCourse[courseKey].forEach(conn => {
+            connectionBoundingBoxes.set(conn, getConnectionBoundingBox(conn));
+        });
+    });
+
     // Build conflict graph based on bounding box intersections
     for (let i = 0; i < courseKeys.length; i++) {
         const course1 = courseKeys[i];
@@ -2954,10 +2132,10 @@ function drawAllConnections() {
             // Check if any pair of connections from these courses conflict
             let hasConflict = false;
             for (const conn1 of conns1) {
-                const box1 = getConnectionBoundingBox(conn1);
+                const box1 = connectionBoundingBoxes.get(conn1);
 
                 for (const conn2 of conns2) {
-                    const box2 = getConnectionBoundingBox(conn2);
+                    const box2 = connectionBoundingBoxes.get(conn2);
 
                     if (boundingBoxesConflict(box1, box2)) {
                         hasConflict = true;
@@ -3024,18 +2202,17 @@ function drawAllConnections() {
         const semA = courseData[a].semester;
         const semB = courseData[b].semester;
         
-        // First, sort by semester order
-        const semIndexA = semesterOrder.indexOf(semA);
-        const semIndexB = semesterOrder.indexOf(semB);
+        // First, sort by semester order (O(1) lookup with map instead of O(n) indexOf)
+        const semIndexA = semesterIndexMap.get(semA);
+        const semIndexB = semesterIndexMap.get(semB);
         
         if (semIndexA !== semIndexB) {
             return semIndexA - semIndexB;
         }
         
         // Within same semester, sort by vertical position (top to bottom)
-        // Get all courses in this semester
-        const semesterCourses = Object.keys(courseData)
-            .filter(k => courseData[k].semester === semA);
+        // Use pre-computed course lists instead of rebuilding
+        const semesterCourses = courseListBySemester[semA];
         
         const indexA = semesterCourses.indexOf(a);
         const indexB = semesterCourses.indexOf(b);
@@ -3108,8 +2285,8 @@ function drawAllConnections() {
         conns.forEach(conn => {
             const fromSem = courseData[conn.from].semester;
             const toSem = courseData[conn.to].semester;
-            const fromSemIdx = semesterOrder.indexOf(fromSem);
-            const toSemIdx = semesterOrder.indexOf(toSem);
+            const fromSemIdx = semesterIndexMap.get(fromSem);
+            const toSemIdx = semesterIndexMap.get(toSem);
             
             // Track all gaps this connection crosses
             for (let semIdx = fromSemIdx; semIdx < toSemIdx; semIdx++) {
@@ -3172,10 +2349,7 @@ function drawAllConnections() {
         const courseConnections = connectionsByCourse[fromCourseKey];
         const fromRecord = courseRecords[fromCourseKey];
 
-        if (!fromRecord || !fromRecord.rightStubs[0]) {
-            console.warn('No output stub for course', fromCourseKey);
-            return;
-        }
+        if (!fromRecord || !fromRecord.rightStubs[0]) return;
 
         const outputStub = fromRecord.rightStubs[0];
 
@@ -3184,11 +2358,11 @@ function drawAllConnections() {
 
         // Sort connections by priority for stub assignment
         // Priority: same semester (top down) > earlier semesters (earliest first, top down) > later semesters (top down)
-        const fromSemIdx = semesterOrder.indexOf(fromRecord.semester);
+        const fromSemIdx = semesterIndexMap.get(fromRecord.semester);
 
         const sortedConnections = [...courseConnections].sort((connA, connB) => {
-            const toSemIdxA = semesterOrder.indexOf(connA.toRecord.semester);
-            const toSemIdxB = semesterOrder.indexOf(connB.toRecord.semester);
+            const toSemIdxA = semesterIndexMap.get(connA.toRecord.semester);
+            const toSemIdxB = semesterIndexMap.get(connB.toRecord.semester);
 
             const isSameSemA = toSemIdxA === fromSemIdx;
             const isSameSemB = toSemIdxB === fromSemIdx;
@@ -3230,23 +2404,17 @@ function drawAllConnections() {
         sortedConnections.forEach(conn => {
             const toRecord = conn.toRecord;
 
-            // Get available input stub from destination
             const availableInputStubs = toRecord.leftStubs.filter(s => !s.used);
-            if (availableInputStubs.length === 0) {
-                console.warn('No available input stub for', conn.to);
-                return;
-            }
+            if (availableInputStubs.length === 0) return;
 
             // Prioritize input stubs based on connection type
-            // NEW Priority order:
-            // 1. Cross-semester (highest cross semester output gets highest stub)
             // 2. Adjacent same semester (highest stub)
             // 3. Adjacent same semester (lower stubs)
 
             const fromSemester = fromRecord.semester;
             const toSemester = toRecord.semester;
-            const fromSemIdx = semesterOrder.indexOf(fromSemester);
-            const toSemIdx = semesterOrder.indexOf(toSemester);
+            const fromSemIdx = semesterIndexMap.get(fromSemester);
+            const toSemIdx = semesterIndexMap.get(toSemester);
             const isSameSemester = fromSemIdx === toSemIdx;
 
             // Sort available input stubs based on priority
@@ -3446,11 +2614,9 @@ function drawAllConnections() {
                     }
                     exitIndicator.setAttribute('points', points);
                     exitIndicator.setAttribute('fill', courseColor);
-                    exitIndicator.style.zIndex = '100'; // Above everything
+                    exitIndicator.style.zIndex = '100';
                     svg.appendChild(exitIndicator);
                 } else {
-                    // Fallback to direct line if no horizontal lane available
-                    console.warn('No horizontal lane available for same-semester connection', conn.from, '->', conn.to);
                     const path = `M ${startStub.x} ${startStub.y} L ${endStub.x} ${endStub.y}`;
                     const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     pathEl.setAttribute('d', path);
@@ -3474,23 +2640,15 @@ function drawAllConnections() {
                     const gapKey = `${semesterOrder[fromSemIdx]}|${semesterOrder[fromSemIdx + 1]}`;
                     const gap = semesterGaps[gapKey];
 
-                    // Check if we already have a lane assigned for this source course in this gap
-                    // Same source MUST use same lane
+                    // Check if we already have a lane assigned for this source course in this gap. Same source MUST use same lane
                     let selectedLane = globalVerticalLanes[fromCourseKey][gapKey];
 
                     if (!selectedLane) {
-                        // First connection from this source course through this gap
-                        // Find an available lane for this specific connection's Y-range
-                        // Pass horizontal segment positions to avoid conflicts
-                        // Adjacent connections prefer early/inner lanes (closer to courses)
+                        // First connection from this source: find available lane for Y-range. Adjacent connections prefer early/inner lanes
                         selectedLane = findAvailableLaneForRange(gap, outputStub.y, inputStub.y, outputStub.y, inputStub.y, true, fromCourseKey, conn.to, true);
 
-                        if (!selectedLane) {
-                            console.warn('No lane available for', conn.from, '->', conn.to);
-                            return;
-                        }
+                        if (!selectedLane) return;
 
-                        // Save this lane for all connections from this source course
                         globalVerticalLanes[fromCourseKey][gapKey] = selectedLane;
                     }
 
@@ -3513,7 +2671,7 @@ function drawAllConnections() {
                     // Add visual indicators at entry and exit points
                     // Entry indicator (filled circle) at output stub
                     const entryIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    entryIndicator.setAttribute('cx', outputStub.x - 3);
+                    entryIndicator.setAttribute('cx', outputStub.x);
                     entryIndicator.setAttribute('cy', outputStub.y);
                     entryIndicator.setAttribute('r', '4');
                     entryIndicator.setAttribute('fill', courseColor);
@@ -3582,26 +2740,12 @@ function drawAllConnections() {
                                     
                                     shouldPreferTopLane = isTopCourse;
                                 } else if (selectedHorizontalY !== null) {
-                                    // Subsequent gaps: MUST stay at the same Y as the previously selected lane
                                     laneTargetY = selectedHorizontalY;
-                                    shouldPreferTopLane = false; // Don't prefer top lane, just find closest to our target Y
+                                    shouldPreferTopLane = false;
                                 } else {
-                                    // Fallback
                                     laneTargetY = currentY;
                                     shouldPreferTopLane = false;
                                 }
-
-                                // Only log for MATH-172 (commented out for production)
-                                // if (fromCourseKey === 'MATH-172') {
-                                //     console.log(`[${fromCourseKey}] Lane assignment (gap ${semIdx - fromSemIdx + 1}):`, {
-                                //         isInUpperHalf,
-                                //         isFirstGap,
-                                //         selectedHorizontalY,
-                                //         laneTargetY,
-                                //         shouldPreferTopLane,
-                                //         nextSemester
-                                //     });
-                                // }
 
                                 horizLane = findClosestAvailableHorizontalLane(
                                     nextSemester,
@@ -3612,16 +2756,10 @@ function drawAllConnections() {
                                     fromCourseKey
                                 );
 
-                                // if (fromCourseKey === 'MATH-172') {
-                                //     console.log(`[${fromCourseKey}] Selected lane:`, horizLane ? { y: horizLane.y, isAboveAll: horizLane.isAboveAll } : 'NONE');
-                                // }
-
                                 if (!horizLane) {
-                                    console.warn('No horizontal lane in', nextSemester, 'for', conn.from, '->', conn.to);
                                     return;
                                 }
 
-                                // Save for all connections from this course
                                 globalHorizontalLanes[fromCourseKey][nextSemester] = horizLane;
                                 reserveHorizontalLane(horizLane, currentX, semesterPositions[semesterOrder[semIdx + 2]]?.left || 1000, fromCourseKey);
                                 
@@ -3653,12 +2791,8 @@ function drawAllConnections() {
                             // endY: where horizontal segment exits the vertical lane (targetY)
                             verticalLane = findAvailableLaneForRange(gap, currentY, targetY, currentY, targetY, false, fromCourseKey, conn.to, false);
 
-                            if (!verticalLane) {
-                                console.warn('No vertical lane in gap', gapKey, 'for', conn.from, '->', conn.to);
-                                return;
-                            }
+                            if (!verticalLane) return;
 
-                            // Save this lane for all connections from this source course
                             globalVerticalLanes[fromCourseKey][gapKey] = verticalLane;
                         }
 
@@ -3675,9 +2809,7 @@ function drawAllConnections() {
                             pathSegments.push(`L ${currentX} ${inputStub.y}`);
                             currentY = inputStub.y;
                         } else {
-                            // Not last gap - use the horizontal lane we already allocated above
-                            // Reserve vertical lane from current Y to horizontal lane Y
-                            // Horizontal segment enters at currentY, exits at horizLane.y
+                            // Not last gap - use horizontal lane allocated above. Reserve vertical lane and drop/rise to horizontal lane
                             reserveVerticalLane(verticalLane, currentY, horizLane.y, fromCourseKey, currentY, horizLane.y, conn.to, false);
 
                             // Drop/rise to horizontal lane
@@ -3704,7 +2836,7 @@ function drawAllConnections() {
                     // Add visual indicators at entry and exit points
                     // Entry indicator (filled circle) at output stub
                     const entryIndicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    entryIndicator.setAttribute('cx', outputStub.x - 3);
+                    entryIndicator.setAttribute('cx', outputStub.x);
                     entryIndicator.setAttribute('cy', outputStub.y);
                     entryIndicator.setAttribute('r', '4');
                     entryIndicator.setAttribute('fill', courseColor);
@@ -4433,34 +3565,98 @@ function drawAllConnections() {
 
         // Function to populate program selector dynamically
         function populateProgramSelector() {
+            console.log('populateProgramSelector called');
             const select = domCache.programSelect;
+            console.log('select element:', select);
             if (!select) return;
+            
+            // Safety check: ensure programsData is loaded
+            if (typeof programsData === 'undefined' || !programsData) {
+                console.warn('programsData not loaded yet, retrying...');
+                setTimeout(populateProgramSelector, 100);
+                return;
+            }
+            
+            console.log('programsData available, keys:', Object.keys(programsData));
 
             // Clear existing options efficiently
             while (select.firstChild) {
                 select.removeChild(select.firstChild);
             }
 
-            // Get all programs and sort them
-            const programs = Object.keys(programsData).map(key => ({
-                key: key,
-                name: programsData[key].name
-            }));
+            // Get all programs and add version metadata
+            const programs = Object.keys(programsData).map(key => {
+                const program = programsData[key];
+                console.log(`Processing ${key}:`, program);
+                let displayLabel = program.name || 'Unknown Program';
+                
+                // Get status with fallback
+                const status = program.status || 'current';
+                const version = program.version || '1.0';
+                const effectiveDate = program.effectiveDate || '';
+                const effectiveUntil = program.effectiveUntil || '';
+                
+                console.log(`  - Status: ${status}, EffectiveDate: "${effectiveDate}", effectiveUntil: "${effectiveUntil}"`);
+                
+                // Debug logging (remove in production if needed)
+                if (!effectiveDate && status === 'current') {
+                    console.warn(`Missing effectiveDate for ${key}:`, program);
+                }
+                
+                // Add version information to label based on status
+                if (status === 'current') {
+                    displayLabel += ` (Current - Effective ${effectiveDate})`;
+                } else if (status === 'proposed') {
+                    displayLabel += ` (Proposed - Effective ${effectiveDate})`;
+                } else if (status === 'archived') {
+                    if (effectiveUntil) {
+                        displayLabel += ` (Archived - Effective Until ${effectiveUntil})`;
+                    } else {
+                        displayLabel += ` (Archived - v${version})`;
+                    }
+                }
+                
+                console.log(`  - Final label: "${displayLabel}"`);
+                
+                return {
+                    key: key,
+                    name: program.name || 'Unknown',
+                    displayLabel: displayLabel,
+                    status: status,
+                    effectiveDate: effectiveDate,
+                    sortOrder: status === 'current' ? 1 : status === 'proposed' ? 2 : 3
+                };
+            });
 
-            // Sort: CHE first, then alphabetically
+            console.log('Programs array:', programs);
+
+            // Sort: Current first, then proposed, then archived. CHE always first within each group
             programs.sort((a, b) => {
-                if (a.key === 'CHE') return -1;
-                if (b.key === 'CHE') return 1;
+                // Sort by status first (current < proposed < archived)
+                if (a.sortOrder !== b.sortOrder) {
+                    return a.sortOrder - b.sortOrder;
+                }
+                
+                // Within same status, CHE always first
+                if (a.key === 'CHE' || a.key.startsWith('CHE-')) return -1;
+                if (b.key === 'CHE' || b.key.startsWith('CHE-')) return 1;
+                
+                // Otherwise sort alphabetically by name
                 return a.name.localeCompare(b.name);
             });
 
+            console.log('Sorted programs:', programs);
+
             // Add all programs as individual options
             programs.forEach(program => {
+                console.log(`Adding option: ${program.displayLabel}`);
                 const option = document.createElement('option');
                 option.value = program.key;
-                option.textContent = program.name;
+                option.textContent = program.displayLabel;
                 select.appendChild(option);
             });
+            
+            console.log('Dropdown populated with', programs.length, 'options');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
