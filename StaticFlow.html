@@ -3114,8 +3114,10 @@ function drawAllConnections() {
                         const notesIndicator = document.createElement('div');
                         notesIndicator.className = 'notes-indicator';
                         notesIndicator.textContent = 'i';
-                        notesIndicator.setAttribute('aria-label', `Note: ${course.notes}`);
-                        notesIndicator.setAttribute('title', course.notes);
+                        // Convert <br> tags to newlines for plain text attributes
+                        const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, '\n');
+                        notesIndicator.setAttribute('aria-label', `Note: ${plainTextNotes}`);
+                        notesIndicator.setAttribute('title', plainTextNotes);
 
                         courseDiv.appendChild(notesIndicator);
                         courseDiv.setAttribute('data-has-notes', 'true');
@@ -3565,9 +3567,7 @@ function drawAllConnections() {
 
         // Function to populate program selector dynamically
         function populateProgramSelector() {
-            console.log('populateProgramSelector called');
             const select = domCache.programSelect;
-            console.log('select element:', select);
             if (!select) return;
             
             // Safety check: ensure programsData is loaded
@@ -3576,8 +3576,6 @@ function drawAllConnections() {
                 setTimeout(populateProgramSelector, 100);
                 return;
             }
-            
-            console.log('programsData available, keys:', Object.keys(programsData));
 
             // Clear existing options efficiently
             while (select.firstChild) {
@@ -3587,7 +3585,6 @@ function drawAllConnections() {
             // Get all programs and add version metadata
             const programs = Object.keys(programsData).map(key => {
                 const program = programsData[key];
-                console.log(`Processing ${key}:`, program);
                 let displayLabel = program.name || 'Unknown Program';
                 
                 // Get status with fallback
@@ -3595,8 +3592,6 @@ function drawAllConnections() {
                 const version = program.version || '1.0';
                 const effectiveDate = program.effectiveDate || '';
                 const effectiveUntil = program.effectiveUntil || '';
-                
-                console.log(`  - Status: ${status}, EffectiveDate: "${effectiveDate}", effectiveUntil: "${effectiveUntil}"`);
                 
                 // Debug logging (remove in production if needed)
                 if (!effectiveDate && status === 'current') {
@@ -3616,8 +3611,6 @@ function drawAllConnections() {
                     }
                 }
                 
-                console.log(`  - Final label: "${displayLabel}"`);
-                
                 return {
                     key: key,
                     name: program.name || 'Unknown',
@@ -3627,8 +3620,6 @@ function drawAllConnections() {
                     sortOrder: status === 'current' ? 1 : status === 'proposed' ? 2 : 3
                 };
             });
-
-            console.log('Programs array:', programs);
 
             // Sort: Current first, then proposed, then archived. CHE always first within each group
             programs.sort((a, b) => {
@@ -3645,18 +3636,24 @@ function drawAllConnections() {
                 return a.name.localeCompare(b.name);
             });
 
-            console.log('Sorted programs:', programs);
-
-            // Add all programs as individual options
+            // Add all programs as individual options with separators between status groups
+            let lastStatus = null;
             programs.forEach(program => {
-                console.log(`Adding option: ${program.displayLabel}`);
+                // Add separator when status changes
+                if (lastStatus !== null && lastStatus !== program.status) {
+                    const separator = document.createElement('option');
+                    separator.disabled = true;
+                    separator.textContent = '─────────────────────────';
+                    select.appendChild(separator);
+                }
+                
                 const option = document.createElement('option');
                 option.value = program.key;
                 option.textContent = program.displayLabel;
                 select.appendChild(option);
+                
+                lastStatus = program.status;
             });
-            
-            console.log('Dropdown populated with', programs.length, 'options');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
