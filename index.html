@@ -818,9 +818,6 @@
     <script src="programsData.js?v=20251021"></script>
 
     <script>
-        // Debug: Log when programsData loads
-        console.log('programsData loaded:', typeof programsData !== 'undefined' ? Object.keys(programsData) : 'NOT LOADED');
-        
         /*
          * Browser Requirements:
          * - Modern browsers (Chrome 80+, Firefox 75+, Safari 13.1+, Edge 80+)
@@ -999,40 +996,50 @@
             // Clear the container
             const container = document.createElement('div');
 
-            // Split text by URL pattern
-            const urlPattern = /(https?:\/\/[^\s<]+)/g;
-            const parts = text.split(urlPattern);
+            // First, split by <br> tags to handle line breaks
+            const lines = text.split(/<br\s*\/?>/gi);
+            
+            lines.forEach((line, lineIndex) => {
+                // Split line by URL pattern
+                const urlPattern = /(https?:\/\/[^\s<]+)/g;
+                const parts = line.split(urlPattern);
 
-            parts.forEach((part, index) => {
-                if (index % 2 === 0) {
-                    // Text part - use textContent for safety
-                    if (part) {
-                        const textNode = document.createTextNode(part);
-                        container.appendChild(textNode);
-                    }
-                } else {
-                    // URL part - validate and create link
-                    try {
-                        const url = new URL(part);
-                        // Only allow http and https protocols
-                        if (url.protocol === 'http:' || url.protocol === 'https:') {
-                            const link = document.createElement('a');
-                            link.href = url.href;
-                            link.textContent = url.href; // Use textContent, not innerHTML
-                            link.target = '_blank';
-                            link.rel = 'noopener noreferrer';
-                            link.setAttribute('aria-label', `${url.href} (opens in new window)`);
-                            link.style.color = '#A60F2D';
-                            link.style.textDecoration = 'underline';
-                            container.appendChild(link);
-                        } else {
-                            // Invalid protocol - treat as text
+                parts.forEach((part, index) => {
+                    if (index % 2 === 0) {
+                        // Text part - use textContent for safety
+                        if (part) {
+                            const textNode = document.createTextNode(part);
+                            container.appendChild(textNode);
+                        }
+                    } else {
+                        // URL part - validate and create link
+                        try {
+                            const url = new URL(part);
+                            // Only allow http and https protocols
+                            if (url.protocol === 'http:' || url.protocol === 'https:') {
+                                const link = document.createElement('a');
+                                link.href = url.href;
+                                link.textContent = url.href; // Use textContent, not innerHTML
+                                link.target = '_blank';
+                                link.rel = 'noopener noreferrer';
+                                link.setAttribute('aria-label', `${url.href} (opens in new window)`);
+                                link.style.color = '#A60F2D';
+                                link.style.textDecoration = 'underline';
+                                container.appendChild(link);
+                            } else {
+                                // Invalid protocol - treat as text
+                                container.appendChild(document.createTextNode(part));
+                            }
+                        } catch (e) {
+                            // Invalid URL - treat as text
                             container.appendChild(document.createTextNode(part));
                         }
-                    } catch (e) {
-                        // Invalid URL - treat as text
-                        container.appendChild(document.createTextNode(part));
                     }
+                });
+                
+                // Add line break after each line except the last one
+                if (lineIndex < lines.length - 1) {
+                    container.appendChild(document.createElement('br'));
                 }
             });
 
@@ -1078,8 +1085,11 @@
             // Store trigger for focus return
             notesTooltipTrigger = document.activeElement;
             
+            // Convert <br> tags to spaces for screen reader announcement
+            const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, ' ');
+            
             if (announcer) {
-                announcer.textContent = `Notes for ${course.code}: ${course.notes}`;
+                announcer.textContent = `Notes for ${course.code}: ${plainTextNotes}`;
             }
 
             // Position tooltip and set focus
@@ -1095,7 +1105,7 @@
             if (closeBtn) {
                 closeBtn.focus();
                 if (announcer) {
-                    announcer.textContent = `Notes for ${course.code}: ${course.notes}. Press Escape to close.`;
+                    announcer.textContent = `Notes for ${course.code}: ${plainTextNotes}. Press Escape to close.`;
                 }
             }
         }
@@ -1824,8 +1834,10 @@
                         notesIndicator.className = 'notes-indicator';
                         notesIndicator.textContent = 'i';
                         notesIndicator.setAttribute('aria-hidden', 'true');
-                        notesIndicator.setAttribute('aria-label', 'This course has notes - press I to view');
-                        notesIndicator.setAttribute('title', 'This course has notes - press I to view');
+                        // Convert <br> tags to newlines for plain text attributes
+                        const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, '\n');
+                        notesIndicator.setAttribute('aria-label', `Note: ${plainTextNotes}`);
+                        notesIndicator.setAttribute('title', plainTextNotes);
 
                         notesIndicator.addEventListener('click', (e) => {
                             e.stopPropagation();
@@ -2297,9 +2309,7 @@
 
         // Function to populate program selector dynamically
         function populateProgramSelector() {
-            console.log('populateProgramSelector called');
             const select = domCache.programSelect;
-            console.log('select element:', select);
             if (!select) return;
             
             // Safety check: ensure programsData is loaded
@@ -2308,8 +2318,6 @@
                 setTimeout(populateProgramSelector, 100);
                 return;
             }
-            
-            console.log('programsData available, keys:', Object.keys(programsData));
 
             // Clear existing options efficiently
             while (select.firstChild) {
@@ -2319,7 +2327,6 @@
             // Get all programs and add version metadata
             const programs = Object.keys(programsData).map(key => {
                 const program = programsData[key];
-                console.log(`Processing ${key}:`, program);
                 let displayLabel = program.name || 'Unknown Program';
                 
                 // Get status with fallback
@@ -2327,8 +2334,6 @@
                 const version = program.version || '1.0';
                 const effectiveDate = program.effectiveDate || '';
                 const effectiveUntil = program.effectiveUntil || '';
-                
-                console.log(`  - Status: ${status}, EffectiveDate: "${effectiveDate}", effectiveUntil: "${effectiveUntil}"`);
                 
                 // Debug logging (remove in production if needed)
                 if (!effectiveDate && status === 'current') {
@@ -2348,8 +2353,6 @@
                     }
                 }
                 
-                console.log(`  - Final label: "${displayLabel}"`);
-                
                 return {
                     key: key,
                     name: program.name || 'Unknown',
@@ -2359,8 +2362,6 @@
                     sortOrder: status === 'current' ? 1 : status === 'proposed' ? 2 : 3
                 };
             });
-
-            console.log('Programs array:', programs);
 
             // Sort: Current first, then proposed, then archived. CHE always first within each group
             programs.sort((a, b) => {
@@ -2377,18 +2378,24 @@
                 return a.name.localeCompare(b.name);
             });
 
-            console.log('Sorted programs:', programs);
-
-            // Add all programs as individual options
+            // Add all programs as individual options with separators between status groups
+            let lastStatus = null;
             programs.forEach(program => {
-                console.log(`Adding option: ${program.displayLabel}`);
+                // Add separator when status changes
+                if (lastStatus !== null && lastStatus !== program.status) {
+                    const separator = document.createElement('option');
+                    separator.disabled = true;
+                    separator.textContent = '─────────────────────────';
+                    select.appendChild(separator);
+                }
+                
                 const option = document.createElement('option');
                 option.value = program.key;
                 option.textContent = program.displayLabel;
                 select.appendChild(option);
+                
+                lastStatus = program.status;
             });
-            
-            console.log('Dropdown populated with', programs.length, 'options');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
