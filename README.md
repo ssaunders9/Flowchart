@@ -1,4 +1,4 @@
-# WSU Engineering Curriculum Flowchart
+# WSU CHE and BIOENG Curriculum Flowchart
 
 An interactive, accessible curriculum flowchart for Washington State University's Voiland School of Chemical Engineering and Bioengineering. This tool helps students visualize their degree plans with prerequisites, corequisites, and course relationships.
 
