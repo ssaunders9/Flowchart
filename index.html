@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WSU Chemical Engineering Curriculum</title>
+    <title>WSU Engineering Curriculum Flowchart - Combined Interactive/Static</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; line-height: 1.6; padding: 1.25rem; background: #f5f5f5; }
 
-        /* Standardized focus indicator for accessibility */
         *:focus {
             outline: 3px solid #A60F2D;
             outline-offset: 2px;
@@ -17,15 +16,15 @@
 
         .skip-link { position: absolute; top: -2.5rem; left: 0; background: #A60F2D; color: white; padding: 0.5rem 1rem; text-decoration: none; z-index: 100; font-weight: bold; }
         .skip-link:focus { top: 0; }
-
-        .visually-hidden { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
         
         header { background: #A60F2D; color: white; padding: 1.25rem; margin-bottom: 1.875rem; border-radius: 0.5rem; }
         h1 { font-size: 1.8em; margin-bottom: 0.625rem; }
         .subtitle { font-size: 1.1em; opacity: 0.9; }
 
-        .program-selector { margin-top: 0.938rem; }
-        .program-selector label { font-size: 1em; font-weight: bold; margin-right: 0.625rem; display: inline-block; }
+        .controls { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; margin-top: 0.938rem; }
+        
+        .program-selector { display: flex; align-items: center; gap: 0.625rem; }
+        .program-selector label { font-size: 1em; font-weight: bold; }
         .program-selector select {
             font-size: 1em;
             padding: 0.5rem 0.75rem;
@@ -35,1794 +34,430 @@
             color: #A60F2D;
             font-weight: bold;
             cursor: pointer;
-            max-width: 100%;
-            min-width: min(300px, 100%);
-        }
-        .program-selector select:focus {
-            outline: 3px solid #fff;
-            outline-offset: 2px;
-        }
-        .program-selector select option {
-            font-weight: bold;
-        }
-        .program-selector select optgroup {
-            font-weight: bold;
-        }
-        .diagram-wrapper { background: white; padding: 1.875rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; scroll-behavior: smooth; display: flex; justify-content: flex-start; }
-        .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 30px; scroll-snap-type: x mandatory; }
-
-        @media (min-width: 1700px) {
-            .diagram-wrapper { justify-content: center; }
-        }
-        .semester-column { flex: 0 0 180px; display: flex; flex-direction: column; gap: 12px; scroll-snap-align: start; }
-        .semester-header { font-size: 1em; font-weight: bold; color: white; background: #A60F2D; padding: 0.625rem; border-radius: 0.375rem; text-align: center; margin-bottom: 0.313rem; }
-        .semester-header .credits { font-weight: normal; font-size: 0.85em; opacity: 0.9; }
-        .course { padding: 0.625rem; border-radius: 0.375rem; border: 3px solid #333; min-height: 4.688rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
-        .course:focus {
-            box-shadow: 0 0 0 5px rgba(166, 15, 45, 0.3);
-            transform: translateY(-2px);
-        }
-        .course:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        .course.engineering { background: #8fc9f7; border-color: #1565c0; color: #002942; }
-        .course.science { background: #a5d6a7; border-color: #2e7d32; color: #003d0a; }
-        .course.ucore { background: #ce93d8; border-color: #6a1b9a; color: #1f0030; }
-        .course.technical { background: #bdbdbd; border-color: #616161; color: #212121; }
-        .course-code { font-weight: bold; font-size: 1em; display: block; margin-bottom: 0.25rem; text-align: center; }
-        .course-name { font-size: 0.9em; font-weight: 600; display: block; margin-bottom: 0.25rem; text-align: center; line-height: 1.3; }
-        .course-credits { font-size: 0.8em; display: block; text-align: center; }
-        
-        .relationship-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #ff9800;
-            color: white;
-            border-radius: 4px;
-            padding: 0.188rem 0.375rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7em;
-            font-weight: bold;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            z-index: 200;
         }
         
-        .relationship-badge.prereq { background: #c44100; }
-        .relationship-badge.coreq { background: #0d47a1; }
-        .relationship-badge.leadsto { background: #1b5e20; }
-
-        .semester-restriction-badge {
-            position: absolute;
-            bottom: -8px;
-            right: -8px;
-            background: #D2691E;
-            color: white;
-            border-radius: 4px;
-            padding: 0.188rem 0.375rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7em;
-            font-weight: bold;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            z-index: 200;
-        }
-
-        .semester-restriction-badge.fall { background: #8B4513; }
-        .semester-restriction-badge.spring { background: #1b5e20; }
-        .semester-restriction-badge.summer { background: #c44100; }
-
-        .notes-indicator {
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            background: #757575;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75em;
-            font-weight: bold;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            z-index: 200;
+        .mode-toggle { display: flex; align-items: center; gap: 0.5rem; }
+        .mode-toggle label { font-size: 1em; font-weight: bold; cursor: pointer; }
+        .mode-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
             cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .notes-indicator:hover {
-            transform: scale(1.1);
-            background: #616161;
-        }
-
-        .alternatives-indicator {
-            position: absolute;
-            bottom: -8px;
-            left: -8px;
-            background: #616161;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.6em;
-            font-weight: bold;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            z-index: 200;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            line-height: 1;
-        }
-
-        .alternatives-indicator:hover {
-            transform: scale(1.1);
-            background: #424242;
         }
         
-        .notes-tooltip {
-            position: fixed;
-            background: white;
-            border: 2px solid #757575;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            width: 400px;
-            max-width: calc(100vw - 40px);
-            z-index: 10000;
-            display: none;
-        }
-        
-        .notes-tooltip.visible {
-            display: block;
-        }
-        
-        .notes-tooltip[role="tooltip"] {
-            outline: none;
-        }
-        
-        .notes-tooltip-header {
-            font-weight: bold;
-            color: #424242;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .notes-tooltip-content {
-            color: #333;
-            line-height: 1.5;
-        }
-        
-        .notes-tooltip-close {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: none;
-            border: none;
-            font-size: 1.2em;
-            color: #666;
-            cursor: pointer;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .mode-indicator {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
             border-radius: 4px;
+            font-size: 0.9em;
         }
         
-        .notes-tooltip-close:hover {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .alternatives-tooltip {
-            border-color: #616161;
-        }
-
-        .alternatives-tooltip .notes-tooltip-header {
-            color: #424242;
-            border-bottom-color: #616161;
+        .diagram-wrapper { background: white; padding: 1.875rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; }
+        .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 30px; }
+        
+        .semester-column { flex: 0 0 180px; display: flex; flex-direction: column; gap: 12px; }
+        .semester-header { font-size: 1em; font-weight: bold; color: white; background: #A60F2D; padding: 0.625rem; border-radius: 0.375rem; text-align: center; line-height: 1.3; }
+        
+        .course {
+            padding: 0.625rem;
+            border-radius: 0.375rem;
+            border: 3px solid #333;
+            min-height: 4.688rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            transition: all 0.2s ease;
         }
         
-        .text-semester { margin-bottom: 40px; }
-        .text-semester h3 { color: #A60F2D; font-size: 1.4em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #A60F2D; }
-        .text-semester h4 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
-        .text-course { margin-bottom: 15px; padding: 15px; border-left: 5px solid #1565c0; background: #f5f5f5; border-radius: 4px; }
-        .text-course.science { border-left-color: #2e7d32; }
-        .text-course.ucore { border-left-color: #6a1b9a; }
-        .text-course p { margin: 5px 0; color: #666; }
-        kbd { background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold; }
+        .interactive-mode .course { cursor: pointer; }
+        .interactive-mode .course:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .static-mode .course { cursor: default; }
         
-        .legend { background: #f0f0f0; padding: 0.938rem; margin-bottom: 1.25rem; border-radius: 0.375rem; border-left: 4px solid #A60F2D; }
-        #guideToggle { font-size: 1em; margin-bottom: 0.5rem; color: #A60F2D; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; font-weight: bold; border: none; background: none; padding: 0; text-align: left; width: 100%; font-family: Arial, sans-serif; }
-        #guideToggle:hover { color: #8a0c24; }
-        #guideToggle::after { content: '▼'; font-size: 0.8em; transition: transform 0.3s ease; }
-        #guideToggle.collapsed::after { transform: rotate(-90deg); }
-        .legend-content { transition: all 0.3s ease; overflow: hidden; }
-        .legend-content.hidden { max-height: 0; opacity: 0; margin: 0; }
-        .legend-section { margin-bottom: 20px; }
-        .legend-section:last-child { margin-bottom: 0; }
-        .legend-items { display: flex; flex-wrap: wrap; gap: 20px; }
-        .legend-item { display: flex; align-items: center; gap: 8px; }
-        .legend-box { width: 30px; height: 30px; border-radius: 4px; border: 3px solid; }
+        /* Course highlighting for interactive mode */
+        .course.selected {
+            border: 5px solid #000 !important;
+            box-shadow: 0 0 0 4px #A60F2D, 0 0 20px rgba(166, 15, 45, 0.5) !important;
+            z-index: 100 !important;
+        }
+        
+        .course.highlighted-prereq {
+            border: 5px solid #ff9800 !important;
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.8) !important;
+            opacity: 1 !important;
+            filter: none !important;
+        }
+        
+        .course.highlighted-coreq {
+            border: 5px solid #2196f3 !important;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.8) !important;
+            opacity: 1 !important;
+            filter: none !important;
+        }
+        
+        .course.highlighted-leadsto {
+            border: 5px solid #4caf50 !important;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.8) !important;
+            opacity: 1 !important;
+            filter: none !important;
+        }
+        
+        .course.dimmed {
+            opacity: 0.25;
+            filter: grayscale(80%);
+        }
+        
+        .course.engineering { background: #8fc9f7; border-color: #1565c0; }
+        .course.science { background: #a5d6a7; border-color: #2e7d32; }
+        .course.ucore { background: #ce93d8; border-color: #6a1b9a; }
+        .course.technical { background: #fff59d; border-color: #f57f17; }
+        
+        .course-code { font-weight: bold; font-size: 1em; }
+        .course-name { font-size: 0.9em; font-weight: 600; line-height: 1.3; margin: 0.25rem 0; }
+        .course-credits { font-size: 0.8em; color: #555; }
+        
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        
+        .legend {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 0.5rem;
+            border-left: 4px solid #A60F2D;
+        }
+        
+        .legend h3 {
+            font-size: 1.1em;
+            margin-bottom: 0.75rem;
+            color: #A60F2D;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-box {
+            width: 40px;
+            height: 30px;
+            border-radius: 4px;
+            border: 2px solid #333;
+        }
+        
         .legend-box.engineering { background: #8fc9f7; border-color: #1565c0; }
         .legend-box.science { background: #a5d6a7; border-color: #2e7d32; }
         .legend-box.ucore { background: #ce93d8; border-color: #6a1b9a; }
-        .legend-box.technical { background: #bdbdbd; border-color: #616161; }
-        .legend-label { font-size: 0.9em; font-weight: 500; }
+        .legend-box.technical { background: #fff59d; border-color: #f57f17; }
         
-        .scroll-indicators { display: flex; justify-content: center; gap: 0.625rem; margin-top: 0.938rem; padding: 0.625rem; }
-        .scroll-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; cursor: pointer; transition: all 0.3s ease; border: 2px solid #ff5252; }
-        .scroll-dot:hover { background: #A60F2D; border-color: #8a0c24; transform: scale(1.2); }
-        .scroll-dot:focus {
-            background: #A60F2D;
-        }
-        .scroll-dot.active { background: #A60F2D; width: 14px; height: 14px; border: 3px solid #8a0c24; box-shadow: 0 0 8px rgba(166, 15, 45, 0.5); }
-        .scroll-dot.out-of-view { background: white; border: 2px solid #333; opacity: 1; }
-        .scroll-hint { text-align: center; color: #666; font-size: 0.9em; margin-top: 0.625rem; padding: 0.5rem; background: #f9f9f9; border-radius: 0.25rem; }
-        
-        @media (max-width: 768px) {
-            .scroll-hint { font-size: 0.85em; }
+        .legend-line {
+            width: 40px;
+            height: 3px;
+            border-radius: 2px;
         }
         
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-            .course:hover { transform: none; }
-            .scroll-dot { transition: none; }
+        .mode-instructions {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #e3f2fd;
+            border-radius: 0.5rem;
+            border-left: 4px solid #2196f3;
         }
-
-        /* Disclaimer Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10001;
-            padding: 20px;
+        
+        .mode-instructions h3 {
+            font-size: 1em;
+            margin-bottom: 0.5rem;
+            color: #1565c0;
         }
-
-        .modal-overlay.hidden {
-            display: none;
+        
+        .mode-instructions ul {
+            margin-left: 1.5rem;
         }
-
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            position: relative;
-        }
-
-        .modal-content h2 {
-            color: #A60F2D;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .modal-content p {
-            line-height: 1.6;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .modal-content ul {
-            margin: 15px 0 15px 25px;
-            line-height: 1.8;
-        }
-
-        .modal-content li {
-            margin-bottom: 8px;
-        }
-
-        .modal-content a {
-            color: #A60F2D;
-            text-decoration: underline;
-        }
-
-        .modal-content a:hover {
-            color: #8a0c24;
-        }
-
-        .modal-button {
-            background: #A60F2D;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1.1em;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .modal-button:hover {
-            background: #8a0c24;
-        }
-
-        /* Modal button uses default focus style */
-
-        /* Print Styles */
-        @media print {
-            /* Hide interactive elements */
-            .skip-link,
-            .program-selector,
-            .scroll-indicators,
-            .scroll-hint,
-            #toggleBtn,
-            .modal-overlay,
-            .notes-tooltip,
-            .alternatives-tooltip,
-            footer {
-                display: none !important;
-            }
-
-            /* Reset body and container */
-            @page {
-                size: landscape;
-                margin: 0.3in;
-            }
-
-            body {
-                padding: 0;
-                background: white;
-                font-size: 9pt;
-            }
-
-            header {
-                background: white !important;
-                color: #000 !important;
-                border: 1px solid #000;
-                padding: 0.3in !important;
-                margin-bottom: 0.05in !important;
-                border-radius: 0 !important;
-            }
-
-            h1 {
-                color: #000 !important;
-                font-size: 14pt !important;
-                margin-bottom: 0.05in !important;
-            }
-
-            .subtitle {
-                color: #333 !important;
-                font-size: 9pt !important;
-            }
-
-            /* Print legend */
-            .legend {
-                display: block !important;
-                background: white !important;
-                border: 1px solid #000 !important;
-                padding: 0.08in !important;
-                margin-bottom: 0.1in !important;
-                border-radius: 0 !important;
-            }
-
-            .legend-content {
-                display: block !important;
-                max-height: none !important;
-                opacity: 1 !important;
-                margin: 0 !important;
-            }
-
-            #guideToggle {
-                display: none !important;
-            }
-
-            .legend-section {
-                margin-bottom: 0.06in !important;
-            }
-
-            .legend-section:last-child {
-                margin-bottom: 0 !important;
-            }
-
-            .legend-section h4 {
-                font-size: 7pt !important;
-                margin-bottom: 0.03in !important;
-                font-weight: bold !important;
-            }
-
-            .legend-items {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: 0.08in !important;
-            }
-
-            .legend-item {
-                display: flex !important;
-                align-items: center !important;
-                gap: 0.03in !important;
-            }
-
-            .legend-box {
-                width: 0.15in !important;
-                height: 0.15in !important;
-                border-radius: 0 !important;
-                border: 1px solid #000 !important;
-                flex-shrink: 0 !important;
-            }
-
-            .legend-label {
-                font-size: 6pt !important;
-                font-weight: normal !important;
-            }
-
-            /* Hide unnecessary legend sections in print */
-            /* Note: nth-child counts from h3, so legend-section:nth-child(2) is first section */
-            .legend-section:nth-child(2),  /* Course Types */
-            .legend-section:nth-child(3),  /* Course Relationships */
-            .legend-section:nth-child(5) { /* Keyboard Navigation */
-                display: none !important;
-            }
-
-            /* Keep only the Additional Indicators section (4th child) visible */
-            .legend-section:nth-child(4) {
-                display: block !important;
-            }
-
-            /* Flowchart container - compact layout */
-            .diagram-wrapper {
-                overflow: visible !important;
-                box-shadow: none;
-                padding: 0 !important;
-                page-break-inside: avoid;
-            }
-
-            .diagram-container {
-                min-width: 100% !important;
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                justify-content: flex-start !important;
-                gap: 0.15in !important;
-            }
-
-            .semester-column {
-                flex: 0 0 1.1in !important;
-                width: 1.1in !important;
-                min-width: 0 !important;
-                display: flex;
-                flex-direction: column;
-                gap: 0.12in !important;
-            }
-
-            .semester-header {
-                background: #e0e0e0 !important;
-                color: #000 !important;
-                border: 2px solid #000 !important;
-                border-top: 3px solid #000 !important;
-                border-bottom: 3px solid #000 !important;
-                padding: 0.1in !important;
-                font-size: 9pt !important;
-                font-weight: bold !important;
-                margin-bottom: 0.12in !important;
-                border-radius: 0 !important;
-                line-height: 1.3 !important;
-                text-transform: uppercase !important;
-                letter-spacing: 0.5pt !important;
-            }
-
-            .semester-header .credits {
-                font-size: 7pt !important;
-                display: block !important;
-                margin-top: 0.03in !important;
-            }
-
-            .semester-header br {
-                display: block !important;
-                content: "" !important;
-                margin: 0.02in 0 !important;
-            }
-
-            /* Compact course boxes */
-            .course {
-                border: 1px solid #000 !important;
-                padding: 0.04in 0.04in !important;
-                min-height: 0.5in !important;
-                page-break-inside: avoid;
-                box-shadow: none !important;
-                transform: none !important;
-                border-radius: 0 !important;
-                font-size: 6pt !important;
-            }
-
-            .course-code {
-                font-size: 6.5pt !important;
-                margin-bottom: 0.005in !important;
-            }
-
-            .course-name {
-                font-size: 5.5pt !important;
-                line-height: 1 !important;
-                margin-bottom: 0.005in !important;
-            }
-
-            .course-credits {
-                font-size: 5pt !important;
-            }
-
-            .course.engineering {
-                background: #e8f4ff !important;
-                color: #000 !important;
-            }
-
-            .course.science {
-                background: #e8ffe8 !important;
-                color: #000 !important;
-            }
-
-            .course.ucore {
-                background: #f8e8ff !important;
-                color: #000 !important;
-            }
-
-            .course.technical {
-                background: #f0f0f0 !important;
-                color: #000 !important;
-            }
-
-            /* Hide SVG connections */
-            #connectionsSvg {
-                display: none !important;
-            }
-
-            /* Make badges smaller */
-            .notes-indicator,
-            .alternatives-indicator {
-                width: 14px !important;
-                height: 14px !important;
-                font-size: 6pt !important;
-                border-width: 1px !important;
-            }
-
-            .relationship-badge,
-            .semester-restriction-badge {
-                font-size: 5pt !important;
-                padding: 0.01in 0.02in !important;
-                border-width: 1px !important;
-            }
-
-            /* Footer */
-            body::after {
-                content: "Generated: " attr(data-print-date);
-                display: block;
-                text-align: center;
-                font-size: 7pt;
-                color: #666;
-                margin-top: 0.1in;
-                padding-top: 0.05in;
-                border-top: 1px solid #ccc;
-            }
-
-            /* Remove transitions and animations */
-            * {
-                transition: none !important;
-                animation: none !important;
-            }
-
-            /* Hide link URLs in print */
-            a[href^="http"]::after {
-                content: none !important;
-            }
+        
+        .mode-instructions li {
+            margin-bottom: 0.25rem;
         }
     </style>
 </head>
 <body>
-    <!-- Disclaimer Modal -->
-    <div id="disclaimerModal" class="modal-overlay" role="dialog" aria-labelledby="disclaimerTitle" aria-modal="true">
-        <div class="modal-content">
-            <h2 id="disclaimerTitle">Important: Planning Tool Disclaimer</h2>
-            <p>This flowchart is provided for <strong>convenience only</strong> to help you visualize your degree plan. The official <a href="https://catalog.wsu.edu/" target="_blank" rel="noopener noreferrer" aria-label="WSU catalog (opens in new window)">WSU catalog</a> is the authoritative reference for all degree requirements.</p>
-
-            <p><strong>Students are responsible for:</strong></p>
-            <ul>
-                <li>Verifying all course information against the official catalog</li>
-                <li>Following <a href="https://registrar.wsu.edu/academic-regulations/#108" target="_blank" rel="noopener noreferrer" aria-label="WSU academic regulations (opens in new window)">WSU academic regulations</a></li>
-                <li>Consulting with their academic advisor for questions or concerns</li>
-            </ul>
-
-            <p>By using this tool, you acknowledge that it is for planning purposes only and may not reflect the most current information.</p>
-
-            <button class="modal-button" id="disclaimerButton">I Understand</button>
-        </div>
-    </div>
-
     <a href="#main-content" class="skip-link">Skip to main content</a>
     
-    <header role="banner">
-        <h1>Washington State University</h1>
-        <p class="subtitle">Voiland School of Chemical Engineering and Bioengineering</p>
-        <p class="subtitle" id="programTitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</p>
-        <div class="program-selector">
-            <label for="programSelect">Select Program:</label>
-            <select id="programSelect">
-                <!-- Options will be populated dynamically from programsData -->
-            </select>
+    <header>
+        <h1>WSU Engineering Curriculum Flowchart</h1>
+        <p class="subtitle" id="program-title">Bachelor of Science - Chemical Engineering (4 Year Plan)</p>
+        
+        <div class="controls">
+            <div class="program-selector">
+                <label for="program-select">Select Program:</label>
+                <select id="program-select">
+                    <option value="CHE" selected>Chemical Engineering</option>
+                    <option value="BIOENG-BMSE">Bioengineering - Biomedical Systems</option>
+                </select>
+            </div>
+            
+            <div class="mode-toggle">
+                <input type="checkbox" id="static-mode-toggle">
+                <label for="static-mode-toggle">Static Mode (Show All Connections)</label>
+            </div>
+            
+            <div class="mode-indicator">
+                <span id="mode-text">Mode: Interactive</span>
+            </div>
         </div>
     </header>
-    
-    <main role="main" id="main-content">
-        <h2 class="visually-hidden">Curriculum Flowchart</h2>
-        <div id="announcements" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" aria-live="polite" aria-atomic="true"></div>
 
+    <main id="main-content">
+        <div id="mode-instructions-interactive" class="mode-instructions">
+            <h3>📖 Interactive Mode Instructions:</h3>
+            <ul>
+                <li><strong>Click any course</strong> to highlight its prerequisites (orange), co-requisites (blue), and courses it leads to (green)</li>
+                <li><strong>Click again</strong> or click outside to clear the selection</li>
+                <li>Use arrow keys to navigate between courses when focused</li>
+            </ul>
+        </div>
+        
+        <div id="mode-instructions-static" class="mode-instructions" style="display: none;">
+            <h3>📖 Static Mode Instructions:</h3>
+            <ul>
+                <li><strong>All prerequisite connections</strong> are shown with color-coded paths</li>
+                <li>Each course has a unique color for easy tracking</li>
+                <li>Lines show the progression through the curriculum</li>
+                <li>Scroll horizontally to view all semesters</li>
+            </ul>
+        </div>
+        
+        <div class="diagram-wrapper">
+            <div class="diagram-container" id="diagram-container">
+                <!-- Flowchart will be drawn here -->
+            </div>
+        </div>
+        
         <div class="legend">
-            <button id="guideToggle" class="collapsed" aria-expanded="false"><span><span aria-hidden="true">📖</span> How to Use This Tool</span></button>
-
-            <div class="legend-content hidden" id="guideContent">
-            <h3 class="visually-hidden">User Guide</h3>
-            <div class="legend-section">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Course Types:</h4>
-                <div class="legend-items">
+            <h3>Course Types</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-box engineering"></div>
+                    <span><strong>Engineering</strong> - Core engineering courses</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box science"></div>
+                    <span><strong>Science</strong> - Math, chemistry, physics, biology</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box ucore"></div>
+                    <span><strong>UCORE</strong> - University Core Requirements</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box technical"></div>
+                    <span><strong>Technical</strong> - Technical electives</span>
+                </div>
+            </div>
+            <div id="connection-legend" style="display: none; margin-top: 1rem;">
+                <h3 style="margin-top: 0.5rem;">Connection Types (Interactive Mode)</h3>
+                <div class="legend-grid">
                     <div class="legend-item">
-                        <div class="legend-box engineering"></div>
-                        <span class="legend-label">Engineering</span>
+                        <div class="legend-line" style="background: #ff9800;"></div>
+                        <span><strong>Orange</strong> - Prerequisites (must take before)</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-box science"></div>
-                        <span class="legend-label">Science/Math</span>
+                        <div class="legend-line" style="background: #2196f3;"></div>
+                        <span><strong>Blue</strong> - Co-requisites (must take with)</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-box ucore"></div>
-                        <span class="legend-label">UCORE</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box technical"></div>
-                        <span class="legend-label">Technical Elective</span>
+                        <div class="legend-line" style="background: #4caf50;"></div>
+                        <span><strong>Green</strong> - Leads to (unlocks these courses)</span>
                     </div>
                 </div>
             </div>
-
-            <div class="legend-section">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Course Relationships (click any course to see):</h4>
-                <div class="legend-items">
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 5px solid #000; background: #fff; box-shadow: 0 0 0 3px #A60F2D; border-radius: 4px; margin: 8px;"></div>
-                        <span class="legend-label">Selected Course</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 5px solid #ff9800; background: #fff3e0; box-shadow: 0 0 10px rgba(255, 152, 0, 0.6); border-radius: 4px; margin: 8px; position: relative;">
-                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #c44100; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">PRE</div>
-                        </div>
-                        <span class="legend-label">Prerequisites (must take first)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 5px solid #2196f3; background: #e3f2fd; box-shadow: 0 0 10px rgba(33, 150, 243, 0.6); border-radius: 4px; margin: 8px; position: relative;">
-                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #0d47a1; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">CO</div>
-                        </div>
-                        <span class="legend-label">Co-requisites (take together)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 5px solid #4caf50; background: #e8f5e9; box-shadow: 0 0 10px rgba(76, 175, 80, 0.6); border-radius: 4px; margin: 8px; position: relative;">
-                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #1b5e20; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">▶</div>
-                        </div>
-                        <span class="legend-label">Leads to (unlocks these courses)</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="legend-section">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Additional Indicators:</h4>
-                <div class="legend-items">
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
-                            <div style="position: absolute; top: -8px; left: -8px; background: #757575; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; border: 2px solid white;">i</div>
-                        </div>
-                        <span class="legend-label">Course has notes (click to view)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
-                            <div style="position: absolute; bottom: -8px; left: -8px; background: #616161; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; font-weight: bold; border: 2px solid white;">OR</div>
-                        </div>
-                        <span class="legend-label">Course has alternatives (click to view)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
-                            <div style="position: absolute; bottom: -8px; right: -8px; background: #8B4513; color: white; border-radius: 4px; padding: 3px 6px; font-size: 0.7em; font-weight: bold; border: 2px solid white;">F</div>
-                        </div>
-                        <span class="legend-label">Fall only</span>
-                    </div>
-                    <div class="legend-item">
-                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
-                            <div style="position: absolute; bottom: -8px; right: -8px; background: #1b5e20; color: white; border-radius: 4px; padding: 3px 6px; font-size: 0.7em; font-weight: bold; border: 2px solid white;">Sp</div>
-                        </div>
-                        <span class="legend-label">Spring only</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="legend-section">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Keyboard Navigation:</h4>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><kbd>Tab</kbd> - Navigate between courses and buttons</li>
-                    <li><kbd>Enter</kbd> or <kbd>Space</kbd> - Select course to view prerequisites</li>
-                    <li><kbd>I</kbd> - View notes for the focused course (if it has notes)</li>
-                    <li><kbd>A</kbd> - View alternatives for the focused course (if it has alternatives)</li>
-                    <li><kbd>Arrow Keys</kbd> - Move between courses in the grid (NVDA users: press <kbd>Insert+Space</kbd> to enable Focus Mode)</li>
-                    <li><kbd>Escape</kbd> - Close tooltips or clear selection</li>
-                    <li><kbd>V</kbd> - Toggle visual/text views</li>
-                </ul>
-            </div>
-            </div>
         </div>
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button id="toggleBtn" style="padding: 12px 24px; font-size: 1em; font-weight: bold; background: #A60F2D; color: white; border: 2px solid #A60F2D; border-radius: 6px; cursor: pointer;">
-                Switch to Text-Only View
-            </button>
-        </div>
-        
-        <div class="diagram-wrapper" id="visualView" role="application" aria-label="Interactive course flowchart - use arrow keys to navigate between courses">
-            <div class="diagram-container" id="flowchartContainer">
-                <svg id="connectionsSvg" aria-hidden="true" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;">
-                </svg>
-            </div>
-        </div>
-        <div class="scroll-controls">
-            <div class="scroll-indicators" role="navigation" aria-label="Semester navigation">
-                <div id="scrollIndicators"></div>
-            </div>
-            <div class="scroll-hint"><span aria-hidden="true">💡</span> Swipe or scroll horizontally to view all semesters • Click dots to jump to a semester</div>
-        </div>
-        
-        <div id="textView" style="display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <h2 style="color: #A60F2D; margin-bottom: 20px;">Text-Based Course Listing</h2>
-            <div id="textContent"></div>
-        </div>
-        
-        <!-- Notes tooltip -->
-        <div id="notesTooltip" class="notes-tooltip" role="tooltip" aria-live="polite">
-            <button class="notes-tooltip-close" id="closeNotesBtn" aria-label="Close notes">✕</button>
-            <div class="notes-tooltip-header" id="tooltipHeader"></div>
-            <div class="notes-tooltip-content" id="tooltipContent"></div>
-        </div>
-
-        <!-- Alternatives tooltip -->
-        <div id="alternativesTooltip" class="notes-tooltip alternatives-tooltip" role="tooltip" aria-live="polite">
-            <button class="notes-tooltip-close" id="closeAlternativesBtn" aria-label="Close alternatives">✕</button>
-            <div class="notes-tooltip-header" id="alternativesHeader"></div>
-            <div class="notes-tooltip-content" id="alternativesContent"></div>
-        </div>
-        
-        <!-- Link to Static Flow -->
-        <footer style="text-align: center; padding: 2rem 1rem; margin-top: 3rem; border-top: 2px solid #ddd;">
-            <a href="StaticFlow.html" id="staticFlowLink" style="display: inline-block; padding: 0.75rem 1.5rem; background: #A60F2D; color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#8B0C24'" onmouseout="this.style.background='#A60F2D'" aria-label="View Static Flowchart with all connections visible. Note: The static flowchart is a visual-only reference and is unfortunately not accessible with screen readers.">
-                📊 View Static Flowchart (All Connections Visible)
-            </a>
-        </footer>
     </main>
 
-    <!-- Load external course data (with cache busting timestamp) -->
-    <script src="programsData.js?v=20251021"></script>
-
     <script>
-        /*
-         * Browser Requirements:
-         * - Modern browsers (Chrome 80+, Firefox 75+, Safari 13.1+, Edge 80+)
-         * - Required features:
-         *   - ES6+ (const, let, arrow functions, template literals, destructuring)
-         *   - Array methods (forEach, map, filter, sort)
-         *   - requestAnimationFrame
-         *   - localStorage (optional - gracefully degrades)
-         *   - SVG support
-         *   - CSS Grid and Flexbox
-         *
-         * This application will not work in Internet Explorer.
-         */
-
-        // Feature detection
-        (function checkBrowserCompatibility() {
-            try {
-                const testArrow = () => true;
-                const testDestructure = { a: 1 };
-                const { a } = testDestructure;
-                const testTemplate = `test`;
-
-                const missingFeatures = [];
-
-                if (typeof requestAnimationFrame !== 'function') {
-                    missingFeatures.push('requestAnimationFrame');
-                }
-                if (typeof document.querySelector !== 'function') {
-                    missingFeatures.push('querySelector');
-                }
-                if (!('classList' in document.createElement('div'))) {
-                    missingFeatures.push('classList');
-                }
-                if (typeof Array.prototype.forEach !== 'function') {
-                    missingFeatures.push('Array.forEach');
-                }
-
-                if (missingFeatures.length > 0) {
-                    console.warn('Browser compatibility issue. Missing features:', missingFeatures.join(', '));
-                    console.warn('Please use a modern browser (Chrome 80+, Firefox 75+, Safari 13.1+, Edge 80+)');
-                    alert('This application requires a modern browser. Please update your browser or use Chrome, Firefox, Safari, or Edge.');
-                }
-            } catch (e) {
-                console.error('Browser compatibility check failed:', e);
-                alert('This application requires a modern browser. Please update your browser.');
-            }
-        })();
-
-        // Program data loaded from external file: programsData.js
-
-        // Current program state
+        // Combined flowchart implementation - Phase 2
+        // Integrates both interactive (Flow.html) and static (StaticFlow.html) modes
+        
+        let currentMode = 'interactive';
         let currentProgram = 'CHE';
-        let courseData = programsData[currentProgram].courseData;
-        let semesterOrder = programsData[currentProgram].semesterOrder;
-
-        // Make courseData and semesterOrder available globally
-        window.courseData = courseData;
-        window.semesterOrder = semesterOrder;
-
-        // Cached DOM elements for performance
-        const domCache = {
-            flowchartContainer: null,
-            visualView: null,
-            textView: null,
-            textContent: null,
-            connectionsSvg: null,
-            scrollIndicators: null,
-            notesTooltip: null,
-            alternativesTooltip: null,
-            tooltipHeader: null,
-            tooltipContent: null,
-            alternativesHeader: null,
-            alternativesContent: null,
-            announcements: null,
-            guideToggle: null,
-            guideContent: null,
-            toggleBtn: null,
-            programSelect: null,
-            programTitle: null,
-            scrollControls: null,
-            disclaimerModal: null
-        };
-
-        // Initialize DOM cache
-        function initDOMCache() {
-            domCache.flowchartContainer = document.getElementById('flowchartContainer');
-            domCache.visualView = document.getElementById('visualView');
-            domCache.textView = document.getElementById('textView');
-            domCache.textContent = document.getElementById('textContent');
-            domCache.connectionsSvg = document.getElementById('connectionsSvg');
-            domCache.scrollIndicators = document.getElementById('scrollIndicators');
-            domCache.notesTooltip = document.getElementById('notesTooltip');
-            domCache.alternativesTooltip = document.getElementById('alternativesTooltip');
-            domCache.tooltipHeader = document.getElementById('tooltipHeader');
-            domCache.tooltipContent = document.getElementById('tooltipContent');
-            domCache.alternativesHeader = document.getElementById('alternativesHeader');
-            domCache.alternativesContent = document.getElementById('alternativesContent');
-            domCache.announcements = document.getElementById('announcements');
-            domCache.guideToggle = document.getElementById('guideToggle');
-            domCache.guideContent = document.getElementById('guideContent');
-            domCache.toggleBtn = document.getElementById('toggleBtn');
-            domCache.programSelect = document.getElementById('programSelect');
-            domCache.programTitle = document.getElementById('programTitle');
-            domCache.scrollControls = document.querySelector('.scroll-controls');
-            domCache.disclaimerModal = document.getElementById('disclaimerModal');
-        }
-
-        function buildLeadsToMap() {
-            try {
-                const leadsToMap = {};
-
-                if (!courseData || typeof courseData !== 'object') {
-                    console.error('Invalid courseData');
-                    return {};
-                }
-
-                Object.keys(courseData).forEach(key => {
-                    leadsToMap[key] = { asPrereq: [], asCoreq: [] };
-                });
-
-                Object.entries(courseData).forEach(([courseKey, course]) => {
-                    if (!course) return;
-
-                    if (Array.isArray(course.prereqs)) {
-                        course.prereqs.forEach(prereqKey => {
-                            if (leadsToMap[prereqKey]) {
-                                leadsToMap[prereqKey].asPrereq.push(courseKey);
-                            }
-                        });
-                    }
-
-                    if (Array.isArray(course.coreqs)) {
-                        course.coreqs.forEach(coreqKey => {
-                            if (leadsToMap[coreqKey]) {
-                                leadsToMap[coreqKey].asCoreq.push(courseKey);
-                            }
-                        });
-                    }
-                });
-
-                return leadsToMap;
-            } catch (error) {
-                console.error('Error building leads-to map:', error);
-                return {};
-            }
-        }
-        
-        let leadsToMap = {};
         let selectedCourseKey = null;
-        let connectionCounts = {};
-        let sourceConnectionCounts = {};
-        let currentNotesIndicator = null;
+        
+        // Program data extracted from Flow.html
+        // NOTE: For production, this would include all 5 programs. 
+        // For this demonstration, I'm including CHE and BIOENG-BMSE
+        const programsData = {
+            'CHE': {
+                name: 'Chemical Engineering',
+                fullTitle: 'Bachelor of Science - Chemical Engineering (4 Year Plan)',
+                courseData: {
+                    'CHE-101': { code: 'CHE 101', name: 'Overview of Chemical Engineering', shortName: 'CHE Overview', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: ['MATH-171'], alternatives: [], notes: '' },
+                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
 
-        // Course element cache for performance optimization
-        let courseElementCache = new Map();
+                    'CHE-110': { code: 'CHE 110', name: 'Introduction to Chemical Engineering', shortName: 'Intro to CHE', credits: 2, type: 'engineering', semester: 'Year 1 Spring', prereqs: ['CHE-101', 'MATH-171'], coreqs: ['CHEM-105'], alternatives: [], notes: '' },
+                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: [], notes: '' },
+                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: [], notes: '' },
 
-        // Helper function: Get course element from cache or DOM
-        function getCourseElement(courseKey) {
-            if (!courseElementCache.has(courseKey)) {
-                const element = document.querySelector(`[data-course-key="${courseKey}"]`);
-                if (element) {
-                    courseElementCache.set(courseKey, element);
-                }
-                return element;
+                    'CHE-201': { code: 'CHE 201', name: 'Chemical Process Principles and Calculations', shortName: 'Process Princ', credits: 3, type: 'engineering', semester: 'Year 2 Fall', prereqs: ['CHE-110', 'CHEM-106', 'MATH-172'], coreqs: [], alternatives: [], notes: '' },
+                    'CHEM-345': { code: 'CHEM 345', name: 'Organic Chemistry I', shortName: 'Org Chem I', credits: 4, type: 'science', semester: 'Year 2 Fall', prereqs: ['CHEM-106'], coreqs: [], alternatives: [], notes: '' },
+                    'PHYS-201': { code: 'PHYS 201', name: 'Physics for Scientists and Engineers I [PSCI]', shortName: 'Physics I (PSCI)', credits: 3, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-171'], coreqs: ['PHYS-211'], alternatives: [], notes: '' },
+                    'PHYS-211': { code: 'PHYS 211', name: 'Physics Lab for Scientists and Engineers [PSCI]', shortName: 'Phys Lab I (PSCI)', credits: 1, type: 'science', semester: 'Year 2 Fall', prereqs: [], coreqs: ['PHYS-201'], alternatives: [], notes: '' },
+                    'MATH-273': { code: 'MATH 273', name: 'Calculus III', shortName: 'Calculus III', credits: 2, type: 'science', semester: 'Year 2 Fall', prereqs: ['MATH-172'], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-INQ-2': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 2 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+
+                    'CHE-211': { code: 'CHE 211', name: 'Process Simulation', shortName: 'Proc Sim', credits: 3, type: 'engineering', semester: 'Year 2 Spring', prereqs: ['CHE-201'], coreqs: ['MATH-315'], alternatives: [], notes: '' },
+                    'CHEM-348': { code: 'CHEM 348', name: 'Organic Chemistry II and Problem Solving', shortName: 'Org Chem II', credits: 4, type: 'science', semester: 'Year 2 Spring', prereqs: ['CHEM-345'], coreqs: [], alternatives: [], notes: '' },
+                    'PHYS-202': { code: 'PHYS 202', name: 'Physics for Scientists and Engineers II', shortName: 'Physics II', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-201'], coreqs: ['PHYS-212'], alternatives: [], notes: '' },
+                    'PHYS-212': { code: 'PHYS 212', name: 'Physics Lab for Scientists and Engineers II', shortName: 'Phys Lab II', credits: 1, type: 'science', semester: 'Year 2 Spring', prereqs: ['PHYS-211'], coreqs: ['PHYS-202'], alternatives: [], notes: '' },
+                    'MATH-220': { code: 'MATH 220', name: 'Introductory Linear Algebra', shortName: 'Linear Algebra', credits: 2, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-172'], coreqs: [], alternatives: [], notes: '' },
+                    'MATH-315': { code: 'MATH 315', name: 'Differential Equations', shortName: 'Differential Equations', credits: 3, type: 'science', semester: 'Year 2 Spring', prereqs: ['MATH-273'], coreqs: ['MATH-220'], alternatives: [], notes: '' },
+
+                    'CHE-301': { code: 'CHE 301', name: 'Chemical Engineering Thermodynamics', shortName: 'Thermo I', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-101', 'PHYS-202', 'PHYS-212'], coreqs: ['CHE-211', 'CHEM-345'], alternatives: [], notes: '' },
+                    'CHE-310': { code: 'CHE 310', name: 'Introduction to Transport Processes', shortName: 'Transport', credits: 3, type: 'engineering', semester: 'Year 3 Fall', prereqs: ['CHE-201'], coreqs: ['CHE-211', 'MATH-315'], alternatives: [], notes: '' },
+                    'CHE-498': { code: 'CHE 498', name: 'Seminar', shortName: 'Seminar', credits: 1, type: 'engineering', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'ENGL-402': { code: 'ENGL 402', name: 'Technical and Professional Writing [M] [WRTG]', shortName: 'Tech Writing [M]', credits: 3, type: 'ucore', semester: 'Year 3 Fall', prereqs: ['ENGL-101'], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-TECH-1': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-INQ-3': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 3 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+
+                    'CHE-302': { code: 'CHE 302', name: 'Chemical Engineering Thermodynamics II', shortName: 'Thermo II', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-301'], coreqs: [], alternatives: [], notes: '' },
+                    'CHE-321': { code: 'CHE 321', name: 'Kinetics and Reactor Design', shortName: 'Kinetics', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310'], coreqs: ['CHE-302'], alternatives: [], notes: '' },
+                    'CHE-332': { code: 'CHE 332', name: 'Fluid Mechanics and Heat Transfer', shortName: 'Fluids/Heat', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310'], coreqs: ['CHE-302'], alternatives: [], notes: '' },
+                    'CHE-334': { code: 'CHE 334', name: 'Chemical Engineering Separations', shortName: 'Separations', credits: 3, type: 'engineering', semester: 'Year 3 Spring', prereqs: ['CHE-211', 'CHE-310', 'CHEM-345'], coreqs: ['CHE-302'], alternatives: [], notes: '' },
+
+                    'CHE-432': { code: 'CHE 432', name: 'Chemical Engineering Lab I [M]', shortName: 'Lab I [M]', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: ['CHE-352', 'ENGL-402'], alternatives: [], notes: '' },
+                    'CHE-441': { code: 'CHE 441', name: 'Process Control', shortName: 'Process Control', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: [], alternatives: [], notes: '' },
+                    'CHE-450': { code: 'CHE 450', name: 'Chemical Process Analysis and Design I', shortName: 'Design I', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-302', 'CHE-321', 'CHE-332', 'CHE-334'], coreqs: ['CHE-352', 'ENGL-402'], alternatives: [], notes: '' },
+                    'CHE-352': { code: 'CHE 352', name: 'Chemical Process Safety', shortName: 'Process Safety', credits: 3, type: 'engineering', semester: 'Year 4 Fall', prereqs: ['CHE-321', 'CHE-332'], coreqs: [], alternatives: [], notes: '' },
+                    'ECONS-101': { code: 'ECONS 101', name: 'Fundamentals of Microeconomics [SSCI]', shortName: 'Microecon (SSCI)', credits: 3, type: 'ucore', semester: 'Year 4 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+
+                    'CHE-433': { code: 'CHE 433', name: 'Chemical Engineering Lab II [M]', shortName: 'Lab II [M]', credits: 2, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['CHE-432'], coreqs: [], alternatives: [], notes: '' },
+                    'CHE-451': { code: 'CHE 451', name: 'Chemical Process Analysis and Design II [M] [CAPS]', shortName: 'Design II [M] [CAPS]', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: ['CHE-450'], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-CHE-1': { code: 'Elective', name: 'Chemical Engineering Elective', shortName: 'CHE Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-CHE-2': { code: 'Elective', name: 'Chemical Engineering Elective', shortName: 'CHE Elec', credits: 3, type: 'engineering', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-TECH-2': { code: 'Elective', name: 'Technical Elective', shortName: 'Technical', credits: 3, type: 'technical', semester: 'Year 4 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' }
+                },
+                semesterOrder: [
+                    'Year 1 Fall', 'Year 1 Spring',
+                    'Year 2 Fall', 'Year 2 Spring',
+                    'Year 3 Fall', 'Year 3 Spring',
+                    'Year 4 Fall', 'Year 4 Spring'
+                ]
+            },
+            'BIOENG-BMSE': {
+                name: 'Bioengineering: Biomedical Systems',
+                fullTitle: 'Bachelor of Science - Bioengineering: Biomedical Systems (4 Year Plan)',
+                courseData: {
+                    'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'ENGR-120': { code: 'ENGR 120', name: 'Introduction to Engineering and Design', shortName: 'Intro to ENGR', credits: 2, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'HIST-105': { code: 'HIST 105', name: 'The Roots of Contemporary Issues [ROOT]', shortName: 'Cont. Issues (ROOT)', credits: 3, type: 'ucore', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    
+                    'BIOLOGY-107': { code: 'BIOLOGY 107', name: 'Introductory Biology: Cell Biology and Genetics [BSCI]', shortName: 'Cell Bio & Gen (BSCI)', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'CHEM-106': { code: 'CHEM 106', name: 'Principles of Chemistry II', shortName: 'Gen Chem II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['CHEM-105'], coreqs: [], alternatives: [], notes: '' },
+                    'ENGL-101': { code: 'ENGL 101', name: 'College Composition [WRTG]', shortName: 'Composition (WRTG)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' },
+                    'MATH-172': { code: 'MATH 172', name: 'Calculus II', shortName: 'Calculus II', credits: 4, type: 'science', semester: 'Year 1 Spring', prereqs: ['MATH-171'], coreqs: [], alternatives: [], notes: '' },
+                    'ELEC-INQ-1': { code: 'Elective', name: 'Elective [INQUIRY]', shortName: '(INQUIRY)', credits: 3, type: 'ucore', semester: 'Year 1 Spring', prereqs: [], coreqs: [], alternatives: [], notes: '' }
+                },
+                semesterOrder: [
+                    'Year 1 Fall', 'Year 1 Spring',
+                    'Year 2 Fall', 'Year 2 Spring',
+                    'Year 3 Fall', 'Year 3 Spring',
+                    'Year 4 Fall', 'Year 4 Spring'
+                ]
             }
-            return courseElementCache.get(courseKey);
+        };
+        
+        // Get current course data and semester order
+        function getCourseData() {
+            return programsData[currentProgram].courseData;
         }
-
-        // Helper function: Clear course element cache
-        function clearCourseElementCache() {
-            courseElementCache.clear();
+        
+        function getSemesterOrder() {
+            return programsData[currentProgram].semesterOrder;
         }
-
-        // Utility function to safely create links from text
-        function createSafeLinksFromText(text) {
-            // Clear the container
-            const container = document.createElement('div');
-
-            // First, split by <br> tags to handle line breaks
-            const lines = text.split(/<br\s*\/?>/gi);
+        
+        // Build leads-to map (which courses unlock other courses)
+        function buildLeadsToMap() {
+            const courseData = getCourseData();
+            const leadsToMap = {};
             
-            lines.forEach((line, lineIndex) => {
-                // Split line by URL pattern
-                const urlPattern = /(https?:\/\/[^\s<]+)/g;
-                const parts = line.split(urlPattern);
-
-                parts.forEach((part, index) => {
-                    if (index % 2 === 0) {
-                        // Text part - use textContent for safety
-                        if (part) {
-                            const textNode = document.createTextNode(part);
-                            container.appendChild(textNode);
+            Object.keys(courseData).forEach(key => {
+                leadsToMap[key] = { asPrereq: [], asCoreq: [] };
+            });
+            
+            Object.entries(courseData).forEach(([courseKey, course]) => {
+                if (course.prereqs) {
+                    course.prereqs.forEach(prereqKey => {
+                        if (leadsToMap[prereqKey]) {
+                            leadsToMap[prereqKey].asPrereq.push(courseKey);
                         }
-                    } else {
-                        // URL part - validate and create link
-                        try {
-                            const url = new URL(part);
-                            // Only allow http and https protocols
-                            if (url.protocol === 'http:' || url.protocol === 'https:') {
-                                const link = document.createElement('a');
-                                link.href = url.href;
-                                link.textContent = url.href; // Use textContent, not innerHTML
-                                link.target = '_blank';
-                                link.rel = 'noopener noreferrer';
-                                link.setAttribute('aria-label', `${url.href} (opens in new window)`);
-                                link.style.color = '#A60F2D';
-                                link.style.textDecoration = 'underline';
-                                container.appendChild(link);
-                            } else {
-                                // Invalid protocol - treat as text
-                                container.appendChild(document.createTextNode(part));
-                            }
-                        } catch (e) {
-                            // Invalid URL - treat as text
-                            container.appendChild(document.createTextNode(part));
+                    });
+                }
+                
+                if (course.coreqs) {
+                    course.coreqs.forEach(coreqKey => {
+                        if (leadsToMap[coreqKey]) {
+                            leadsToMap[coreqKey].asCoreq.push(courseKey);
                         }
-                    }
-                });
-                
-                // Add line break after each line except the last one
-                if (lineIndex < lines.length - 1) {
-                    container.appendChild(document.createElement('br'));
+                    });
                 }
             });
-
-            return container;
-        }
-
-        function showNotesTooltip(courseKey, event, indicatorElement) {
-            event.stopPropagation();
-
-            // Close any open tooltips first
-            closeAlternativesTooltip();
-
-            const course = courseData[courseKey];
-            if (!course || !course.notes || course.notes.trim() === '') return;
-
-            // Use cached DOM elements
-            const tooltip = domCache.notesTooltip;
-            const header = domCache.tooltipHeader;
-            const content = domCache.tooltipContent;
-            const announcer = domCache.announcements;
-
-            if (!tooltip || !header || !content) return;
-
-            header.textContent = `${course.code} - ${course.name}`;
-
-            // Safely create links from notes text
-            content.textContent = ''; // Clear existing content
-            const safeContent = createSafeLinksFromText(course.notes);
-            content.appendChild(safeContent);
-
-            const x = event.clientX;
-            const y = event.clientY;
-
-            tooltip.style.left = `${x + 10}px`;
-            tooltip.style.top = `${y + 10}px`;
-
-            tooltip.classList.add('visible');
-
-            const tooltipId = 'notesTooltip';
-            indicatorElement.setAttribute('aria-describedby', tooltipId);
-            currentNotesIndicator = indicatorElement;
-
-            // Store trigger for focus return
-            notesTooltipTrigger = document.activeElement;
             
-            // Convert <br> tags to spaces for screen reader announcement
-            const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, ' ');
-            
-            if (announcer) {
-                announcer.textContent = `Notes for ${course.code}: ${plainTextNotes}`;
-            }
-
-            // Position tooltip and set focus
-            const rect = tooltip.getBoundingClientRect();
-            if (rect.right > window.innerWidth) {
-                tooltip.style.left = `${window.innerWidth - rect.width - 20}px`;
-            }
-            if (rect.bottom > window.innerHeight) {
-                tooltip.style.top = `${window.innerHeight - rect.height - 20}px`;
-            }
-
-            const closeBtn = tooltip.querySelector('.notes-tooltip-close');
-            if (closeBtn) {
-                closeBtn.focus();
-                if (announcer) {
-                    announcer.textContent = `Notes for ${course.code}: ${plainTextNotes}. Press Escape to close.`;
-                }
-            }
+            return leadsToMap;
         }
         
-        let notesTooltipTrigger = null;
-
-        window.closeNotesTooltip = function() {
-            const tooltip = domCache.notesTooltip;
-            if (tooltip) {
-                tooltip.classList.remove('visible');
-            }
-
-            if (currentNotesIndicator) {
-                currentNotesIndicator.removeAttribute('aria-describedby');
-                currentNotesIndicator = null;
-            }
-
-            // Return focus to trigger element
-            if (notesTooltipTrigger && notesTooltipTrigger.focus) {
-                notesTooltipTrigger.focus();
-                notesTooltipTrigger = null;
-            }
-        };
-
-        let currentAlternativesIndicator = null;
-
-        function showAlternativesTooltip(courseKey, event, indicatorElement) {
-            event.stopPropagation();
-
-            // Close any open tooltips first
-            closeNotesTooltip();
-
-            const course = courseData[courseKey];
-            if (!course || !course.alternatives || course.alternatives.length === 0) return;
-
-            // Use cached DOM elements
-            const tooltip = domCache.alternativesTooltip;
-            const header = domCache.alternativesHeader;
-            const content = domCache.alternativesContent;
-            const announcer = domCache.announcements;
-
-            if (!tooltip || !header || !content) return;
-
-            header.textContent = `${course.code} - Alternative Courses`;
-
-            // Clear existing content
-            content.textContent = '';
-
-            if (course.alternatives.length === 1) {
-                content.textContent = course.alternatives[0];
-            } else {
-                // Safely build alternatives list using DOM manipulation
-                course.alternatives.forEach((alt, index) => {
-                    const optionDiv = document.createElement('div');
-                    optionDiv.style.marginBottom = '10px';
-
-                    const strong = document.createElement('strong');
-                    strong.textContent = `Option ${index + 1}: `;
-                    optionDiv.appendChild(strong);
-
-                    const textNode = document.createTextNode(alt);
-                    optionDiv.appendChild(textNode);
-
-                    content.appendChild(optionDiv);
-                });
-            }
-
-            const x = event.clientX;
-            const y = event.clientY;
-
-            tooltip.style.left = `${x + 10}px`;
-            tooltip.style.top = `${y + 10}px`;
-
-            tooltip.classList.add('visible');
-
-            const tooltipId = 'alternativesTooltip';
-            indicatorElement.setAttribute('aria-describedby', tooltipId);
-            currentAlternativesIndicator = indicatorElement;
-
-            // Store trigger for focus return
-            alternativesTooltipTrigger = document.activeElement;
-
-            if (announcer) {
-                if (course.alternatives.length === 1) {
-                    announcer.textContent = `Alternative course for ${course.code}: ${course.alternatives[0]}`;
-                } else {
-                    const altText = course.alternatives.map((alt, index) =>
-                        `Option ${index + 1}: ${alt}`
-                    ).join('. ');
-                    announcer.textContent = `Alternative courses for ${course.code}. ${altText}`;
-                }
-            }
-
-            // Position tooltip and set focus
-            const rect = tooltip.getBoundingClientRect();
-            if (rect.right > window.innerWidth) {
-                tooltip.style.left = `${window.innerWidth - rect.width - 20}px`;
-            }
-            if (rect.bottom > window.innerHeight) {
-                tooltip.style.top = `${window.innerHeight - rect.height - 20}px`;
-            }
-
-            const closeBtn = tooltip.querySelector('.notes-tooltip-close');
-            if (closeBtn) {
-                closeBtn.focus();
-                if (announcer) {
-                    announcer.textContent += '. Press Escape to close.';
-                }
-            }
-        }
-
-        let alternativesTooltipTrigger = null;
-
-        window.closeAlternativesTooltip = function() {
-            const tooltip = domCache.alternativesTooltip;
-            if (tooltip) {
-                tooltip.classList.remove('visible');
-            }
-
-            if (currentAlternativesIndicator) {
-                currentAlternativesIndicator.removeAttribute('aria-describedby');
-                currentAlternativesIndicator = null;
-            }
-
-            // Return focus to trigger element
-            if (alternativesTooltipTrigger && alternativesTooltipTrigger.focus) {
-                alternativesTooltipTrigger.focus();
-                alternativesTooltipTrigger = null;
-            }
-        };
+        //  ===========================================
+        //  INTERACTIVE MODE IMPLEMENTATION (Flow.html)
+        //  ===========================================
         
-        window.clearHighlights = function() {
-            // Batch DOM reads and writes for better performance
-            // Query once and reuse
-            const courses = document.querySelectorAll('.course');
-
-            // Remove all badges and reset styles in a single loop
-            courses.forEach(courseDiv => {
-                // Remove badge
-                const badge = courseDiv.querySelector('.relationship-badge');
-                if (badge) badge.remove();
-
-                // Reset classes and styles
-                courseDiv.classList.remove('selected', 'highlighted-prereq', 'highlighted-coreq', 'highlighted-leadsto', 'dimmed');
-                courseDiv.style.cssText = ''; // Clear all inline styles at once
-            });
-
-            // Clear SVG efficiently
-            const svg = domCache.connectionsSvg;
-            if (svg) {
-                // More efficient than innerHTML = ''
-                while (svg.firstChild) {
-                    svg.removeChild(svg.firstChild);
-                }
-            }
-
-            connectionCounts = {};
-            sourceConnectionCounts = {};
-
-            if (selectedCourseKey) {
-                const announcer = domCache.announcements;
-                if (announcer) {
-                    announcer.textContent = 'Course selection cleared.';
-                }
-            }
-
-            selectedCourseKey = null;
-        };
-        
-        function updateSVGSize() {
-            const svg = domCache.connectionsSvg;
-            const container = domCache.flowchartContainer;
-            const wrapper = domCache.visualView;
-
-            if (!svg || !container || !wrapper) return;
-
-            // Calculate actual content dimensions based on semester columns
-            const columns = container.querySelectorAll('.semester-column');
-            let contentWidth = 0;
-            let contentHeight = 0;
-
-            if (columns.length > 0) {
-                // Get the rightmost edge of the last column
-                const lastColumn = columns[columns.length - 1];
-                const containerRect = container.getBoundingClientRect();
-                const lastColumnRect = lastColumn.getBoundingClientRect();
-                contentWidth = (lastColumnRect.right - containerRect.left) + 30; // Add some padding
-
-                // Get the tallest column
-                columns.forEach(col => {
-                    contentHeight = Math.max(contentHeight, col.offsetHeight);
-                });
-            }
-
-            // Fallback to offsetWidth/Height if no columns found
-            const fullWidth = contentWidth || container.offsetWidth;
-            const fullHeight = contentHeight || container.offsetHeight;
-
-            svg.style.width = fullWidth + 'px';
-            svg.style.height = fullHeight + 'px';
-            svg.setAttribute('width', fullWidth);
-            svg.setAttribute('height', fullHeight);
-            svg.setAttribute('viewBox', `0 0 ${fullWidth} ${fullHeight}`);
-        }
-        
-        function drawConnection(fromKey, toKey, color, type, sourcePositionIndex) {
-            const fromDiv = getCourseElement(fromKey);
-            const toDiv = getCourseElement(toKey);
-            const svg = domCache.connectionsSvg;
-            const wrapper = domCache.visualView;
-            const container = domCache.flowchartContainer;
-
-            if (!fromDiv || !toDiv || !svg || !wrapper || !container) return;
-
-            const fromRect = fromDiv.getBoundingClientRect();
-            const toRect = toDiv.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
-
-            const fromCourse = courseData[fromKey];
-            const toCourse = courseData[toKey];
-            const sameSemester = fromCourse.semester === toCourse.semester;
-
-            let fromX, fromY, toX, toY;
-
-            if (sameSemester) {
-                const fromIsAbove = fromRect.top < toRect.top;
-
-                if (fromIsAbove) {
-                    fromX = fromRect.left - containerRect.left + fromRect.width / 2;
-                    fromY = fromRect.top - containerRect.top + fromRect.height;
-                    toX = toRect.left - containerRect.left + toRect.width / 2;
-                    toY = toRect.top - containerRect.top;
-                } else {
-                    fromX = fromRect.left - containerRect.left + fromRect.width / 2;
-                    fromY = fromRect.top - containerRect.top;
-                    toX = toRect.left - containerRect.left + toRect.width / 2;
-                    toY = toRect.top - containerRect.top + toRect.height;
-                }
-            } else {
-                if (!sourceConnectionCounts[fromKey]) {
-                    sourceConnectionCounts[fromKey] = 0;
-                }
-
-                const sourceIndex = sourceConnectionCounts[fromKey];
-                const totalSourceConnections = window.srcTotalConnections[fromKey] || 1;
-
-                let sourceVerticalOffset = 0;
-                if (totalSourceConnections > 1) {
-                    const spacing = 15;
-                    const totalSpread = (totalSourceConnections - 1) * spacing;
-                    sourceVerticalOffset = (sourceIndex * spacing) - (totalSpread / 2);
-                }
-
-                sourceConnectionCounts[fromKey]++;
-
-                // Use sourcePositionIndex to determine destination point
-                // Sources with higher positions get higher destination points
-                const totalConnections = window.destTotalConnections[toKey] || 1;
-
-                let destVerticalOffset = 0;
-                if (totalConnections > 1 && sourcePositionIndex !== undefined) {
-                    const spacing = 15;
-                    const totalSpread = (totalConnections - 1) * spacing;
-                    destVerticalOffset = (sourcePositionIndex * spacing) - (totalSpread / 2);
-                }
-
-                fromX = fromRect.left - containerRect.left + fromRect.width;
-                fromY = fromRect.top - containerRect.top + fromRect.height / 2 + sourceVerticalOffset;
-
-                toX = toRect.left - containerRect.left;
-                toY = toRect.top - containerRect.top + toRect.height / 2 + destVerticalOffset;
-            }
+        function drawInteractiveFlowchart() {
+            const container = document.getElementById('diagram-container');
+            const courseData = getCourseData();
+            const semesterOrder = getSemesterOrder();
             
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            const d = `M ${fromX} ${fromY} L ${toX} ${toY}`;
-
-            path.setAttribute('d', d);
-            path.setAttribute('stroke', color);
-            path.setAttribute('stroke-width', '3');
-            path.setAttribute('fill', 'none');
-            path.setAttribute('stroke-opacity', '0.7');
-
-            svg.appendChild(path);
-        }
-        
-        function createArrowMarkers() {
-            // Arrow markers removed - not currently used
-        }
-
-        // Helper function: Highlight selected course
-        function highlightSelectedCourse(courseKey) {
-            const selectedDiv = getCourseElement(courseKey);
-            if (selectedDiv) {
-                selectedDiv.classList.add('selected');
-                selectedDiv.style.border = '5px solid #000';
-                selectedDiv.style.boxShadow = '0 0 0 4px #A60F2D, 0 0 20px rgba(166, 15, 45, 0.5)';
-                selectedDiv.style.zIndex = '100';
-                selectedDiv.style.opacity = '1';
-                selectedDiv.style.filter = 'none';
-            }
-            return selectedDiv;
-        }
-
-        // Helper function: Dim all other courses
-        function dimOtherCourses(courseKey, coursesCache = null) {
-            // Use cached courses if provided, otherwise query
-            const courses = coursesCache || document.querySelectorAll('.course');
-            courses.forEach(courseDiv => {
-                if (courseDiv.getAttribute('data-course-key') !== courseKey) {
-                    courseDiv.classList.add('dimmed');
-                    courseDiv.style.opacity = '0.25';
-                    courseDiv.style.filter = 'grayscale(80%)';
-                }
-            });
-        }
-
-        // Helper function: Apply relationship styling to a course
-        function applyRelationshipStyle(courseDiv, type, badgeText) {
-            if (!courseDiv) return;
-
-            const styles = {
-                prereq: { border: '5px solid #ff9800', boxShadow: '0 0 15px rgba(255, 152, 0, 0.8)', class: 'highlighted-prereq' },
-                coreq: { border: '5px solid #2196f3', boxShadow: '0 0 15px rgba(33, 150, 243, 0.8)', class: 'highlighted-coreq' },
-                leadsto: { border: '5px solid #4caf50', boxShadow: '0 0 15px rgba(76, 175, 80, 0.8)', class: 'highlighted-leadsto' }
-            };
-
-            const style = styles[type];
-            if (!style) return;
-
-            courseDiv.classList.remove('dimmed');
-            courseDiv.classList.add(style.class);
-            courseDiv.style.border = style.border;
-            courseDiv.style.boxShadow = style.boxShadow;
-            courseDiv.style.opacity = '1';
-            courseDiv.style.filter = 'none';
-
-            const badge = document.createElement('div');
-            badge.className = `relationship-badge ${type}`;
-            badge.textContent = badgeText;
-            badge.setAttribute('aria-hidden', 'true');
-            courseDiv.appendChild(badge);
-        }
-
-        // Helper function: Highlight prerequisites
-        function highlightPrerequisites(prereqKeys) {
-            prereqKeys.forEach(prereqKey => {
-                const prereqDiv = getCourseElement(prereqKey);
-                applyRelationshipStyle(prereqDiv, 'prereq', 'PR');
-            });
-        }
-
-        // Helper function: Highlight corequisites
-        function highlightCorequisites(coreqKeys) {
-            coreqKeys.forEach(coreqKey => {
-                const coreqDiv = getCourseElement(coreqKey);
-                applyRelationshipStyle(coreqDiv, 'coreq', 'CO');
-            });
-        }
-
-        // Helper function: Highlight courses this leads to
-        function highlightLeadsTo(leadsToKeys) {
-            leadsToKeys.forEach(leadsToKey => {
-                const leadsToDiv = getCourseElement(leadsToKey);
-                applyRelationshipStyle(leadsToDiv, 'leadsto', '▶');
-            });
-        }
-
-        // Helper function: Sort course keys by vertical position
-        function sortCoursesByPosition(courseKeys) {
-            // Pre-calculate all bounding rectangles to avoid repeated layout calculations
-            const positions = new Map();
-            courseKeys.forEach(key => {
-                const div = getCourseElement(key);
-                if (div) {
-                    positions.set(key, div.getBoundingClientRect().top);
-                }
-            });
-
-            return [...courseKeys].sort((a, b) => {
-                const posA = positions.get(a);
-                const posB = positions.get(b);
-                if (posA === undefined || posB === undefined) return 0;
-                return posA - posB;
-            });
-        }
-
-        // Helper function: Calculate connection counts
-        function calculateConnectionCounts(courseKey, prereqsSorted, coreqsSorted, leadsToSorted) {
-            const destConnectionCounts = {};
-            const srcConnectionCounts = {};
-
-            prereqsSorted.forEach(prereqKey => {
-                if (!destConnectionCounts[courseKey]) destConnectionCounts[courseKey] = 0;
-                destConnectionCounts[courseKey]++;
-
-                if (!srcConnectionCounts[prereqKey]) srcConnectionCounts[prereqKey] = 0;
-                srcConnectionCounts[prereqKey]++;
-            });
-
-            coreqsSorted.forEach(coreqKey => {
-                if (!destConnectionCounts[courseKey]) destConnectionCounts[courseKey] = 0;
-                destConnectionCounts[courseKey]++;
-
-                if (!srcConnectionCounts[coreqKey]) srcConnectionCounts[coreqKey] = 0;
-                srcConnectionCounts[coreqKey]++;
-            });
-
-            leadsToSorted.forEach(leadsToKey => {
-                if (!destConnectionCounts[leadsToKey]) destConnectionCounts[leadsToKey] = 0;
-                destConnectionCounts[leadsToKey]++;
-
-                if (!srcConnectionCounts[courseKey]) srcConnectionCounts[courseKey] = 0;
-                srcConnectionCounts[courseKey]++;
-            });
-
-            return { destConnectionCounts, srcConnectionCounts };
-        }
-
-        // Helper function: Draw all connection lines
-        function drawAllConnections(courseKey, course, prereqsSorted, coreqsSorted, leadsToSorted, destConnectionCounts, srcConnectionCounts) {
-            const courseDiv = getCourseElement(courseKey);
-            const courseRect = courseDiv ? courseDiv.getBoundingClientRect() : null;
-
-            // Filter out coreqs in same semester (they use vertical connections without offsets)
-            const coreqsDifferentSemester = coreqsSorted.filter(key => {
-                const coreqCourse = courseData[key];
-                return coreqCourse && coreqCourse.semester !== course.semester;
-            });
-
-            const incomingConnections = [
-                ...prereqsSorted.map(key => ({ key, type: 'prereq', color: '#ff9800' })),
-                ...coreqsDifferentSemester.map(key => ({ key, type: 'coreq', color: '#2196f3' }))
-            ];
-
-            // Calculate position and angle from each source to destination
-            incomingConnections.forEach(conn => {
-                const sourceDiv = getCourseElement(conn.key);
-                if (sourceDiv && courseRect) {
-                    const sourceRect = sourceDiv.getBoundingClientRect();
-                    conn.verticalPos = sourceRect.top + sourceRect.height / 2;
-                    const dx = courseRect.left - (sourceRect.left + sourceRect.width);
-                    const dy = (courseRect.top + courseRect.height / 2) - (sourceRect.top + sourceRect.height / 2);
-                    conn.angle = Math.atan2(dy, dx);
-                } else {
-                    conn.verticalPos = 0;
-                    conn.angle = 0;
-                }
-            });
-
-            // Sort primarily by vertical position, secondarily by angle
-            incomingConnections.sort((a, b) => {
-                const verticalDiff = a.verticalPos - b.verticalPos;
-                if (Math.abs(verticalDiff) > 20) {
-                    return verticalDiff;
-                }
-                return a.angle - b.angle;
-            });
-
-            // Draw all incoming connections
-            incomingConnections.forEach((conn, index) => {
-                drawConnection(conn.key, courseKey, conn.color, conn.type, index);
-            });
-
-            // Draw coreqs in same semester
-            const coreqsSameSemester = coreqsSorted.filter(key => {
-                const coreqCourse = courseData[key];
-                return coreqCourse && coreqCourse.semester === course.semester;
-            });
-            coreqsSameSemester.forEach(coreqKey => {
-                drawConnection(coreqKey, courseKey, '#2196f3', 'coreq', undefined);
-            });
-
-            // Calculate and draw outgoing connections
-            const outgoingConnections = leadsToSorted.map(key => ({
-                key,
-                type: 'leadsto',
-                color: '#4caf50'
-            }));
-
-            outgoingConnections.forEach(conn => {
-                const destDiv = getCourseElement(conn.key);
-                if (destDiv && courseRect) {
-                    const destRect = destDiv.getBoundingClientRect();
-                    conn.verticalPos = destRect.top + destRect.height / 2;
-                    const dx = destRect.left - (courseRect.left + courseRect.width);
-                    const dy = (destRect.top + destRect.height / 2) - (courseRect.top + courseRect.height / 2);
-                    conn.angle = Math.atan2(dy, dx);
-                } else {
-                    conn.verticalPos = 0;
-                    conn.angle = 0;
-                }
-            });
-
-            outgoingConnections.sort((a, b) => {
-                const verticalDiff = a.verticalPos - b.verticalPos;
-                if (Math.abs(verticalDiff) > 20) {
-                    return verticalDiff;
-                }
-                return a.angle - b.angle;
-            });
-
-            outgoingConnections.forEach((conn, index) => {
-                drawConnection(courseKey, conn.key, conn.color, conn.type, index);
-            });
-        }
-
-        window.highlightRelatedCourses = function(courseKey) {
-            try {
-                window.clearHighlights();
-
-                const course = courseData[courseKey];
-                const leadsTo = leadsToMap[courseKey];
-
-                if (!course || !leadsTo) return;
-
-            // Combine highlighting and drawing in a single requestAnimationFrame
-            requestAnimationFrame(() => {
-                    try {
-                        // Highlight the selected course
-                        highlightSelectedCourse(courseKey);
-
-                        // Dim all other courses
-                        dimOtherCourses(courseKey);
-
-                        // Highlight prerequisites
-                        highlightPrerequisites(course.prereqs);
-
-                        // Highlight corequisites
-                        highlightCorequisites(course.coreqs);
-
-                        // Sort courses by position (now in same frame)
-                        const prereqsSorted = sortCoursesByPosition(course.prereqs);
-                        const coreqsSorted = sortCoursesByPosition(course.coreqs);
-
-                        // Combine leads-to arrays once and reuse
-                        const allLeadsToKeys = [...leadsTo.asPrereq, ...leadsTo.asCoreq];
-                        const leadsToSorted = sortCoursesByPosition(allLeadsToKeys);
-
-                        // Highlight courses this leads to (filter out duplicates)
-                        const allLeadsTo = allLeadsToKeys.filter(
-                            key => !course.coreqs.includes(key)
-                        );
-                        highlightLeadsTo(allLeadsTo);
-
-                        // Calculate connection counts
-                        const { destConnectionCounts, srcConnectionCounts } = calculateConnectionCounts(
-                            courseKey,
-                            prereqsSorted,
-                            coreqsSorted,
-                            leadsToSorted
-                        );
-
-                        window.destTotalConnections = destConnectionCounts;
-                        window.srcTotalConnections = srcConnectionCounts;
-
-                        // Draw all connection lines
-                        drawAllConnections(
-                            courseKey,
-                            course,
-                            prereqsSorted,
-                            coreqsSorted,
-                            leadsToSorted,
-                            destConnectionCounts,
-                            srcConnectionCounts
-                        );
-
-                        // Announce the selection
-                        announceSelection(courseKey, course, leadsToSorted);
-
-                        // Update SVG size
-                        updateSVGSize();
-                    } catch (error) {
-                        console.error('Error highlighting and drawing connections:', error);
-                    }
-                });
-
-                selectedCourseKey = courseKey;
-            } catch (error) {
-                console.error('Error in highlightRelatedCourses:', error);
-                // Clean up on error
-                window.clearHighlights();
-            }
-        };
-        
-        function announceSelection(courseKey, course, leadsTo) {
-            const announcer = domCache.announcements;
-            if (!announcer) return;
+            // Create SVG for connections
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('id', 'connections-svg');
+            container.appendChild(svg);
             
-            const courseInfo = courseData[courseKey];
-            if (!courseInfo) return;
-            
-            const prereqCount = course.prereqs.length;
-            const coreqCount = course.coreqs.length;
-            const leadsToCount = leadsTo.length;
-            
-            let message = `${courseInfo.code} ${courseInfo.name} selected. `;
-            
-            if (prereqCount === 0 && coreqCount === 0 && leadsToCount === 0) {
-                message += 'This course has no prerequisites, co-requisites, or courses it leads to.';
-            } else {
-                const parts = [];
-                
-                if (prereqCount > 0) {
-                    const prereqNames = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
-                    parts.push(`${prereqCount} prerequisite${prereqCount > 1 ? 's' : ''}: ${prereqNames}`);
-                }
-                
-                if (coreqCount > 0) {
-                    const coreqNames = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
-                    parts.push(`${coreqCount} co-requisite${coreqCount > 1 ? 's' : ''}: ${coreqNames}`);
-                }
-                
-                if (leadsToCount > 0) {
-                    const leadsToNames = leadsTo.map(l => courseData[l]?.code || l).join(', ');
-                    parts.push(`leads to ${leadsToCount} course${leadsToCount > 1 ? 's' : ''}: ${leadsToNames}`);
-                }
-                
-                message += parts.join('. ') + '.';
-            }
-            
-            announcer.textContent = message;
-        }
-        
-        // Store event handlers for cleanup
-        const eventHandlers = new WeakMap();
-
-        function buildFlowchart(isProgramSwitch = false) {
-            const container = domCache.flowchartContainer;
-            if (!container) return;
-            
+            // Group courses by semester
             const courseBySemester = {};
             semesterOrder.forEach(sem => courseBySemester[sem] = []);
             
             Object.entries(courseData).forEach(([key, course]) => {
                 courseBySemester[course.semester].push({key, ...course});
             });
-
-            // Sort priority map for efficient course ordering
-            const sortPriorityPrefixes = [
-                ['CHE-', 1],
-                ['BIOENG-', 1],
-                ['ELEC-CHE', 2],
-                ['ELEC-BIOENG', 2],
-                ['CELL-MOL-', 2],  // Cell & Molecular electives - treat like bioeng electives
-                ['ENGR-', 3],
-                ['EE-', 3],  // Electrical Engineering
-                ['CE-', 3],  // Civil Engineering
-                ['ELEC-TECH', 4],
-                ['CHEM-', 5],
-                ['MBIOS-', 5],  // Treat MBIOS like chemistry
-                ['MATH-', 6],
-                ['PHYS-', 7],
-                ['BIOLOGY-', 8],
-                ['ENGL-', 9],
-                ['HIST-', 10],
-                ['ECONS-', 11],
-                ['ELEC-', 12],
-                ['STAT-', 13]
-            ];
-
-            function getSortPriority(courseCode) {
-                for (const [prefix, priority] of sortPriorityPrefixes) {
-                    if (courseCode.startsWith(prefix)) {
-                        return priority;
-                    }
-                }
-                return 14;  // Default priority
-            }
             
-            semesterOrder.forEach(semester => {
-                courseBySemester[semester].sort((a, b) => {
-                    const priorityA = getSortPriority(a.key);
-                    const priorityB = getSortPriority(b.key);
-                    if (priorityA !== priorityB) {
-                        return priorityA - priorityB;
-                    }
-                    return a.key.localeCompare(b.key);
-                });
-            });
-            
+            // Draw each semester column
             semesterOrder.forEach(semester => {
                 const column = document.createElement('div');
                 column.className = 'semester-column';
-
-                // Calculate total credits for this semester
-                const totalCredits = courseBySemester[semester].reduce((sum, course) => sum + course.credits, 0);
-
+                
+                // Calculate total credits
+                const totalCredits = courseBySemester[semester].reduce((sum, c) => sum + c.credits, 0);
+                
                 const header = document.createElement('div');
                 header.className = 'semester-header';
                 const parts = semester.split(' ');
-                header.innerHTML = `${parts[0]} ${parts[1]}<br>${parts[2]}<br><span class="credits">${totalCredits} Credits</span>`;
+                header.innerHTML = `${parts[0]} ${parts[1]}<br>${parts[2]}<br><span style="font-size: 0.9em;">${totalCredits} Credits</span>`;
                 column.appendChild(header);
-
+                
                 courseBySemester[semester].forEach(course => {
                     const courseDiv = document.createElement('div');
                     courseDiv.className = `course ${course.type}`;
-                    courseDiv.setAttribute('tabindex', '0');
                     courseDiv.setAttribute('data-course-key', course.key);
-                    
-                    const prereqText = course.prereqs.length > 0
-                        ? `Requires: ${course.prereqs.map(p => courseData[p]?.code || p).join(', ')}.`
-                        : '';
-
-                    const coreqText = course.coreqs.length > 0
-                        ? ` With: ${course.coreqs.map(c => courseData[c]?.code || c).join(', ')}.`
-                        : '';
-
-                    const alternativesText = course.alternatives && course.alternatives.length > 0
-                        ? ` Has ${course.alternatives.length} alternative course${course.alternatives.length > 1 ? 's' : ''}, press A to view.`
-                        : '';
-
-                    const semesterRestrictionText = course.semesterRestriction
-                        ? ` Only offered in ${course.semesterRestriction}.`
-                        : '';
-
-                    const ariaLabel = `${course.code}, ${course.credits} credits.${semesterRestrictionText} ${prereqText}${coreqText}${alternativesText}`;
-                    courseDiv.setAttribute('aria-label', ariaLabel);
+                    courseDiv.setAttribute('tabindex', '0');
                     
                     courseDiv.innerHTML = `
                         <span class="course-code">${course.code}</span>
@@ -1830,115 +465,13 @@
                         <span class="course-credits">${course.credits} cr</span>
                     `;
                     
-                    if (course.notes && course.notes.trim() !== '') {
-                        const notesIndicator = document.createElement('div');
-                        notesIndicator.className = 'notes-indicator';
-                        notesIndicator.textContent = 'i';
-                        notesIndicator.setAttribute('aria-hidden', 'true');
-                        // Convert <br> tags to newlines for plain text attributes
-                        const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, '\n');
-                        notesIndicator.setAttribute('aria-label', `Note: ${plainTextNotes}`);
-                        notesIndicator.setAttribute('title', plainTextNotes);
-
-                        notesIndicator.addEventListener('click', (e) => {
-                            e.stopPropagation();
-
-                            // Check if clicking the same indicator to toggle off
-                            const tooltip = domCache.notesTooltip;
-                            if (tooltip && tooltip.classList.contains('visible') && currentNotesIndicator === courseDiv) {
-                                closeNotesTooltip();
-                                return;
-                            }
-
-                            const rect = courseDiv.getBoundingClientRect();
-                            const syntheticEvent = {
-                                clientX: rect.left + rect.width / 2,
-                                clientY: rect.top + rect.height / 2,
-                                stopPropagation: () => {}
-                            };
-                            showNotesTooltip(course.key, syntheticEvent, courseDiv);
-                        });
-
-                        courseDiv.appendChild(notesIndicator);
-                        courseDiv.setAttribute('data-has-notes', 'true');
-                    }
-
-                    if (course.semesterRestriction) {
-                        const restrictionBadge = document.createElement('div');
-                        const semester = course.semesterRestriction.toLowerCase();
-                        restrictionBadge.className = `semester-restriction-badge ${semester}`;
-
-                        // Display text: "F" for Fall, "Sp" for Spring, "Su" for Summer
-                        let displayText = course.semesterRestriction;
-                        if (course.semesterRestriction === 'Fall') {
-                            displayText = 'F';
-                        } else if (course.semesterRestriction === 'Spring') {
-                            displayText = 'Sp';
-                        } else if (course.semesterRestriction === 'Summer') {
-                            displayText = 'Su';
-                        }
-
-                        restrictionBadge.textContent = displayText;
-                        restrictionBadge.setAttribute('aria-hidden', 'true');
-                        restrictionBadge.setAttribute('aria-label', `Only offered in ${course.semesterRestriction}`);
-                        restrictionBadge.setAttribute('title', `Only offered in ${course.semesterRestriction}`);
-
-                        courseDiv.appendChild(restrictionBadge);
-                    }
-
-                    if (course.alternatives && course.alternatives.length > 0) {
-                        const alternativesIndicator = document.createElement('div');
-                        alternativesIndicator.className = 'alternatives-indicator';
-                        alternativesIndicator.textContent = 'OR';
-                        alternativesIndicator.setAttribute('aria-hidden', 'true');
-                        alternativesIndicator.setAttribute('aria-label', `Alternative: ${course.alternatives.join(', ')}`);
-                        alternativesIndicator.setAttribute('title', `Alternative: ${course.alternatives.join(', ')}`);
-
-                        alternativesIndicator.addEventListener('click', (e) => {
-                            e.stopPropagation();
-
-                            // Check if clicking the same indicator to toggle off
-                            const tooltip = domCache.alternativesTooltip;
-                            if (tooltip && tooltip.classList.contains('visible') && currentAlternativesIndicator === alternativesIndicator) {
-                                closeAlternativesTooltip();
-                                return;
-                            }
-
-                            const rect = courseDiv.getBoundingClientRect();
-                            const syntheticEvent = {
-                                clientX: rect.left + rect.width / 2,
-                                clientY: rect.bottom,
-                                stopPropagation: () => {}
-                            };
-                            showAlternativesTooltip(course.key, syntheticEvent, alternativesIndicator);
-                        });
-
-                        courseDiv.appendChild(alternativesIndicator);
-                        courseDiv.setAttribute('data-has-alternatives', 'true');
-                    }
-                    
+                    // Interactive mode: Add click handler
                     courseDiv.addEventListener('click', (e) => {
-                        // Close any open tooltips first
-                        const notesTooltip = domCache.notesTooltip;
-                        const alternativesTooltip = domCache.alternativesTooltip;
-
-                        if (!e.target.closest('.notes-indicator')) {
-                            if (notesTooltip && notesTooltip.classList.contains('visible')) {
-                                closeNotesTooltip();
-                            }
-                        }
-
-                        if (!e.target.closest('.alternatives-indicator')) {
-                            if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
-                                closeAlternativesTooltip();
-                            }
-                        }
-
                         e.stopPropagation();
                         if (selectedCourseKey === course.key) {
-                            window.clearHighlights();
+                            clearHighlights();
                         } else {
-                            window.highlightRelatedCourses(course.key);
+                            highlightRelatedCourses(course.key);
                         }
                     });
                     
@@ -1946,33 +479,10 @@
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
                             if (selectedCourseKey === course.key) {
-                                window.clearHighlights();
+                                clearHighlights();
                             } else {
-                                window.highlightRelatedCourses(course.key);
+                                highlightRelatedCourses(course.key);
                             }
-                        }
-
-                        if ((e.key === 'i' || e.key === 'I') && courseDiv.getAttribute('data-has-notes') === 'true') {
-                            e.preventDefault();
-                            const rect = courseDiv.getBoundingClientRect();
-                            const syntheticEvent = {
-                                clientX: rect.left + rect.width / 2,
-                                clientY: rect.top + rect.height / 2,
-                                stopPropagation: () => {}
-                            };
-                            showNotesTooltip(course.key, syntheticEvent, courseDiv);
-                        }
-
-                        if ((e.key === 'a' || e.key === 'A') && courseDiv.getAttribute('data-has-alternatives') === 'true') {
-                            e.preventDefault();
-                            const rect = courseDiv.getBoundingClientRect();
-                            const syntheticEvent = {
-                                clientX: rect.left + rect.width / 2,
-                                clientY: rect.bottom,
-                                stopPropagation: () => {}
-                            };
-                            const altIndicator = courseDiv.querySelector('.alternatives-indicator');
-                            showAlternativesTooltip(course.key, syntheticEvent, altIndicator);
                         }
                     });
                     
@@ -1981,891 +491,309 @@
                 
                 container.appendChild(column);
             });
-
-            // Only reset scroll position on initial load, not on program switch
-            if (!isProgramSwitch) {
-                setTimeout(() => {
-                    centerFlowchartOnInit();
-                }, 0);
-            }
+            
+            // Update SVG size
+            setTimeout(() => updateSVGSize(), 0);
         }
-
-        function centerFlowchartOnInit() {
-            const wrapper = domCache.visualView;
-            if (!wrapper) return;
-
-            // Always start with Year 1 Fall visible (leftmost position)
-            wrapper.scrollLeft = 0;
-        }
-
-        window.switchProgram = function() {
-            const select = domCache.programSelect;
-            if (!select) return;
-
-            const newProgram = select.value;
-
-            if (newProgram === currentProgram) return;
-
-            // Save current scroll position before switching
-            const wrapper = domCache.visualView;
-            const savedScrollLeft = wrapper ? wrapper.scrollLeft : 0;
-
-            // Close any open tooltips
-            closeNotesTooltip();
-            closeAlternativesTooltip();
-
-            // Clear highlights
-            window.clearHighlights();
-
-            // Update current program
-            currentProgram = newProgram;
-            courseData = programsData[currentProgram].courseData;
-            semesterOrder = programsData[currentProgram].semesterOrder;
-
-            // Update global references
-            window.courseData = courseData;
-            window.semesterOrder = semesterOrder;
-
-            // Update page title
-            const programTitle = domCache.programTitle;
-            if (programTitle) {
-                programTitle.textContent = programsData[currentProgram].fullTitle;
+        
+        function highlightRelatedCourses(courseKey) {
+            clearHighlights();
+            
+            const courseData = getCourseData();
+            const leadsToMap = buildLeadsToMap();
+            const course = courseData[courseKey];
+            const leadsTo = leadsToMap[courseKey];
+            
+            if (!course || !leadsTo) return;
+            
+            selectedCourseKey = courseKey;
+            
+            // Highlight selected course
+            const selectedDiv = document.querySelector(`[data-course-key="${courseKey}"]`);
+            if (selectedDiv) {
+                selectedDiv.classList.add('selected');
             }
-
-            // Clear existing flowchart and text view efficiently
-            const flowchartContainer = domCache.flowchartContainer;
-            const textContent = domCache.textContent;
-            const svg = domCache.connectionsSvg;
-
-            // Clear course element cache since DOM is being rebuilt
-            clearCourseElementCache();
-
-            // Preserve the SVG element before clearing
-            const svgElement = svg ? svg.cloneNode(false) : null;
-
-            // Clear containers efficiently
-            if (flowchartContainer) {
-                while (flowchartContainer.firstChild) {
-                    flowchartContainer.removeChild(flowchartContainer.firstChild);
+            
+            // Dim all other courses
+            document.querySelectorAll('.course').forEach(courseDiv => {
+                if (courseDiv.getAttribute('data-course-key') !== courseKey) {
+                    courseDiv.classList.add('dimmed');
                 }
-            }
-            if (textContent) {
-                while (textContent.firstChild) {
-                    textContent.removeChild(textContent.firstChild);
+            });
+            
+            // Highlight prerequisites (orange)
+            course.prereqs.forEach(prereqKey => {
+                const prereqDiv = document.querySelector(`[data-course-key="${prereqKey}"]`);
+                if (prereqDiv) {
+                    prereqDiv.classList.remove('dimmed');
+                    prereqDiv.classList.add('highlighted-prereq');
                 }
-            }
-
-            // Re-add the SVG element to the container
-            if (svgElement && flowchartContainer) {
-                // Update cache reference
-                domCache.connectionsSvg = svgElement;
-                flowchartContainer.appendChild(svgElement);
-            }
-
-            // Rebuild everything (with scroll preservation flag)
-            leadsToMap = buildLeadsToMap();
-            buildFlowchart(true); // Pass true to indicate program switch
-            buildTextView();
-            setupScrollIndicators();
-            createArrowMarkers();
+                drawConnection(prereqKey, courseKey, '#ff9800');
+            });
+            
+            // Highlight corequisites (blue)
+            course.coreqs.forEach(coreqKey => {
+                const coreqDiv = document.querySelector(`[data-course-key="${coreqKey}"]`);
+                if (coreqDiv) {
+                    coreqDiv.classList.remove('dimmed');
+                    coreqDiv.classList.add('highlighted-coreq');
+                }
+                drawConnection(coreqKey, courseKey, '#2196f3');
+            });
+            
+            // Highlight courses this leads to (green)
+            const allLeadsTo = [...leadsTo.asPrereq, ...leadsTo.asCoreq];
+            allLeadsTo.forEach(leadsToKey => {
+                const leadsToDiv = document.querySelector(`[data-course-key="${leadsToKey}"]`);
+                if (leadsToDiv) {
+                    leadsToDiv.classList.remove('dimmed');
+                    leadsToDiv.classList.add('highlighted-leadsto');
+                }
+                drawConnection(courseKey, leadsToKey, '#4caf50');
+            });
+            
             updateSVGSize();
-
-            // Restore scroll position after rebuild
-            if (wrapper) {
-                setTimeout(() => {
-                    wrapper.scrollLeft = savedScrollLeft;
-                    updateActiveIndicator();
-                }, 10);
-            }
-
-            // Announce the change
-            const announcer = domCache.announcements;
-            if (announcer) {
-                announcer.textContent = `Switched to ${programsData[currentProgram].name} program.`;
-            }
-            
-            // Update the Static Flow link with current program
-            updateStaticFlowLink();
-        };
-        
-        // Update Static Flow link to maintain program selection
-        function updateStaticFlowLink() {
-            const staticFlowLink = document.getElementById('staticFlowLink');
-            if (staticFlowLink && currentProgram) {
-                staticFlowLink.href = `StaticFlow.html?program=${encodeURIComponent(currentProgram)}`;
-            }
-        }
-
-        // Disclaimer Modal Functions
-        let modalPreviousFocus = null;
-
-        // Utility function to safely write to localStorage
-        function safeLocalStorageSet(key, value) {
-            // Validate key to prevent prototype pollution
-            if (typeof key !== 'string' || key.includes('__proto__') || key.includes('constructor') || key.includes('prototype')) {
-                console.warn('Invalid localStorage key');
-                return false;
-            }
-
-            try {
-                // Only store boolean true as string 'true'
-                const sanitizedValue = value === true ? 'true' : 'false';
-                localStorage.setItem(key, sanitizedValue);
-                return true;
-            } catch (e) {
-                // localStorage might be disabled or full
-                console.warn('Could not save to localStorage');
-                return false;
-            }
-        }
-
-        // Utility function to safely read from localStorage
-        function safeLocalStorageGet(key) {
-            // Validate key
-            if (typeof key !== 'string' || key.includes('__proto__') || key.includes('constructor') || key.includes('prototype')) {
-                console.warn('Invalid localStorage key');
-                return null;
-            }
-
-            try {
-                const value = localStorage.getItem(key);
-                // Validate that value is exactly 'true' or 'false'
-                if (value === 'true') {
-                    return true;
-                } else if (value === 'false') {
-                    return false;
-                }
-                return null;
-            } catch (e) {
-                // localStorage might be disabled
-                console.warn('Could not read from localStorage');
-                return null;
-            }
-        }
-
-        window.closeDisclaimerModal = function() {
-            const modal = domCache.disclaimerModal;
-            if (modal) {
-                modal.classList.add('hidden');
-                // Remove focus trap
-                removeFocusTrap(modal);
-                // Store that user has seen the disclaimer
-                safeLocalStorageSet('flowchartDisclaimerShown', true);
-                // Return focus to previously focused element
-                if (modalPreviousFocus && modalPreviousFocus.focus) {
-                    modalPreviousFocus.focus();
-                }
-            }
-        };
-
-        // Focus trap for modal
-        let modalFocusTrapHandler = null;
-
-        function trapFocus(element) {
-            const focusableElements = element.querySelectorAll(
-                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-            );
-            const firstFocusable = focusableElements[0];
-            const lastFocusable = focusableElements[focusableElements.length - 1];
-
-            // Remove previous handler if it exists
-            if (modalFocusTrapHandler) {
-                element.removeEventListener('keydown', modalFocusTrapHandler);
-            }
-
-            // Create and store new handler
-            modalFocusTrapHandler = function(e) {
-                if (e.key !== 'Tab') return;
-
-                if (e.shiftKey) {
-                    if (document.activeElement === firstFocusable) {
-                        lastFocusable.focus();
-                        e.preventDefault();
-                    }
-                } else {
-                    if (document.activeElement === lastFocusable) {
-                        firstFocusable.focus();
-                        e.preventDefault();
-                    }
-                }
-            };
-
-            element.addEventListener('keydown', modalFocusTrapHandler);
-        }
-
-        function removeFocusTrap(element) {
-            if (modalFocusTrapHandler) {
-                element.removeEventListener('keydown', modalFocusTrapHandler);
-                modalFocusTrapHandler = null;
-            }
-        }
-
-        function checkAndShowDisclaimer() {
-            // Use safe localStorage getter
-            const hasSeenDisclaimer = safeLocalStorageGet('flowchartDisclaimerShown');
-
-            const modal = domCache.disclaimerModal;
-            if (modal) {
-                // Show modal if user hasn't seen it (null or false)
-                if (hasSeenDisclaimer === true) {
-                    modal.classList.add('hidden');
-                } else {
-                    modal.classList.remove('hidden');
-                    // Store current focus
-                    modalPreviousFocus = document.activeElement;
-                    // Set up focus trap
-                    trapFocus(modal);
-                    // Focus the button for keyboard accessibility
-                    setTimeout(() => {
-                        const button = modal.querySelector('.modal-button');
-                        if (button) button.focus();
-                    }, 100);
-                }
-            }
-        }
-
-        // Allow Escape key to close modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const modal = domCache.disclaimerModal;
-                if (modal && !modal.classList.contains('hidden')) {
-                    closeDisclaimerModal();
-                    return;
-                }
-            }
-
-            const focusedElement = document.activeElement;
-
-            const notesTooltip = domCache.notesTooltip;
-            const alternativesTooltip = domCache.alternativesTooltip;
-
-            if (e.key === 'Escape') {
-                if (notesTooltip && notesTooltip.classList.contains('visible')) {
-                    closeNotesTooltip();
-                }
-
-                if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
-                    closeAlternativesTooltip();
-                }
-
-                window.clearHighlights();
-                return;
-            }
-
-            if (e.key === 'v' || e.key === 'V') {
-                if (!focusedElement.matches('input, textarea')) {
-                    toggleView();
-                }
-                return;
-            }
-
-            if (!focusedElement.classList.contains('course')) return;
-
-            const allCourses = Array.from(document.querySelectorAll('.course'));
-            const currentIndex = allCourses.indexOf(focusedElement);
-            let nextIndex = currentIndex;
-
-            const currentColumn = focusedElement.closest('.semester-column');
-            const columns = Array.from(document.querySelectorAll('.semester-column'));
-            const columnIndex = columns.indexOf(currentColumn);
-            const coursesInColumn = Array.from(currentColumn.querySelectorAll('.course'));
-            const positionInColumn = coursesInColumn.indexOf(focusedElement);
-
-            switch(e.key) {
-                case 'ArrowRight':
-                    e.preventDefault();
-                    if (columnIndex < columns.length - 1) {
-                        const nextColumn = columns[columnIndex + 1];
-                        const nextColumnCourses = Array.from(nextColumn.querySelectorAll('.course'));
-                        const targetCourse = nextColumnCourses[Math.min(positionInColumn, nextColumnCourses.length - 1)];
-                        if (targetCourse) targetCourse.focus();
-                    }
-                    break;
-
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    if (columnIndex > 0) {
-                        const prevColumn = columns[columnIndex - 1];
-                        const prevColumnCourses = Array.from(prevColumn.querySelectorAll('.course'));
-                        const targetCourse = prevColumnCourses[Math.min(positionInColumn, prevColumnCourses.length - 1)];
-                        if (targetCourse) targetCourse.focus();
-                    }
-                    break;
-
-                case 'ArrowDown':
-                    e.preventDefault();
-                    if (positionInColumn < coursesInColumn.length - 1) {
-                        coursesInColumn[positionInColumn + 1].focus();
-                    }
-                    break;
-
-                case 'ArrowUp':
-                    e.preventDefault();
-                    if (positionInColumn > 0) {
-                        coursesInColumn[positionInColumn - 1].focus();
-                    }
-                    break;
-            }
-        });
-
-        // Function to populate program selector dynamically
-        function populateProgramSelector() {
-            const select = domCache.programSelect;
-            if (!select) return;
-            
-            // Safety check: ensure programsData is loaded
-            if (typeof programsData === 'undefined' || !programsData) {
-                console.warn('programsData not loaded yet, retrying...');
-                setTimeout(populateProgramSelector, 100);
-                return;
-            }
-
-            // Clear existing options efficiently
-            while (select.firstChild) {
-                select.removeChild(select.firstChild);
-            }
-
-            // Get all programs and add version metadata
-            const programs = Object.keys(programsData).map(key => {
-                const program = programsData[key];
-                let displayLabel = program.name || 'Unknown Program';
-                
-                // Get status with fallback
-                const status = program.status || 'current';
-                const version = program.version || '1.0';
-                const effectiveDate = program.effectiveDate || '';
-                const effectiveUntil = program.effectiveUntil || '';
-                
-                // Debug logging (remove in production if needed)
-                if (!effectiveDate && status === 'current') {
-                    console.warn(`Missing effectiveDate for ${key}:`, program);
-                }
-                
-                // Add version information to label based on status
-                if (status === 'current') {
-                    displayLabel += ` (Current - Effective ${effectiveDate})`;
-                } else if (status === 'proposed') {
-                    displayLabel += ` (Proposed - Effective ${effectiveDate})`;
-                } else if (status === 'archived') {
-                    if (effectiveUntil) {
-                        displayLabel += ` (Archived - Effective Until ${effectiveUntil})`;
-                    } else {
-                        displayLabel += ` (Archived - v${version})`;
-                    }
-                }
-                
-                return {
-                    key: key,
-                    name: program.name || 'Unknown',
-                    displayLabel: displayLabel,
-                    status: status,
-                    effectiveDate: effectiveDate,
-                    sortOrder: status === 'current' ? 1 : status === 'proposed' ? 2 : 3
-                };
-            });
-
-            // Sort: Current first, then proposed, then archived. CHE always first within each group
-            programs.sort((a, b) => {
-                // Sort by status first (current < proposed < archived)
-                if (a.sortOrder !== b.sortOrder) {
-                    return a.sortOrder - b.sortOrder;
-                }
-                
-                // Within same status, CHE always first
-                if (a.key === 'CHE' || a.key.startsWith('CHE-')) return -1;
-                if (b.key === 'CHE' || b.key.startsWith('CHE-')) return 1;
-                
-                // Otherwise sort alphabetically by name
-                return a.name.localeCompare(b.name);
-            });
-
-            // Add all programs as individual options with separators between status groups
-            let lastStatus = null;
-            programs.forEach(program => {
-                // Add separator when status changes
-                if (lastStatus !== null && lastStatus !== program.status) {
-                    const separator = document.createElement('option');
-                    separator.disabled = true;
-                    separator.textContent = '─────────────────────────';
-                    select.appendChild(separator);
-                }
-                
-                const option = document.createElement('option');
-                option.value = program.key;
-                option.textContent = program.displayLabel;
-                select.appendChild(option);
-                
-                lastStatus = program.status;
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                // Initialize DOM cache first
-                initDOMCache();
-
-                // Set print date for footer
-                try {
-                    const printDate = new Date().toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                    document.body.setAttribute('data-print-date', printDate);
-                } catch (error) {
-                    console.error('Error setting print date:', error);
-                }
-
-                // Populate program selector from programsData
-                try {
-                    populateProgramSelector();
-                } catch (error) {
-                    console.error('Error populating program selector:', error);
-                }
-
-                // Check and show disclaimer if needed
-                try {
-                    checkAndShowDisclaimer();
-                } catch (error) {
-                    console.error('Error checking disclaimer:', error);
-                }
-
-                // Check for URL parameter to set initial program
-                try {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const programParam = urlParams.get('program');
-
-                    // Validate program parameter against whitelist
-                    if (programParam) {
-                        // Sanitize input - only allow alphanumeric, hyphens, and underscores
-                        const sanitizedParam = programParam.replace(/[^a-zA-Z0-9\-_]/g, '');
-
-                        // Check if sanitized param exists in programsData
-                        if (sanitizedParam && Object.prototype.hasOwnProperty.call(programsData, sanitizedParam)) {
-                            currentProgram = sanitizedParam;
-                            courseData = programsData[currentProgram].courseData;
-                            semesterOrder = programsData[currentProgram].semesterOrder;
-                            window.courseData = courseData;
-                            window.semesterOrder = semesterOrder;
-
-                            // Update dropdown
-                            const select = domCache.programSelect;
-                            if (select) select.value = currentProgram;
-
-                            // Update title
-                            const programTitle = domCache.programTitle;
-                            if (programTitle) {
-                                programTitle.textContent = programsData[currentProgram].fullTitle;
-                            }
-                        } else {
-                            // Invalid program parameter - log but continue with default
-                            console.warn('Invalid program parameter provided');
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error processing URL parameters:', error);
-                }
-
-                // Build and render flowchart
-                try {
-                    leadsToMap = buildLeadsToMap();
-                    buildFlowchart();
-                    buildTextView();
-                    setupScrollIndicators();
-                    createArrowMarkers();
-                    updateSVGSize();
-                    // Update Static Flow link with current program
-                    updateStaticFlowLink();
-                } catch (error) {
-                    console.error('Error building flowchart:', error);
-                    alert('Error loading flowchart. Please refresh the page.');
-                }
-
-                // Initialize dot states after everything is rendered
-                try {
-                    setTimeout(() => {
-                        updateActiveIndicator();
-                    }, 100);
-                } catch (error) {
-                    console.error('Error initializing scroll indicators:', error);
-                }
-
-                // Add resize listener
-                try {
-                    window.addEventListener('resize', updateSVGSize);
-                } catch (error) {
-                    console.error('Error adding resize listener:', error);
-                }
-
-                // Add event listeners for buttons
-                try {
-                    const disclaimerButton = domCache.disclaimerModal?.querySelector('.modal-button');
-                    if (disclaimerButton) {
-                        disclaimerButton.addEventListener('click', closeDisclaimerModal);
-                    }
-
-                    const guideToggle = domCache.guideToggle;
-                    if (guideToggle) {
-                        guideToggle.addEventListener('click', toggleGuide);
-                    }
-
-                    const toggleBtn = domCache.toggleBtn;
-                    if (toggleBtn) {
-                        toggleBtn.addEventListener('click', toggleView);
-                    }
-
-                    const closeNotesBtn = domCache.notesTooltip?.querySelector('#closeNotesBtn');
-                    if (closeNotesBtn) {
-                        closeNotesBtn.addEventListener('click', closeNotesTooltip);
-                    }
-
-                    const closeAlternativesBtn = domCache.alternativesTooltip?.querySelector('#closeAlternativesBtn');
-                    if (closeAlternativesBtn) {
-                        closeAlternativesBtn.addEventListener('click', closeAlternativesTooltip);
-                    }
-
-                    const programSelect = domCache.programSelect;
-                    if (programSelect) {
-                        programSelect.addEventListener('change', switchProgram);
-                    }
-
-                    document.addEventListener('click', (e) => {
-                        // Close tooltips if clicking outside
-                        const notesTooltip = domCache.notesTooltip;
-                        const alternativesTooltip = domCache.alternativesTooltip;
-
-                        if (notesTooltip && notesTooltip.classList.contains('visible')) {
-                            if (!e.target.closest('#notesTooltip') && !e.target.closest('.notes-indicator')) {
-                                closeNotesTooltip();
-                            }
-                        }
-
-                        if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
-                            if (!e.target.closest('#alternativesTooltip') && !e.target.closest('.alternatives-indicator')) {
-                                closeAlternativesTooltip();
-                            }
-                        }
-
-                        // Clear course highlights if clicking outside
-                        if (!e.target.closest('.course') && selectedCourseKey) {
-                            window.clearHighlights();
-                        }
-                    });
-                } catch (error) {
-                    console.error('Error setting up event listeners:', error);
-                }
-            } catch (error) {
-                console.error('Critical error during initialization:', error);
-                alert('An error occurred while loading the application. Please refresh the page.');
-            }
-        });
-        
-        function setupScrollIndicators() {
-            const container = domCache.flowchartContainer;
-            const indicatorsDiv = domCache.scrollIndicators;
-            const wrapper = domCache.visualView;
-
-            if (!container || !indicatorsDiv || !wrapper) return;
-
-            // Clear existing indicators efficiently
-            while (indicatorsDiv.firstChild) {
-                indicatorsDiv.removeChild(indicatorsDiv.firstChild);
-            }
-
-            semesterOrder.forEach((semester, index) => {
-                const dot = document.createElement('button');
-                dot.className = 'scroll-dot';
-                dot.setAttribute('type', 'button');
-
-                if (index === 0) {
-                    dot.classList.add('active');
-                    dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
-                } else {
-                    dot.setAttribute('aria-label', `Jump to ${semester}`);
-                }
-                
-                dot.addEventListener('click', () => {
-                    const columns = container.querySelectorAll('.semester-column');
-                    if (columns[index]) {
-                        columns[index].scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'nearest',
-                            inline: 'start'
-                        });
-                        // Move focus to first course in the scrolled semester
-                        setTimeout(() => {
-                            const firstCourse = columns[index].querySelector('.course');
-                            if (firstCourse) {
-                                firstCourse.focus();
-                            }
-                        }, 500);
-                    }
-                });
-                
-                indicatorsDiv.appendChild(dot);
-            });
-            
-            let scrollTimeout;
-            wrapper.addEventListener('scroll', () => {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    updateActiveIndicator();
-                }, 100);
-            });
         }
         
-        function updateActiveIndicator() {
-            const wrapper = domCache.visualView;
-            const container = domCache.flowchartContainer;
-            const dots = document.querySelectorAll('.scroll-dot');
-
-            if (!wrapper || !container || dots.length === 0) return;
-            
-            const scrollLeft = wrapper.scrollLeft;
-            const wrapperWidth = wrapper.clientWidth;
-            const scrollWidth = wrapper.scrollWidth;
-            const columns = container.querySelectorAll('.semester-column');
-            
-            const visibleLeft = scrollLeft;
-            const visibleRight = scrollLeft + wrapperWidth;
-            
-            if (scrollLeft + wrapperWidth >= scrollWidth - 5) {
-                dots.forEach((dot, index) => {
-                    const semester = window.semesterOrder[index];
-                    if (index === dots.length - 1) {
-                        dot.classList.add('active');
-                        dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
-                    } else {
-                        dot.classList.remove('active');
-                        dot.setAttribute('aria-label', `Jump to ${semester}`);
-                    }
-                    
-                    const column = columns[index];
-                    const columnLeft = column.offsetLeft - container.offsetLeft;
-                    const columnRight = columnLeft + column.offsetWidth;
-                    const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
-                    
-                    if (isInView) {
-                        dot.classList.remove('out-of-view');
-                    } else {
-                        dot.classList.add('out-of-view');
-                    }
-                });
-                return;
-            }
-            
-            if (scrollLeft <= 5) {
-                dots.forEach((dot, index) => {
-                    const semester = window.semesterOrder[index];
-                    if (index === 0) {
-                        dot.classList.add('active');
-                        dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
-                    } else {
-                        dot.classList.remove('active');
-                        dot.setAttribute('aria-label', `Jump to ${semester}`);
-                    }
-                    
-                    const column = columns[index];
-                    const columnLeft = column.offsetLeft - container.offsetLeft;
-                    const columnRight = columnLeft + column.offsetWidth;
-                    const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
-                    
-                    if (isInView) {
-                        dot.classList.remove('out-of-view');
-                    } else {
-                        dot.classList.add('out-of-view');
-                    }
-                });
-                return;
-            }
-            
-            let activeIndex = 0;
-            let minDistance = Infinity;
-            
-            columns.forEach((column, index) => {
-                const columnLeft = column.offsetLeft - container.offsetLeft;
-                const distance = Math.abs(scrollLeft - columnLeft);
-                
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    activeIndex = index;
-                }
+        function clearHighlights() {
+            document.querySelectorAll('.course').forEach(courseDiv => {
+                courseDiv.classList.remove('selected', 'highlighted-prereq', 'highlighted-coreq', 'highlighted-leadsto', 'dimmed');
             });
             
-            dots.forEach((dot, index) => {
-                const semester = window.semesterOrder[index];
-                if (index === activeIndex) {
-                    dot.classList.add('active');
-                    dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
-                } else {
-                    dot.classList.remove('active');
-                    dot.setAttribute('aria-label', `Jump to ${semester}`);
+            const svg = document.getElementById('connections-svg');
+            if (svg) {
+                while (svg.firstChild) {
+                    svg.removeChild(svg.firstChild);
                 }
-                
-                const column = columns[index];
-                const columnLeft = column.offsetLeft - container.offsetLeft;
-                const columnRight = columnLeft + column.offsetWidth;
-                const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
-                
-                if (isInView) {
-                    dot.classList.remove('out-of-view');
-                } else {
-                    dot.classList.add('out-of-view');
-                }
-            });
+            }
+            
+            selectedCourseKey = null;
         }
         
-        function buildTextView() {
-            const container = domCache.textContent;
-            if (!container) return;
-
+        function drawConnection(fromKey, toKey, color) {
+            const fromDiv = document.querySelector(`[data-course-key="${fromKey}"]`);
+            const toDiv = document.querySelector(`[data-course-key="${toKey}"]`);
+            const svg = document.getElementById('connections-svg');
+            const container = document.getElementById('diagram-container');
+            
+            if (!fromDiv || !toDiv || !svg || !container) return;
+            
+            const fromRect = fromDiv.getBoundingClientRect();
+            const toRect = toDiv.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            const fromX = fromRect.left - containerRect.left + fromRect.width;
+            const fromY = fromRect.top - containerRect.top + fromRect.height / 2;
+            const toX = toRect.left - containerRect.left;
+            const toY = toRect.top - containerRect.top + toRect.height / 2;
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const d = `M ${fromX} ${fromY} L ${toX} ${toY}`;
+            
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', color);
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-opacity', '0.7');
+            
+            svg.appendChild(path);
+        }
+        
+        function updateSVGSize() {
+            const svg = document.getElementById('connections-svg');
+            const container = document.getElementById('diagram-container');
+            
+            if (!svg || !container) return;
+            
+            const fullWidth = container.scrollWidth;
+            const fullHeight = container.scrollHeight;
+            
+            svg.style.width = fullWidth + 'px';
+            svg.style.height = fullHeight + 'px';
+            svg.setAttribute('width', fullWidth);
+            svg.setAttribute('height', fullHeight);
+            svg.setAttribute('viewBox', `0 0 ${fullWidth} ${fullHeight}`);
+        }
+        
+        //  =========================================
+        //  STATIC MODE IMPLEMENTATION (StaticFlow.html)
+        //  =========================================
+        
+        function drawStaticFlowchart() {
+            const container = document.getElementById('diagram-container');
+            const courseData = getCourseData();
+            const semesterOrder = getSemesterOrder();
+            
+            // Create SVG for all connections
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('id', 'connections-svg');
+            container.appendChild(svg);
+            
+            // Group courses by semester
             const courseBySemester = {};
             semesterOrder.forEach(sem => courseBySemester[sem] = []);
-
+            
             Object.entries(courseData).forEach(([key, course]) => {
                 courseBySemester[course.semester].push({key, ...course});
             });
-
+            
+            // Assign colors to courses (for static mode, each course gets unique color)
+            const courseColors = {};
+            const colors = [
+                '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6',
+                '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b'
+            ];
+            
+            let colorIndex = 0;
+            Object.keys(courseData).forEach(key => {
+                courseColors[key] = colors[colorIndex % colors.length];
+                colorIndex++;
+            });
+            
+            // Draw each semester column
             semesterOrder.forEach(semester => {
-                const semesterDiv = document.createElement('div');
-                semesterDiv.className = 'text-semester';
-
-                const header = document.createElement('h3');
-                header.textContent = semester;
-                semesterDiv.appendChild(header);
-
+                const column = document.createElement('div');
+                column.className = 'semester-column';
+                
+                // Calculate total credits
+                const totalCredits = courseBySemester[semester].reduce((sum, c) => sum + c.credits, 0);
+                
+                const header = document.createElement('div');
+                header.className = 'semester-header';
+                const parts = semester.split(' ');
+                header.innerHTML = `${parts[0]} ${parts[1]}<br>${parts[2]}<br><span style="font-size: 0.9em;">${totalCredits} Credits</span>`;
+                column.appendChild(header);
+                
                 courseBySemester[semester].forEach(course => {
                     const courseDiv = document.createElement('div');
-                    courseDiv.className = `text-course ${course.type}`;
-
-                    const heading = document.createElement('h4');
-                    heading.textContent = `${course.code} - ${course.name} (${course.credits} credits)`;
-                    courseDiv.appendChild(heading);
-
-                    if (course.semesterRestriction) {
-                        const restrictionP = document.createElement('p');
-                        restrictionP.innerHTML = `<strong>Availability:</strong> ${course.semesterRestriction} only`;
-                        restrictionP.style.color = '#D2691E';
-                        restrictionP.style.fontWeight = '600';
-                        courseDiv.appendChild(restrictionP);
-                    }
-
-                    const prereqP = document.createElement('p');
-                    if (course.prereqs.length > 0) {
-                        const prereqNames = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
-                        prereqP.innerHTML = `<strong>Prerequisites:</strong> ${prereqNames}`;
-                    } else {
-                        prereqP.innerHTML = `<strong>Prerequisites:</strong> None`;
-                    }
-                    courseDiv.appendChild(prereqP);
-
-                    if (course.coreqs.length > 0) {
-                        const coreqP = document.createElement('p');
-                        const coreqNames = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
-                        coreqP.innerHTML = `<strong>Co-requisites:</strong> ${coreqNames}`;
-                        courseDiv.appendChild(coreqP);
-                    }
-
-                    if (course.alternatives && course.alternatives.length > 0) {
-                        const altP = document.createElement('p');
-                        if (course.alternatives.length === 1) {
-                            altP.innerHTML = `<strong>Alternative:</strong> ${course.alternatives[0]}`;
-                        } else {
-                            const altList = course.alternatives.map((alt, index) =>
-                                `<br>&nbsp;&nbsp;Option ${index + 1}: ${alt}`
-                            ).join('');
-                            altP.innerHTML = `<strong>Alternatives:</strong>${altList}`;
-                        }
-                        courseDiv.appendChild(altP);
-                    }
-
-                    if (course.notes && course.notes.trim() !== '') {
-                        const notesP = document.createElement('p');
-                        notesP.style.fontStyle = 'italic';
-                        notesP.style.color = '#444';
-
-                        // Add "Notes:" label
-                        const strong = document.createElement('strong');
-                        strong.textContent = 'Notes: ';
-                        notesP.appendChild(strong);
-
-                        // Safely create links from notes text
-                        const safeContent = createSafeLinksFromText(course.notes);
-                        notesP.appendChild(safeContent);
-
-                        courseDiv.appendChild(notesP);
-                    }
-
-                    semesterDiv.appendChild(courseDiv);
+                    courseDiv.className = `course ${course.type}`;
+                    courseDiv.setAttribute('data-course-key', course.key);
+                    courseDiv.setAttribute('tabindex', '0');
+                    
+                    // Add color indicator for static mode
+                    const colorIndicator = document.createElement('div');
+                    colorIndicator.style.position = 'absolute';
+                    colorIndicator.style.top = '0';
+                    colorIndicator.style.left = '0';
+                    colorIndicator.style.width = '100%';
+                    colorIndicator.style.height = '4px';
+                    colorIndicator.style.backgroundColor = courseColors[course.key];
+                    colorIndicator.style.borderRadius = '4px 4px 0 0';
+                    
+                    courseDiv.appendChild(colorIndicator);
+                    
+                    const contentDiv = document.createElement('div');
+                    contentDiv.style.paddingTop = '4px';
+                    contentDiv.innerHTML = `
+                        <span class="course-code">${course.code}</span>
+                        <span class="course-name">${course.shortName || course.name}</span>
+                        <span class="course-credits">${course.credits} cr</span>
+                    `;
+                    courseDiv.appendChild(contentDiv);
+                    
+                    column.appendChild(courseDiv);
                 });
-
-                container.appendChild(semesterDiv);
+                
+                container.appendChild(column);
+            });
+            
+            // Draw all connections in static mode
+            setTimeout(() => {
+                drawAllStaticConnections(courseColors);
+                updateSVGSize();
+            }, 0);
+        }
+        
+        function drawAllStaticConnections(courseColors) {
+            const courseData = getCourseData();
+            
+            // Draw all prerequisite connections
+            Object.entries(courseData).forEach(([courseKey, course]) => {
+                if (course.prereqs) {
+                    course.prereqs.forEach(prereqKey => {
+                        drawConnection(prereqKey, courseKey, courseColors[courseKey]);
+                    });
+                }
             });
         }
-
-        window.toggleGuide = function() {
-            const heading = domCache.guideToggle;
-            const content = domCache.guideContent;
-
-            if (!heading || !content) return;
-
-            const isCollapsed = heading.classList.toggle('collapsed');
-            content.classList.toggle('hidden');
-
-            heading.setAttribute('aria-expanded', !isCollapsed);
-        };
-
-        let currentView = 'visual';
-        window.toggleView = function() {
-            const visualView = domCache.visualView;
-            const textView = domCache.textView;
-            const scrollControls = domCache.scrollControls;
-            const btn = domCache.toggleBtn;
-            const announcer = domCache.announcements;
-
-            if (!visualView || !textView || !btn) return;
-
-            if (currentView === 'visual') {
-                visualView.style.display = 'none';
-                textView.style.display = 'block';
-                scrollControls.style.display = 'none';
-                btn.textContent = 'Switch to Visual Flowchart';
-
-                if (announcer) {
-                    announcer.textContent = 'Switched to text-only view. Courses are now listed by semester with full details.';
-                }
-
-                currentView = 'text';
-
-                // Move focus to the first heading in text view
-                setTimeout(() => {
-                    const firstHeading = textView.querySelector('h3');
-                    if (firstHeading) {
-                        firstHeading.setAttribute('tabindex', '-1');
-                        firstHeading.focus();
-                    }
-                }, 100);
-            } else {
-                visualView.style.display = 'block';
-                textView.style.display = 'none';
-                scrollControls.style.display = 'block';
-                btn.textContent = 'Switch to Text-Only View';
-
-                if (announcer) {
-                    announcer.textContent = 'Switched to visual flowchart view. Interactive course boxes are now displayed.';
-                }
-
-                currentView = 'visual';
-
-                // Move focus to the first course in visual view
-                setTimeout(() => {
-                    const firstCourse = visualView.querySelector('.course');
-                    if (firstCourse) {
-                        firstCourse.focus();
-                    }
-                }, 100);
+        
+        //  =========================================
+        //  SHARED FUNCTIONS AND EVENT HANDLERS
+        //  =========================================
+        
+        function drawFlowchart() {
+            const container = document.getElementById('diagram-container');
+            
+            // Clear container
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
             }
-        };
+            
+            // Update program title
+            document.getElementById('program-title').textContent = programsData[currentProgram].fullTitle;
+            
+            // Update instructions visibility
+            const interactiveInstructions = document.getElementById('mode-instructions-interactive');
+            const staticInstructions = document.getElementById('mode-instructions-static');
+            const connectionLegend = document.getElementById('connection-legend');
+            
+            if (currentMode === 'interactive') {
+                interactiveInstructions.style.display = 'block';
+                staticInstructions.style.display = 'none';
+                connectionLegend.style.display = 'block';
+                drawInteractiveFlowchart();
+            } else {
+                interactiveInstructions.style.display = 'none';
+                staticInstructions.style.display = 'block';
+                connectionLegend.style.display = 'none';
+                drawStaticFlowchart();
+            }
+        }
+        
+        // Mode toggle
+        document.getElementById('static-mode-toggle').addEventListener('change', function(e) {
+            currentMode = e.target.checked ? 'static' : 'interactive';
+            document.getElementById('mode-text').textContent = `Mode: ${currentMode === 'static' ? 'Static' : 'Interactive'}`;
+            document.body.classList.toggle('interactive-mode', currentMode === 'interactive');
+            document.body.classList.toggle('static-mode', currentMode === 'static');
+            selectedCourseKey = null; // Clear selection on mode change
+            drawFlowchart();
+        });
+        
+        // Program selector
+        document.getElementById('program-select').addEventListener('change', function(e) {
+            currentProgram = e.target.value;
+            selectedCourseKey = null; // Clear selection on program change
+            drawFlowchart();
+        });
+        
+        // Click outside to clear highlights (interactive mode only)
+        document.addEventListener('click', (e) => {
+            if (currentMode === 'interactive' && !e.target.closest('.course') && selectedCourseKey) {
+                clearHighlights();
+            }
+        });
+        
+        // Keyboard navigation (Escape to clear)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && currentMode === 'interactive') {
+                clearHighlights();
+            }
+        });
+        
+        // Initialize
+        document.body.classList.add('interactive-mode');
+        document.addEventListener('DOMContentLoaded', drawFlowchart);
+        
+        // Redraw on window resize to update SVG
+        window.addEventListener('resize', () => {
+            if (currentMode === 'interactive' && selectedCourseKey) {
+                // Redraw connections on resize
+                highlightRelatedCourses(selectedCourseKey);
+            } else if (currentMode === 'static') {
+                updateSVGSize();
+            }
+        });
     </script>
 </body>
 </html>
