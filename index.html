@@ -2860,8 +2860,13 @@
 
                 currentView = 'visual';
 
-                // Force layout recalculation by triggering a reflow
+                // Apply centering if window is large enough
                 setTimeout(() => {
+                    if (window.innerWidth >= 1700) {
+                        visualView.style.justifyContent = 'center';
+                    } else {
+                        visualView.style.justifyContent = 'flex-start';
+                    }
                     void visualView.offsetHeight; // Trigger reflow
                     
                     // Move focus to the first course in visual view
