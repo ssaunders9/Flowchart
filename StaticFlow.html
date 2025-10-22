@@ -9,15 +9,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; line-height: 1.6; padding: 1.25rem; background: #f5f5f5; }
 
-        /* Standardized focus indicator for accessibility */
-        *:focus {
-            outline: 3px solid #A60F2D;
-            outline-offset: 2px;
-        }
-
-        .skip-link { position: absolute; top: -2.5rem; left: 0; background: #A60F2D; color: white; padding: 0.5rem 1rem; text-decoration: none; z-index: 100; font-weight: bold; }
-        .skip-link:focus { top: 0; }
-
         .visually-hidden { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
         
         header { background: #A60F2D; color: white; padding: 1.25rem; margin-bottom: 1.875rem; border-radius: 0.5rem; }
@@ -38,10 +29,6 @@
             max-width: 100%;
             min-width: min(300px, 100%);
         }
-        .program-selector select:focus {
-            outline: 3px solid #fff;
-            outline-offset: 2px;
-        }
         .program-selector select option {
             font-weight: bold;
         }
@@ -57,9 +44,9 @@
         .semester-column { flex: 0 0 180px; display: flex; flex-direction: column; gap: 20px; scroll-snap-align: start; }
         .semester-header { font-size: 1em; font-weight: bold; color: white; background: #A60F2D; padding: 0.625rem; border-radius: 0.375rem; text-align: center; margin-bottom: 0.313rem; }
         .semester-header .credits { font-weight: normal; font-size: 0.85em; opacity: 0.9; }
-        .course { padding: 0.625rem; border-radius: 0.375rem; border: 3px solid #333; min-height: 4.688rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: default; position: relative; z-index: 10; }
+        .course { padding: 0.625rem; border-radius: 0.375rem; border: 3px solid #333; min-height: 4.688rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; position: relative; z-index: 10; transition: all 0.2s ease; }
+        .course:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         /* .course:focus removed for static version - no interaction */
-        /* .course:hover removed for static version */
         .course.engineering { background: #8fc9f7; border-color: #1565c0; color: #002942; }
         .course.science { background: #a5d6a7; border-color: #2e7d32; color: #003d0a; }
         .course.ucore { background: #ce93d8; border-color: #6a1b9a; color: #1f0030; }
@@ -130,6 +117,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             z-index: 200;
         }
+
+        /* Line highlighting styles */
+        .connection-path { cursor: pointer; }
+        .connection-path.highlighted { stroke-width: 3 !important; opacity: 1 !important; }
+        .connection-path.faded { opacity: 0.15 !important; }
+        .connection-indicator.highlighted { opacity: 1 !important; }
+        .connection-indicator.faded { opacity: 0.15 !important; }
+        .course.highlighted { box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); }
 
         .notes-indicator:hover {
             background: #616161;
@@ -257,9 +252,6 @@
         .scroll-indicators { display: flex; justify-content: center; gap: 0.625rem; margin-top: 0.938rem; padding: 0.625rem; }
         .scroll-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; cursor: pointer; transition: all 0.3s ease; border: 2px solid #ff5252; }
         .scroll-dot:hover { background: #A60F2D; border-color: #8a0c24; transform: scale(1.2); }
-        .scroll-dot:focus {
-            background: #A60F2D;
-        }
         .scroll-dot.active { background: #A60F2D; width: 14px; height: 14px; border: 3px solid #8a0c24; box-shadow: 0 0 8px rgba(166, 15, 45, 0.5); }
         .scroll-dot.out-of-view { background: white; border: 2px solid #333; opacity: 1; }
         .scroll-hint { text-align: center; color: #666; font-size: 0.9em; margin-top: 0.625rem; padding: 0.5rem; background: #f9f9f9; border-radius: 0.25rem; }
@@ -502,8 +494,6 @@
             <button class="modal-button" id="disclaimerButton">I Understand</button>
         </div>
     </div>
-
-    <a href="#main-content" class="skip-link">Skip to main content</a>
     
     <header role="banner">
         <h1>Washington State University</h1>
@@ -519,44 +509,21 @@
     
     <main role="main" id="main-content">
         <h2 class="visually-hidden">Curriculum Flowchart</h2>
+        <div class="visually-hidden" role="status" aria-live="assertive">
+            <p>This is a static visual representation of the curriculum flowchart. For full accessibility features including keyboard navigation, course details, prerequisite relationships, and interactive functionality, please visit the full flowchart page. This static version provides a complete visual overview but has limited interactive and accessibility capabilities.</p>
+        </div>
         <div id="announcements" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" aria-live="polite" aria-atomic="true"></div>
 
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button id="toggleBtn" style="display: none;" style="padding: 12px 24px; font-size: 1em; font-weight: bold; background: #A60F2D; color: white; border: 2px solid #A60F2D; border-radius: 6px; cursor: pointer;">
-                Switch to Text-Only View
-            </button>
-        </div>
-        
-        <div class="diagram-wrapper" id="visualView" role="application" aria-label="Course flowchart showing prerequisites and corequisites">
+        <div class="diagram-wrapper" id="visualView">
             <div class="diagram-container" id="flowchartContainer">
                 <svg id="connectionsSvg" aria-hidden="true" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;">
                 </svg>
             </div>
         </div>
-        <div class="scroll-controls">
-            <div class="scroll-indicators" role="navigation" aria-label="Semester navigation">
-                <div id="scrollIndicators"></div>
-            </div>
-            <div class="scroll-hint"><span aria-hidden="true">💡</span> Swipe or scroll horizontally to view all semesters • Click dots to jump to a semester</div>
-        </div>
         
         <div id="textView" style="display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             <h2 style="color: #A60F2D; margin-bottom: 20px;">Text-Based Course Listing</h2>
             <div id="textContent"></div>
-        </div>
-        
-        <!-- Notes tooltip -->
-        <div id="notesTooltip" class="notes-tooltip" role="tooltip" aria-live="polite">
-            <button class="notes-tooltip-close" id="closeNotesBtn" aria-label="Close notes">✕</button>
-            <div class="notes-tooltip-header" id="tooltipHeader"></div>
-            <div class="notes-tooltip-content" id="tooltipContent"></div>
-        </div>
-
-        <!-- Alternatives tooltip -->
-        <div id="alternativesTooltip" class="notes-tooltip alternatives-tooltip" role="tooltip" aria-live="polite">
-            <button class="notes-tooltip-close" id="closeAlternativesBtn" aria-label="Close alternatives">✕</button>
-            <div class="notes-tooltip-header" id="alternativesHeader"></div>
-            <div class="notes-tooltip-content" id="alternativesContent"></div>
         </div>
     </main>
 
@@ -600,7 +567,7 @@
         // Program data loaded from external file: programsData.js
 
         // Current program state
-        let currentProgram = 'CHE';
+        let currentProgram = 'CHE-V1';
         let courseData = programsData[currentProgram].courseData;
         let semesterOrder = programsData[currentProgram].semesterOrder;
 
@@ -1106,6 +1073,10 @@
             path.setAttribute('stroke-width', '3');
             path.setAttribute('fill', 'none');
             path.setAttribute('stroke-opacity', '0.7');
+            // Add data attributes for highlighting
+            path.setAttribute('data-from-course', fromKey);
+            path.setAttribute('data-to-course', toKey);
+            path.setAttribute('class', 'connection-path');
 
             svg.appendChild(path);
         }
@@ -1811,14 +1782,27 @@ function drawAllConnections() {
     }
 
     // Helper: Check if a horizontal lane segment is available
-    function isHorizontalLaneAvailable(lane, x1, x2) {
+    function isHorizontalLaneAvailable(lane, x1, x2, checkingFor = null) {
         const minX = Math.min(x1, x2);
         const maxX = Math.max(x1, x2);
-        return !lane.reservations.some(res => {
+        
+        // If this is a vertical line (x1 === x2), it doesn't reserve horizontal lane space
+        if (minX === maxX) {
+            return true; // Vertical lines can always use any horizontal lane without conflict
+        }
+        
+        const hasConflict = lane.reservations.some(res => {
+            // Skip reservations that are also vertical lines
+            if (res.x1 === res.x2) {
+                return false; // Vertical lines don't conflict with anything
+            }
+            
             const resMinX = Math.min(res.x1, res.x2);
             const resMaxX = Math.max(res.x1, res.x2);
             return !(maxX < resMinX || minX > resMaxX);
         });
+        
+        return !hasConflict;
     }
 
     // Helper: Find closest available horizontal lane in a semester to a target Y
@@ -1826,7 +1810,7 @@ function drawAllConnections() {
         const lanes = horizontalLanesBySemester[semester];
         if (!lanes || lanes.length === 0) return null;
 
-        let availableLanes = lanes.filter(lane => isHorizontalLaneAvailable(lane, x1, x2));
+        let availableLanes = lanes.filter(lane => isHorizontalLaneAvailable(lane, x1, x2, debugCourse));
         if (availableLanes.length === 0) return null;
 
         // ADDITIONAL FILTER: Avoid Y-positions that conflict with vertical lanes AND stubs
@@ -2542,7 +2526,7 @@ function drawAllConnections() {
 
                         // Find first available lane (checking for conflicts)
                         for (const lane of prioritizedLanes) {
-                            if (isHorizontalLaneAvailable(lane, minX, maxX)) {
+                            if (isHorizontalLaneAvailable(lane, minX, maxX, `${fromCourseKey}->${conn.to}`)) {
                                 horizLane = lane;
                                 break;
                             }
@@ -2584,6 +2568,10 @@ function drawAllConnections() {
                     pathEl.setAttribute('fill', 'none');
                     pathEl.setAttribute('opacity', '0.6'); // Slightly transparent since it goes behind boxes
                     pathEl.style.zIndex = '1'; // Behind boxes (boxes are z-index 10+)
+                    // Add data attributes for highlighting
+                    pathEl.setAttribute('data-from-course', fromCourseKey);
+                    pathEl.setAttribute('data-to-course', conn.to);
+                    pathEl.setAttribute('class', 'connection-path');
                     // Apply dashed line for corequisites, solid for prerequisites
                     if (conn.type === 'coreq') {
                         pathEl.setAttribute('stroke-dasharray', '3 2'); // 3px dash, 2px gap
@@ -2598,6 +2586,10 @@ function drawAllConnections() {
                     entryIndicator.setAttribute('r', '4');
                     entryIndicator.setAttribute('fill', courseColor);
                     entryIndicator.style.zIndex = '100'; // Above everything
+                    // Add data attributes for highlighting
+                    entryIndicator.setAttribute('data-from-course', fromCourseKey);
+                    entryIndicator.setAttribute('data-to-course', conn.to);
+                    entryIndicator.setAttribute('class', 'connection-indicator');
                     svg.appendChild(entryIndicator);
 
                     // Exit indicator (triangle/arrow) at end stub to show direction
@@ -2615,6 +2607,10 @@ function drawAllConnections() {
                     exitIndicator.setAttribute('points', points);
                     exitIndicator.setAttribute('fill', courseColor);
                     exitIndicator.style.zIndex = '100';
+                    // Add data attributes for highlighting
+                    exitIndicator.setAttribute('data-from-course', fromCourseKey);
+                    exitIndicator.setAttribute('data-to-course', conn.to);
+                    exitIndicator.setAttribute('class', 'connection-indicator');
                     svg.appendChild(exitIndicator);
                 } else {
                     const path = `M ${startStub.x} ${startStub.y} L ${endStub.x} ${endStub.y}`;
@@ -2623,6 +2619,10 @@ function drawAllConnections() {
                     pathEl.setAttribute('stroke', courseColor);
                     pathEl.setAttribute('stroke-width', '2');
                     pathEl.setAttribute('fill', 'none');
+                    // Add data attributes for highlighting
+                    pathEl.setAttribute('data-from-course', fromCourseKey);
+                    pathEl.setAttribute('data-to-course', conn.to);
+                    pathEl.setAttribute('class', 'connection-path');
                     // Apply dashed line for corequisites, solid for prerequisites
                     if (conn.type === 'coreq') {
                         pathEl.setAttribute('stroke-dasharray', '3 2');
@@ -2662,6 +2662,10 @@ function drawAllConnections() {
                     pathEl.setAttribute('stroke', courseColor);
                     pathEl.setAttribute('stroke-width', '2');
                     pathEl.setAttribute('fill', 'none');
+                    // Add data attributes for highlighting
+                    pathEl.setAttribute('data-from-course', fromCourseKey);
+                    pathEl.setAttribute('data-to-course', conn.to);
+                    pathEl.setAttribute('class', 'connection-path');
                     // Apply dashed line for corequisites, solid for prerequisites
                     if (conn.type === 'coreq') {
                         pathEl.setAttribute('stroke-dasharray', '3 2');
@@ -2675,6 +2679,10 @@ function drawAllConnections() {
                     entryIndicator.setAttribute('cy', outputStub.y);
                     entryIndicator.setAttribute('r', '4');
                     entryIndicator.setAttribute('fill', courseColor);
+                    // Add data attributes for highlighting
+                    entryIndicator.setAttribute('data-from-course', fromCourseKey);
+                    entryIndicator.setAttribute('data-to-course', conn.to);
+                    entryIndicator.setAttribute('class', 'connection-indicator');
                     svg.appendChild(entryIndicator);
 
                     // Exit indicator (triangle/arrow) at input stub pointing right (into left side of box)
@@ -2684,6 +2692,10 @@ function drawAllConnections() {
                     const points = `${inputStub.x},${inputStub.y} ${inputStub.x - arrowSize * 1.5},${inputStub.y - arrowSize} ${inputStub.x - arrowSize * 1.5},${inputStub.y + arrowSize}`;
                     exitIndicator.setAttribute('points', points);
                     exitIndicator.setAttribute('fill', courseColor);
+                    // Add data attributes for highlighting
+                    exitIndicator.setAttribute('data-from-course', fromCourseKey);
+                    exitIndicator.setAttribute('data-to-course', conn.to);
+                    exitIndicator.setAttribute('class', 'connection-indicator');
                     svg.appendChild(exitIndicator);
                 } else {
                     // Multi-semester jump - allocate lanes per gap
@@ -2759,9 +2771,92 @@ function drawAllConnections() {
                                 if (!horizLane) {
                                     return;
                                 }
+                                
+                                // CRITICAL CHECK: Make sure no other course is using a lane at this same Y in the current semester
+                                // OR in any future semester this connection will traverse
+                                // This prevents visual overlaps when crossing multiple gaps
+                                let hasConflictInAnyAdjacentSemester = false;
+                                const conflictingSemesters = [];
+                                
+                                // Check current semester (the one we're leaving from)
+                                const currentSemesterLanes = horizontalLanesBySemester[currentSem];
+                                if (currentSemesterLanes) {
+                                    const conflictInCurrent = currentSemesterLanes.find(lane => 
+                                        Math.abs(lane.y - horizLane.y) < 1 && lane.reservations.length > 0
+                                    );
+                                    if (conflictInCurrent) {
+                                        hasConflictInAnyAdjacentSemester = true;
+                                        conflictingSemesters.push(currentSem);
+                                    }
+                                }
+                                
+                                // Check all future semesters this connection will traverse
+                                for (let futureIdx = semIdx + 2; futureIdx <= toSemIdx; futureIdx++) {
+                                    const futureSem = semesterOrder[futureIdx];
+                                    const futureLanes = horizontalLanesBySemester[futureSem];
+                                    if (futureLanes) {
+                                        const conflictInFuture = futureLanes.find(lane =>
+                                            Math.abs(lane.y - horizLane.y) < 1 && lane.reservations.length > 0
+                                        );
+                                        if (conflictInFuture) {
+                                            hasConflictInAnyAdjacentSemester = true;
+                                            conflictingSemesters.push(futureSem);
+                                        }
+                                    }
+                                }
+                                
+                                if (hasConflictInAnyAdjacentSemester) {
+                                    // Find the closest available lane that doesn't conflict with any adjacent semester
+                                    const allLanesInNext = horizontalLanesBySemester[nextSemester];
+                                    const candidateLanes = allLanesInNext.filter(lane => {
+                                        // Must not be the top lane
+                                        if (lane.isAboveAll) return false;
+                                        
+                                        // Check if available in next semester
+                                        if (!isHorizontalLaneAvailable(lane, 
+                                            semesterPositions[nextSemester]?.left || 0,
+                                            semesterPositions[semesterOrder[semIdx + 2]]?.right || 1000,
+                                            fromCourseKey)) {
+                                            return false;
+                                        }
+                                        
+                                        // Check if conflicts with current semester
+                                        if (currentSemesterLanes) {
+                                            const conflictInCurrent = currentSemesterLanes.find(l => 
+                                                Math.abs(l.y - lane.y) < 1 && l.reservations.length > 0
+                                            );
+                                            if (conflictInCurrent) return false;
+                                        }
+                                        
+                                        // Check if conflicts with any future semester this connection traverses
+                                        for (let futureIdx = semIdx + 2; futureIdx <= toSemIdx; futureIdx++) {
+                                            const futureSem = semesterOrder[futureIdx];
+                                            const futureLanes = horizontalLanesBySemester[futureSem];
+                                            if (futureLanes) {
+                                                const conflictInFuture = futureLanes.find(l =>
+                                                    Math.abs(l.y - lane.y) < 1 && l.reservations.length > 0
+                                                );
+                                                if (conflictInFuture) return false;
+                                            }
+                                        }
+                                        
+                                        return true;
+                                    });
+                                    
+                                    if (candidateLanes.length === 0) {
+                                        console.error(`Could not find non-conflicting lane for ${fromCourseKey} between ${currentSem} and ${nextSemester}`);
+                                        return;
+                                    }
+                                    
+                                    // Find the closest candidate to the target Y
+                                    horizLane = candidateLanes.reduce((closest, lane) => {
+                                        const currentDist = Math.abs(lane.y - laneTargetY);
+                                        const closestDist = Math.abs(closest.y - laneTargetY);
+                                        return currentDist < closestDist ? lane : closest;
+                                    });
+                                }
 
                                 globalHorizontalLanes[fromCourseKey][nextSemester] = horizLane;
-                                reserveHorizontalLane(horizLane, currentX, semesterPositions[semesterOrder[semIdx + 2]]?.left || 1000, fromCourseKey);
                                 
                                 // Remember this Y position for subsequent gaps (only set once in first gap)
                                 if (isFirstGap) {
@@ -2794,6 +2889,20 @@ function drawAllConnections() {
                             if (!verticalLane) return;
 
                             globalVerticalLanes[fromCourseKey][gapKey] = verticalLane;
+                        } else {
+                            // Reusing vertical lane from earlier connection
+                        }
+
+                        // Before moving to the new vertical lane, reserve any horizontal segment we're about to traverse
+                        // If we're currently on a horizontal lane (currentY is at a lane Y), reserve from currentX to verticalLane.x
+                        if (semIdx > fromSemIdx) {
+                            // Not the first gap - we came from a horizontal lane in the previous iteration
+                            const prevSemester = semesterOrder[semIdx];
+                            const prevHorizLane = globalHorizontalLanes[fromCourseKey][prevSemester];
+                            if (prevHorizLane && Math.abs(currentY - prevHorizLane.y) < 1) {
+                                // We're on the horizontal lane - reserve the segment we're about to traverse
+                                reserveHorizontalLane(prevHorizLane, currentX, verticalLane.x, fromCourseKey);
+                            }
                         }
 
                         // Move horizontally to the vertical lane
@@ -2827,6 +2936,10 @@ function drawAllConnections() {
                     pathEl.setAttribute('stroke', courseColor);
                     pathEl.setAttribute('stroke-width', '2');
                     pathEl.setAttribute('fill', 'none');
+                    // Add data attributes for highlighting
+                    pathEl.setAttribute('data-from-course', fromCourseKey);
+                    pathEl.setAttribute('data-to-course', conn.to);
+                    pathEl.setAttribute('class', 'connection-path');
                     // Apply dashed line for corequisites, solid for prerequisites
                     if (conn.type === 'coreq') {
                         pathEl.setAttribute('stroke-dasharray', '3 2');
@@ -2840,6 +2953,10 @@ function drawAllConnections() {
                     entryIndicator.setAttribute('cy', outputStub.y);
                     entryIndicator.setAttribute('r', '4');
                     entryIndicator.setAttribute('fill', courseColor);
+                    // Add data attributes for highlighting
+                    entryIndicator.setAttribute('data-from-course', fromCourseKey);
+                    entryIndicator.setAttribute('data-to-course', conn.to);
+                    entryIndicator.setAttribute('class', 'connection-indicator');
                     svg.appendChild(entryIndicator);
 
                     // Exit indicator (triangle/arrow) at input stub pointing right (into left side of box)
@@ -2849,6 +2966,10 @@ function drawAllConnections() {
                     const points = `${inputStub.x},${inputStub.y} ${inputStub.x - arrowSize * 1.5},${inputStub.y - arrowSize} ${inputStub.x - arrowSize * 1.5},${inputStub.y + arrowSize}`;
                     exitIndicator.setAttribute('points', points);
                     exitIndicator.setAttribute('fill', courseColor);
+                    // Add data attributes for highlighting
+                    exitIndicator.setAttribute('data-from-course', fromCourseKey);
+                    exitIndicator.setAttribute('data-to-course', conn.to);
+                    exitIndicator.setAttribute('class', 'connection-indicator');
                     svg.appendChild(exitIndicator);
                 }
             }
@@ -4127,6 +4248,118 @@ function drawAllConnections() {
                 }, 100);
             }
         };
+
+        // Line highlighting functionality
+        let currentlyHighlightedCourse = null;
+
+        window.highlightCourseLines = function(courseKey) {
+            if (currentlyHighlightedCourse === courseKey) {
+                // Already highlighted, clear it
+                window.clearHighlights();
+                return;
+            }
+
+            // Clear any previous highlights
+            window.clearHighlights();
+
+            // Mark current
+            currentlyHighlightedCourse = courseKey;
+
+            // Get all paths and indicators
+            const allPaths = document.querySelectorAll('.connection-path');
+            const allIndicators = document.querySelectorAll('.connection-indicator');
+            const courseDivs = document.querySelectorAll('[data-course-key]');
+
+            // Highlight the clicked course
+            courseDivs.forEach(courseDiv => {
+                if (courseDiv.getAttribute('data-course-key') === courseKey) {
+                    courseDiv.classList.add('highlighted');
+                }
+            });
+
+            // Find and highlight all paths and indicators connected to this course
+            const highlightedPaths = new Set();
+            const highlightedIndicators = new Set();
+            const matchedPaths = [];
+            allPaths.forEach(path => {
+                const fromCourse = path.getAttribute('data-from-course');
+                const toCourse = path.getAttribute('data-to-course');
+
+                // Highlight if this course is source or destination
+                if (fromCourse === courseKey || toCourse === courseKey) {
+                    matchedPaths.push({fromCourse, toCourse});
+                    path.classList.add('highlighted');
+                    highlightedPaths.add(path);
+
+                    // Also highlight associated indicators
+                    allIndicators.forEach(indicator => {
+                        const indFromCourse = indicator.getAttribute('data-from-course');
+                        const indToCourse = indicator.getAttribute('data-to-course');
+                        if (indFromCourse === fromCourse && indToCourse === toCourse) {
+                            indicator.classList.add('highlighted');
+                            highlightedIndicators.add(indicator);
+                        }
+                    });
+
+                    // Also highlight the connected course
+                    courseDivs.forEach(courseDiv => {
+                        const otherCourseKey = courseDiv.getAttribute('data-course-key');
+                        if (fromCourse === courseKey && toCourse === otherCourseKey) {
+                            courseDiv.classList.add('highlighted');
+                        } else if (toCourse === courseKey && fromCourse === otherCourseKey) {
+                            courseDiv.classList.add('highlighted');
+                        }
+                    });
+                }
+            });
+
+            // Fade all non-highlighted paths and indicators
+            allPaths.forEach(path => {
+                if (!highlightedPaths.has(path)) {
+                    path.classList.add('faded');
+                }
+            });
+
+            allIndicators.forEach(indicator => {
+                if (!highlightedIndicators.has(indicator)) {
+                    indicator.classList.add('faded');
+                }
+            });
+
+        };
+
+        window.clearHighlights = function() {
+            currentlyHighlightedCourse = null;
+
+            const allPaths = document.querySelectorAll('.connection-path');
+            const allIndicators = document.querySelectorAll('.connection-indicator');
+            const courseDivs = document.querySelectorAll('[data-course-key]');
+
+            allPaths.forEach(path => {
+                path.classList.remove('highlighted');
+                path.classList.remove('faded');
+            });
+
+            allIndicators.forEach(indicator => {
+                indicator.classList.remove('highlighted');
+                indicator.classList.remove('faded');
+            });
+
+            courseDivs.forEach(courseDiv => {
+                courseDiv.classList.remove('highlighted');
+            });
+        };
+
+        // Add click handlers to course boxes
+        window.addEventListener('DOMContentLoaded', () => {
+            const courseDivs = document.querySelectorAll('.course[data-course-key]');
+            courseDivs.forEach(courseDiv => {
+                courseDiv.addEventListener('click', (e) => {
+                    const courseKey = courseDiv.getAttribute('data-course-key');
+                    window.highlightCourseLines(courseKey);
+                });
+            });
+        });
     </script>
 </body>
 </html>
