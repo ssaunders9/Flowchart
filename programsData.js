@@ -5,11 +5,11 @@
 // Last updated: October 21, 2025
 
 const programsData = {
-            'CHE': {
+            'CHE-V1': {
                 name: 'Chemical Engineering',
                 fullTitle: 'Bachelor of Science - Chemical Engineering (4 Year Plan)',
                 version: '1.0',
-                effectiveDate: '2025-10-21',
+                effectiveDate: 'Fall 2025',
                 status: 'current',  // 'current', 'proposed', or 'archived'
                 courseData: {
             'CHE-101': { code: 'CHE 101', name: 'Overview of Chemical Engineering', shortName: 'CHE Overview', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
@@ -69,11 +69,11 @@ const programsData = {
                     'Year 4 Fall', 'Year 4 Spring'
                 ]
             },
-            'BIOENG-BMSE': {
+            'BIOENG-BMSE-V1': {
                 name: 'Bioengineering: Biomedical Systems',
                 fullTitle: 'Bachelor of Science - Bioengineering: Biomedical Systems (4 Year Plan)',
                 version: '1.0',
-                effectiveDate: '2025-10-21',
+                effectiveDate: 'Fall 2023',
                 status: 'current',
                 courseData: {
                     'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
@@ -137,7 +137,7 @@ const programsData = {
                 name: 'Bioengineering: Biomedical Systems',
                 fullTitle: 'Bachelor of Science - Bioengineering: Biomedical Systems (4 Year Plan)',
                 version: '2.0',
-                effectiveDate: '2026-08-16',
+                effectiveDate: 'Fall 2026',
                 status: 'proposed',
                 courseData: {
                     'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
@@ -197,11 +197,11 @@ const programsData = {
                     'Year 4 Fall', 'Year 4 Spring'
                 ]
             },
-            'BIOENG-CMBE': {
+            'BIOENG-CMBE-V1': {
                 name: 'Bioengineering: Cellular/Molecular Bioengineering',
                 fullTitle: 'Bachelor of Science - Bioengineering: Cellular/Molecular Bioengineering (4 Year Plan)',
                 version: '1.0',
-                effectiveDate: '2025-10-21',
+                effectiveDate: 'Fall 2023',
                 status: 'current',
                 courseData: {
                     'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
@@ -264,7 +264,7 @@ const programsData = {
                 name: 'Bioengineering: Cellular/Molecular Bioengineering',
                 fullTitle: 'Bachelor of Science - Bioengineering: Cellular/Molecular Bioengineering (4 Year Plan)',
                 version: '2.0',
-                effectiveDate: '2026-08-16',
+                effectiveDate: 'Fall 2026',
                 status: 'proposed',
                 courseData: {
                     'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
@@ -323,11 +323,11 @@ const programsData = {
                     'Year 4 Fall', 'Year 4 Spring'
                 ]
             },
-            'BIOENG-PREMED-BMSE': {
+            'BIOENG-PREMED-BMSE-V1': {
                 name: 'Bioengineering: Pre-Med Biomedical Systems',
                 fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Biomedical Systems (4 Year Plan)',
                 version: '1.0',
-                effectiveDate: '2025-10-21',
+                effectiveDate: 'Fall 2024',
                 status: 'current',
                 courseData: {
                     'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
@@ -393,7 +393,7 @@ const programsData = {
                 name: 'Bioengineering: Pre-Med Biomedical Systems',
                 fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Biomedical Systems (4 Year Plan)',
                 version: '2.0',
-                effectiveDate: '2026-08-16',
+                effectiveDate: 'Fall 2026',
                 status: 'proposed',
                 courseData: {
                     'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
@@ -459,7 +459,7 @@ const programsData = {
                 name: 'Bioengineering: Pre-Med Cellular/Molecular',
                 fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Cellular/Molecular (4 Year Plan)',
                 version: '1.0',
-                effectiveDate: '2025-10-21',
+                effectiveDate: 'Fall 2023',
                 status: 'current',
                 courseData: {
                     'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
@@ -524,7 +524,7 @@ const programsData = {
                 name: 'Bioengineering: Pre-Med Cellular/Molecular',
                 fullTitle: 'Bachelor of Science - Bioengineering: Pre-Med Cellular/Molecular (4 Year Plan)',
                 version: '2.0',
-                effectiveDate: '2026-08-16',
+                effectiveDate: 'Fall 2026',
                 status: 'proposed',
                 courseData: {
                     'BIOENG-140': { code: 'BIO ENG 140', name: 'Introduction to Bioengineering', shortName: 'Intro to BIOENG', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', semesterRestriction: 'Fall' },
