@@ -1,4 +1,4 @@
-# WSU CHE and BIOENG Curriculum Flowchart
+# WSU Engineering Curriculum Flowchart
 
 An interactive, accessible curriculum flowchart for Washington State University's Voiland School of Chemical Engineering and Bioengineering. This tool helps students visualize their degree plans with prerequisites, corequisites, and course relationships.
 
@@ -20,13 +20,10 @@ An interactive, accessible curriculum flowchart for Washington State University'
 
 ### Supported Programs
 - **Chemical Engineering (CHE)**
-  - Current (V1)
+  - V1 (Current - Fall 2025)
   
 - **Bioengineering (BIOENG)**
-  - Biomedical Systems Engineering (BMSE) - V1 & V2 (Proposed)
-  - Cellular & Molecular (CMBE) - V1 & V2 (Proposed)
-  - Pre-Med Cellular & Molecular (PREMED-CMBE) - V1 & V2 (Proposed)
-  - Pre-Med Biochemical Sciences (PREMED-BMSE) - V1 & V2 (Proposed)
+  - Biomedical Systems Engineering (BMSE) - V1 (Current - Fall 2023)
 
 ## 🚀 Getting Started
 
@@ -73,17 +70,20 @@ The `programsData.js` file contains all curriculum information in the following 
 
 ```javascript
 const programsData = {
-  'BIOENG-CMBE-V2': {
-    name: 'Bioengineering - Cellular & Molecular (Proposed)',
-    effectiveDate: '2026-08-16',
+  'CHE-V1': {
+    name: 'Chemical Engineering',
+    fullTitle: 'Bachelor of Science - Chemical Engineering (4 Year Plan)',
+    version: '1.0',
+    effectiveDate: 'Fall 2025',
+    status: 'current',  // 'current', 'proposed', or 'archived'
     courseData: {
-      'BIOENG-305': {
-        code: 'BIO ENG 305',
-        name: 'Bioengineering Ethics and Professional Development',
-        shortName: 'Ethics & Prof Dev',
-        credits: 3,
+      'CHE-101': {
+        code: 'CHE 101',
+        name: 'Overview of Chemical Engineering',
+        shortName: 'CHE Overview',
+        credits: 1,
         type: 'engineering',
-        semester: 'Year 3 Fall',
+        semester: 'Year 1 Fall',
         prereqs: [],
         coreqs: [],
         alternatives: [],
@@ -96,6 +96,15 @@ const programsData = {
   // ... other programs
 };
 ```
+
+### Program Properties
+- **name** - Short program name (e.g., 'Chemical Engineering')
+- **fullTitle** - Full program title with degree information
+- **version** - Version number for tracking curriculum updates (e.g., '1.0')
+- **effectiveDate** - When this curriculum version becomes/became effective
+- **status** - Current status: `'current'` (actively used), `'proposed'` (future), or `'archived'` (outdated)
+- **courseData** - Object containing all courses indexed by course ID
+- **semesterOrder** - Array defining the order semesters appear in the flowchart
 
 ### Course Properties
 - **code** - Official course code displayed on flowchart
