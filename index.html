@@ -2858,8 +2858,10 @@
 
                 currentView = 'visual';
 
-                // Move focus to the first course in visual view
+                // Force layout recalculation to ensure centering is applied
                 setTimeout(() => {
+                    visualView.offsetHeight; // Trigger reflow
+                    // Move focus to the first course in visual view
                     const firstCourse = visualView.querySelector('.course');
                     if (firstCourse) {
                         firstCourse.focus();
