@@ -48,8 +48,8 @@
         .program-selector select optgroup {
             font-weight: bold;
         }
-        .diagram-wrapper { background: white; padding: 1.875rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; scroll-behavior: smooth; display: flex; justify-content: flex-start; }
-        .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 30px; scroll-snap-type: x mandatory; }
+        .diagram-wrapper { background: white; padding: 1.875rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; scroll-behavior: smooth; display: flex; justify-content: flex-start; align-items: flex-start; }
+        .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 30px; scroll-snap-type: x mandatory; margin: 0 auto; }
 
         @media (min-width: 1700px) {
             .diagram-wrapper { justify-content: center !important; }
@@ -2862,10 +2862,17 @@
 
                 // Apply centering if window is large enough
                 setTimeout(() => {
+                    const flowchartContainer = domCache.flowchartContainer;
                     if (window.innerWidth >= 1700) {
                         visualView.style.justifyContent = 'center';
+                        if (flowchartContainer) {
+                            flowchartContainer.style.margin = '0 auto';
+                        }
                     } else {
                         visualView.style.justifyContent = 'flex-start';
+                        if (flowchartContainer) {
+                            flowchartContainer.style.margin = '0';
+                        }
                     }
                     void visualView.offsetHeight; // Trigger reflow
                     
