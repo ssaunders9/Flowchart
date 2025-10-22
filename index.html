@@ -2861,10 +2861,37 @@
 
                 currentView = 'visual';
 
-                // Apply centering logic
+                // Rebuild the flowchart to ensure proper styling
                 setTimeout(() => {
+                    const flowchartContainer = domCache.flowchartContainer;
+                    const svg = domCache.connectionsSvg;
+                    
+                    // Preserve the SVG element before clearing
+                    const svgElement = svg ? svg.cloneNode(false) : null;
+                    
+                    // Clear the container
+                    if (flowchartContainer) {
+                        while (flowchartContainer.firstChild) {
+                            flowchartContainer.removeChild(flowchartContainer.firstChild);
+                        }
+                    }
+                    
+                    // Re-add the SVG element
+                    if (svgElement && flowchartContainer) {
+                        domCache.connectionsSvg = svgElement;
+                        flowchartContainer.appendChild(svgElement);
+                    }
+                    
+                    // Rebuild flowchart
+                    leadsToMap = buildLeadsToMap();
+                    buildFlowchart();
+                    setupScrollIndicators();
+                    createArrowMarkers();
+                    updateSVGSize();
+                    
+                    // Apply centering and draw connections
                     applyCenteringLogic();
-                    void visualView.offsetHeight; // Trigger reflow
+                    drawAllConnections();
                     
                     // Move focus to the first course in visual view
                     const firstCourse = visualView.querySelector('.course');
