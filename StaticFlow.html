@@ -3455,6 +3455,9 @@ function drawAllConnections() {
             setupScrollIndicators();
             createArrowMarkers();
             updateSVGSize();
+            
+            // Re-attach click handlers to new course elements
+            attachCourseClickHandlers();
 
             // Draw all connections automatically on load (static version)
             setTimeout(() => {
@@ -4352,7 +4355,7 @@ function drawAllConnections() {
         };
 
         // Add click handlers to course boxes
-        window.addEventListener('DOMContentLoaded', () => {
+        function attachCourseClickHandlers() {
             const courseDivs = document.querySelectorAll('.course[data-course-key]');
             courseDivs.forEach(courseDiv => {
                 courseDiv.addEventListener('click', (e) => {
@@ -4360,7 +4363,14 @@ function drawAllConnections() {
                     window.highlightCourseLines(courseKey);
                 });
             });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            attachCourseClickHandlers();
         });
+
+        // Make it globally available so switchProgram can call it
+        window.attachCourseClickHandlers = attachCourseClickHandlers;
     </script>
 </body>
 </html>
