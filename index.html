@@ -2475,6 +2475,7 @@
                     setupScrollIndicators();
                     createArrowMarkers();
                     updateSVGSize();
+                    applyCenteringLogic();  // Apply centering on initial load
                     // Update Static Flow link with current program
                     updateStaticFlowLink();
                 } catch (error) {
@@ -2860,20 +2861,9 @@
 
                 currentView = 'visual';
 
-                // Apply centering if window is large enough
+                // Apply centering logic
                 setTimeout(() => {
-                    const flowchartContainer = domCache.flowchartContainer;
-                    if (window.innerWidth >= 1700) {
-                        visualView.style.justifyContent = 'center';
-                        if (flowchartContainer) {
-                            flowchartContainer.style.margin = '0 auto';
-                        }
-                    } else {
-                        visualView.style.justifyContent = 'flex-start';
-                        if (flowchartContainer) {
-                            flowchartContainer.style.margin = '0';
-                        }
-                    }
+                    applyCenteringLogic();
                     void visualView.offsetHeight; // Trigger reflow
                     
                     // Move focus to the first course in visual view
@@ -2884,6 +2874,26 @@
                 }, 10);
             }
         };
+
+        // Function to apply centering based on window width
+        function applyCenteringLogic() {
+            const visualView = domCache.visualView;
+            const flowchartContainer = domCache.flowchartContainer;
+            
+            if (!visualView || !flowchartContainer) return;
+            
+            if (window.innerWidth >= 1700) {
+                visualView.style.justifyContent = 'center';
+                visualView.style.alignItems = 'flex-start';
+                flowchartContainer.style.margin = '0 auto';
+            } else {
+                visualView.style.justifyContent = 'flex-start';
+                visualView.style.alignItems = 'flex-start';
+                flowchartContainer.style.margin = '0';
+            }
+        }
+
+        window.applyCenteringLogic = applyCenteringLogic;
     </script>
 </body>
 </html>
