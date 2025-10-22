@@ -2860,13 +2860,19 @@
 
                 // Force layout recalculation to ensure centering is applied
                 setTimeout(() => {
-                    visualView.offsetHeight; // Trigger reflow
+                    // Force a reflow and clear any cached layout values
+                    void visualView.offsetHeight; // Trigger reflow
+                    // Remove and re-apply display to force style recalculation
+                    visualView.style.display = 'none';
+                    visualView.style.display = 'block';
+                    void visualView.offsetHeight; // Trigger reflow again
+                    
                     // Move focus to the first course in visual view
                     const firstCourse = visualView.querySelector('.course');
                     if (firstCourse) {
                         firstCourse.focus();
                     }
-                }, 100);
+                }, 50);
             }
         };
     </script>
