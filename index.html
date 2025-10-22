@@ -868,8 +868,9 @@
 
         // Program data loaded from external file: programsData.js
 
-        // Current program state
-        let currentProgram = 'CHE-V1';
+        // Current program state - default to first program with 'current' status
+        let currentProgram = Object.keys(programsData).find(key => programsData[key].status === 'current') ||
+                            Object.keys(programsData)[0];
         let courseData = programsData[currentProgram].courseData;
         let semesterOrder = programsData[currentProgram].semesterOrder;
 
