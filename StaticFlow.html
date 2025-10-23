@@ -125,6 +125,7 @@
         .connection-indicator.highlighted { opacity: 1 !important; }
         .connection-indicator.faded { opacity: 0.15 !important; }
         .course.highlighted { box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); }
+        .course.dimmed { opacity: 0.2; filter: grayscale(80%); transition: opacity 0.2s ease, filter 0.2s ease; }
 
         .notes-indicator:hover {
             background: #616161;
@@ -4274,6 +4275,10 @@ function drawAllConnections() {
             const allIndicators = document.querySelectorAll('.connection-indicator');
             const courseDivs = document.querySelectorAll('[data-course-key]');
 
+            // Track which courses are relevant
+            const relevantCourses = new Set();
+            relevantCourses.add(courseKey); // The selected course itself
+
             // Highlight the clicked course
             courseDivs.forEach(courseDiv => {
                 if (courseDiv.getAttribute('data-course-key') === courseKey) {
@@ -4294,6 +4299,10 @@ function drawAllConnections() {
                     matchedPaths.push({fromCourse, toCourse});
                     path.classList.add('highlighted');
                     highlightedPaths.add(path);
+                    
+                    // Track connected courses as relevant
+                    relevantCourses.add(fromCourse);
+                    relevantCourses.add(toCourse);
 
                     // Also highlight associated indicators
                     allIndicators.forEach(indicator => {
@@ -4330,6 +4339,14 @@ function drawAllConnections() {
                 }
             });
 
+            // Dim all non-relevant courses
+            courseDivs.forEach(courseDiv => {
+                const courseKey = courseDiv.getAttribute('data-course-key');
+                if (!relevantCourses.has(courseKey)) {
+                    courseDiv.classList.add('dimmed');
+                }
+            });
+
         };
 
         window.clearHighlights = function() {
@@ -4351,6 +4368,7 @@ function drawAllConnections() {
 
             courseDivs.forEach(courseDiv => {
                 courseDiv.classList.remove('highlighted');
+                courseDiv.classList.remove('dimmed');
             });
         };
 
