@@ -3255,6 +3255,22 @@ function drawAllConnections() {
                         const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, '\n');
                         notesIndicator.setAttribute('aria-label', `Note: ${plainTextNotes}`);
                         notesIndicator.setAttribute('title', plainTextNotes);
+                        notesIndicator.setAttribute('role', 'button');
+                        notesIndicator.setAttribute('tabindex', '0');
+                        notesIndicator.style.cursor = 'pointer';
+
+                        // Add click handler for notes tooltip
+                        notesIndicator.addEventListener('click', (e) => {
+                            showNotesTooltip(course.key, e, notesIndicator);
+                        });
+
+                        // Add keyboard handler
+                        notesIndicator.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                showNotesTooltip(course.key, e, notesIndicator);
+                            }
+                        });
 
                         courseDiv.appendChild(notesIndicator);
                         courseDiv.setAttribute('data-has-notes', 'true');
@@ -3290,26 +3306,42 @@ function drawAllConnections() {
                         alternativesIndicator.setAttribute('aria-hidden', 'true');
                         alternativesIndicator.setAttribute('aria-label', `Alternative: ${course.alternatives.join(', ')}`);
                         alternativesIndicator.setAttribute('title', `Alternative: ${course.alternatives.join(', ')}`);
+                        alternativesIndicator.setAttribute('role', 'button');
+                        alternativesIndicator.setAttribute('tabindex', '0');
 
-                        // STATIC VERSION: Alternatives clicks disabled
-                        // alternativesIndicator.addEventListener('click', (e) => {
-                        // e.stopPropagation();
+                        // Add click handler for alternatives tooltip
+                        alternativesIndicator.addEventListener('click', (e) => {
+                            e.stopPropagation();
 
                             // Check if clicking the same indicator to toggle off
-                        // const tooltip = domCache.alternativesTooltip;
-                        // if (tooltip && tooltip.classList.contains('visible') && currentAlternativesIndicator === alternativesIndicator) {
-                        // closeAlternativesTooltip();
-                        // return;
-                        // }
+                            const tooltip = domCache.alternativesTooltip;
+                            if (tooltip && tooltip.classList.contains('visible') && currentAlternativesIndicator === alternativesIndicator) {
+                                closeAlternativesTooltip();
+                                return;
+                            }
 
-                        // const rect = courseDiv.getBoundingClientRect();
-                        // const syntheticEvent = {
-                        // clientX: rect.left + rect.width / 2,
-                        // clientY: rect.bottom,
-                        // stopPropagation: () => {}
-                        // };
-                        // showAlternativesTooltip(course.key, syntheticEvent, alternativesIndicator);
-                        // });
+                            const rect = courseDiv.getBoundingClientRect();
+                            const syntheticEvent = {
+                                clientX: rect.left + rect.width / 2,
+                                clientY: rect.bottom,
+                                stopPropagation: () => {}
+                            };
+                            showAlternativesTooltip(course.key, syntheticEvent, alternativesIndicator);
+                        });
+
+                        // Add keyboard handler
+                        alternativesIndicator.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                const rect = courseDiv.getBoundingClientRect();
+                                const syntheticEvent = {
+                                    clientX: rect.left + rect.width / 2,
+                                    clientY: rect.bottom,
+                                    stopPropagation: () => {}
+                                };
+                                showAlternativesTooltip(course.key, syntheticEvent, alternativesIndicator);
+                            }
+                        });
 
                         courseDiv.appendChild(alternativesIndicator);
                         courseDiv.setAttribute('data-has-alternatives', 'true');
@@ -4300,6 +4332,7 @@ function drawAllConnections() {
             courseDivs.forEach(courseDiv => {
                 if (courseDiv.getAttribute('data-course-key') === courseKey) {
                     courseDiv.classList.add('highlighted');
+                    courseDiv.setAttribute('aria-pressed', 'true');
                 }
             });
 
@@ -4364,6 +4397,67 @@ function drawAllConnections() {
                 }
             });
 
+            // Add relationship badges to relevant courses (one badge per course with priority: CO > PRE > LEADS)
+            const selectedCourse = courseData[courseKey];
+            if (selectedCourse) {
+                // Track which courses get badges (to enforce one badge per course)
+                const badgesAdded = new Set();
+
+                // Priority 1: CO badges (corequisites)
+                if (selectedCourse.coreqs && selectedCourse.coreqs.length > 0) {
+                    selectedCourse.coreqs.forEach(coreqKey => {
+                        if (!badgesAdded.has(coreqKey)) {
+                            const coreqDiv = document.querySelector(`[data-course-key="${coreqKey}"]`);
+                            if (coreqDiv) {
+                                const badge = document.createElement('div');
+                                badge.className = 'relationship-badge coreq';
+                                badge.textContent = 'CO';
+                                badge.title = 'Co-requisite for selected course';
+                                coreqDiv.appendChild(badge);
+                                badgesAdded.add(coreqKey);
+                            }
+                        }
+                    });
+                }
+
+                // Priority 2: PRE badges (prerequisites)
+                if (selectedCourse.prereqs && selectedCourse.prereqs.length > 0) {
+                    selectedCourse.prereqs.forEach(prereqKey => {
+                        if (!badgesAdded.has(prereqKey)) {
+                            const prereqDiv = document.querySelector(`[data-course-key="${prereqKey}"]`);
+                            if (prereqDiv) {
+                                const badge = document.createElement('div');
+                                badge.className = 'relationship-badge prereq';
+                                badge.textContent = 'PRE';
+                                badge.title = 'Prerequisite for selected course';
+                                prereqDiv.appendChild(badge);
+                                badgesAdded.add(prereqKey);
+                            }
+                        }
+                    });
+                }
+
+                // Priority 3: ▶ badges to courses this course leads to (find courses where selectedCourse is prereq/coreq)
+                Object.entries(courseData).forEach(([otherKey, otherCourse]) => {
+                    if (!badgesAdded.has(otherKey)) {
+                        const isPrereqFor = otherCourse.prereqs && otherCourse.prereqs.includes(courseKey);
+                        const isCoreqFor = otherCourse.coreqs && otherCourse.coreqs.includes(courseKey);
+                        
+                        if (isPrereqFor || isCoreqFor) {
+                            const otherDiv = document.querySelector(`[data-course-key="${otherKey}"]`);
+                            if (otherDiv) {
+                                const badge = document.createElement('div');
+                                badge.className = 'relationship-badge leadsto';
+                                badge.textContent = '▶';
+                                badge.title = 'This course leads to: ' + otherCourse.code;
+                                otherDiv.appendChild(badge);
+                                badgesAdded.add(otherKey);
+                            }
+                        }
+                    }
+                });
+            }
+
         };
 
         window.clearHighlights = function() {
@@ -4386,8 +4480,147 @@ function drawAllConnections() {
             courseDivs.forEach(courseDiv => {
                 courseDiv.classList.remove('highlighted');
                 courseDiv.classList.remove('dimmed');
+                courseDiv.setAttribute('aria-pressed', 'false');
+                
+                // Remove relationship badges (PRE, CO, ▶)
+                const badges = courseDiv.querySelectorAll('.relationship-badge');
+                badges.forEach(badge => {
+                    badge.remove();
+                });
             });
         };
+
+        // Keyboard navigation support
+        let focusedCourseKey = null;
+
+        function getFocusableCourses() {
+            return Array.from(document.querySelectorAll('.course[data-course-key]'));
+        }
+
+        function getCurrentCourse() {
+            if (!focusedCourseKey) return null;
+            return document.querySelector(`.course[data-course-key="${focusedCourseKey}"]`);
+        }
+
+        function getClosestCourse(courses, direction) {
+            const currentCourse = getCurrentCourse();
+            if (!currentCourse) {
+                // No course focused, return first course
+                return courses[0];
+            }
+
+            const currentRect = currentCourse.getBoundingClientRect();
+            const currentCenterX = currentRect.left + currentRect.width / 2;
+            const currentCenterY = currentRect.top + currentRect.height / 2;
+
+            let closest = null;
+            let closestDistance = Infinity;
+
+            courses.forEach(course => {
+                if (course === currentCourse) return; // Skip current course
+
+                const rect = course.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                let isInDirection = false;
+                let distance = 0;
+
+                if (direction === 'right') {
+                    if (centerX > currentCenterX) {
+                        isInDirection = true;
+                        distance = Math.hypot(centerX - currentCenterX, centerY - currentCenterY);
+                    }
+                } else if (direction === 'left') {
+                    if (centerX < currentCenterX) {
+                        isInDirection = true;
+                        distance = Math.hypot(centerX - currentCenterX, centerY - currentCenterY);
+                    }
+                } else if (direction === 'down') {
+                    if (centerY > currentCenterY) {
+                        isInDirection = true;
+                        distance = Math.hypot(centerX - currentCenterX, centerY - currentCenterY);
+                    }
+                } else if (direction === 'up') {
+                    if (centerY < currentCenterY) {
+                        isInDirection = true;
+                        distance = Math.hypot(centerX - currentCenterX, centerY - currentCenterY);
+                    }
+                }
+
+                if (isInDirection && distance < closestDistance) {
+                    closestDistance = distance;
+                    closest = course;
+                }
+            });
+
+            // If no course found in that direction, wrap around or return first
+            if (!closest) {
+                // Simple fallback: return first course
+                return courses[0];
+            }
+
+            return closest;
+        }
+
+        function focusCourse(courseKey) {
+            const courseDiv = document.querySelector(`.course[data-course-key="${courseKey}"]`);
+            if (courseDiv) {
+                focusedCourseKey = courseKey;
+                courseDiv.focus();
+                courseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                window.highlightCourseLines(courseKey);
+            }
+        }
+
+        function navigateCourses(direction) {
+            const courses = getFocusableCourses();
+            if (courses.length === 0) return;
+
+            const nextCourse = getClosestCourse(courses, direction);
+            if (nextCourse) {
+                const nextCourseKey = nextCourse.getAttribute('data-course-key');
+                focusCourse(nextCourseKey);
+            }
+        }
+
+        // Add keyboard event listener
+        function setupKeyboardNavigation() {
+            document.addEventListener('keydown', (e) => {
+                // Only handle keyboard navigation in visual view
+                if (currentView !== 'visual') return;
+
+                // Check if focus is on an input or select element (skip keyboard nav in these cases)
+                if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                    return;
+                }
+
+                switch(e.key) {
+                    case 'ArrowRight':
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        navigateCourses(e.key === 'ArrowRight' ? 'right' : 'down');
+                        break;
+                    case 'ArrowLeft':
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        navigateCourses(e.key === 'ArrowLeft' ? 'left' : 'up');
+                        break;
+                    case 'Escape':
+                        // Clear highlights on Escape
+                        window.clearHighlights();
+                        focusedCourseKey = null;
+                        break;
+                    case 'Enter':
+                    case ' ':
+                        // If a course is focused, highlight it
+                        if (focusedCourseKey) {
+                            window.highlightCourseLines(focusedCourseKey);
+                        }
+                        break;
+                }
+            });
+        }
 
         // Add click handlers to course boxes
         function attachCourseClickHandlers() {
@@ -4395,13 +4628,20 @@ function drawAllConnections() {
             courseDivs.forEach(courseDiv => {
                 courseDiv.addEventListener('click', (e) => {
                     const courseKey = courseDiv.getAttribute('data-course-key');
+                    focusedCourseKey = courseKey;
                     window.highlightCourseLines(courseKey);
                 });
+                
+                // Make courses keyboard focusable
+                courseDiv.setAttribute('tabindex', '0');
+                courseDiv.setAttribute('role', 'button');
+                courseDiv.setAttribute('aria-pressed', 'false');
             });
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             attachCourseClickHandlers();
+            setupKeyboardNavigation();
         });
 
         // Make it globally available so switchProgram can call it
