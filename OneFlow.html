@@ -36,7 +36,7 @@
             font-weight: bold;
         }
         .diagram-wrapper { background: white; padding: 1.875rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; position: relative; scroll-behavior: smooth; display: flex; justify-content: flex-start; }
-        .diagram-container { position: relative; min-width: 1600px; display: flex; gap: 70px; scroll-snap-type: x mandatory; }
+        .diagram-container { position: relative; min-width: 1600px; max-width: max-content; display: flex; gap: 70px; scroll-snap-type: x mandatory; }
 
         @media (min-width: 1700px) {
             .diagram-wrapper { justify-content: center; }
@@ -4257,13 +4257,17 @@ function drawAllConnections() {
 
                 currentView = 'visual';
 
-                // Move focus to the first course in visual view
+                // Apply centering and focus to the first course
                 setTimeout(() => {
+                    // Apply centering styles
+                    applyCenteringLogic();
+                    
+                    // Move focus to the first course in visual view
                     const firstCourse = visualView.querySelector('.course');
                     if (firstCourse) {
                         firstCourse.focus();
                     }
-                }, 100);
+                }, 10);
             }
         };
 
@@ -4402,6 +4406,26 @@ function drawAllConnections() {
 
         // Make it globally available so switchProgram can call it
         window.attachCourseClickHandlers = attachCourseClickHandlers;
+
+        // Function to apply centering based on window width
+        function applyCenteringLogic() {
+            const visualView = domCache.visualView;
+            const flowchartContainer = domCache.flowchartContainer;
+            
+            if (!visualView || !flowchartContainer) return;
+            
+            if (window.innerWidth >= 1700) {
+                visualView.style.justifyContent = 'center';
+                visualView.style.alignItems = 'flex-start';
+                flowchartContainer.style.margin = '0 auto';
+            } else {
+                visualView.style.justifyContent = 'flex-start';
+                visualView.style.alignItems = 'flex-start';
+                flowchartContainer.style.margin = '0';
+            }
+        }
+
+        window.applyCenteringLogic = applyCenteringLogic;
     </script>
 </body>
 </html>
