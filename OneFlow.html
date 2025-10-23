@@ -129,7 +129,7 @@
             border: 5px solid #000 !important; 
             box-shadow: 0 0 0 3px #A60F2D !important;
         }
-        .course.dimmed { opacity: 0.2; filter: grayscale(80%); transition: opacity 0.2s ease, filter 0.2s ease; }
+        .course.dimmed { opacity: 0.2; filter: grayscale(80%); transition: opacity 0.2s ease, filter 0.2s ease; z-index: 0; }
 
         .notes-indicator:hover {
             background: #616161;
@@ -193,7 +193,7 @@
                 left: 0;
                 width: 100%;
                 height: auto;
-                max-height: 60vh;
+                max-height: 40vh;
                 border-left: none;
                 border-top: 2px solid #757575;
                 box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
@@ -655,30 +655,9 @@
                 </button>
             </div>
             
-            <!-- Tab Container -->
-            <div class="course-info-tabs" role="tablist">
-                <button class="course-info-tab" role="tab" aria-selected="true" aria-controls="details-panel" id="details-tab" data-tab="details">
-                    Details
-                </button>
-                <button class="course-info-tab" role="tab" aria-selected="false" aria-controls="notes-panel" id="notes-tab" data-tab="notes">
-                    Notes
-                </button>
-                <button class="course-info-tab" role="tab" aria-selected="false" aria-controls="alternatives-panel" id="alternatives-tab" data-tab="alternatives">
-                    Alternatives
-                </button>
-            </div>
-            
-            <!-- Tab Content Panels -->
-            <div class="course-info-panel active" role="tabpanel" id="details-panel" aria-labelledby="details-tab">
+            <!-- Single Content Panel (no tabs) -->
+            <div class="course-info-panel active" role="region" aria-label="Course details">
                 <div class="course-info-content" id="detailsContent"></div>
-            </div>
-            
-            <div class="course-info-panel" role="tabpanel" id="notes-panel" aria-labelledby="notes-tab">
-                <div class="course-info-content" id="notesContent"></div>
-            </div>
-            
-            <div class="course-info-panel" role="tabpanel" id="alternatives-panel" aria-labelledby="alternatives-tab">
-                <div class="course-info-content" id="alternativesContent"></div>
             </div>
         </aside>
 
@@ -869,8 +848,6 @@
             scrollIndicators: null,
             courseInfoPane: null,
             detailsContent: null,
-            notesContent: null,
-            alternativesContent: null,
             courseInfoHeader: null,
             announcements: null,
             guideToggle: null,
@@ -892,8 +869,6 @@
             domCache.scrollIndicators = document.getElementById('scrollIndicators');
             domCache.courseInfoPane = document.getElementById('courseInfoPane');
             domCache.detailsContent = document.getElementById('detailsContent');
-            domCache.notesContent = document.getElementById('notesContent');
-            domCache.alternativesContent = document.getElementById('alternativesContent');
             domCache.courseInfoHeader = document.getElementById('courseInfoHeader');
             domCache.announcements = document.getElementById('announcements');
             domCache.guideToggle = document.getElementById('guideToggle');
@@ -985,14 +960,16 @@
             const pane = domCache.courseInfoPane;
             const header = domCache.courseInfoHeader;
             const detailsContent = domCache.detailsContent;
-            const notesContent = domCache.notesContent;
-            const alternativesContent = domCache.alternativesContent;
             const announcer = domCache.announcements;
 
-            if (!pane || !header || !detailsContent || !notesContent || !alternativesContent) return;
+            if (!pane || !header || !detailsContent) return;
 
-            // Set header
-            header.textContent = `${course.code} - ${course.name}`;
+            // Set header with code, name, and credits
+            let headerText = `${course.code} - ${course.name}`;
+            if (course.credits) {
+                headerText += ` (${course.credits} credits)`;
+            }
+            header.textContent = headerText;
 
             // Populate Details tab
             detailsContent.innerHTML = '';
@@ -1014,112 +991,77 @@
                 detailsDiv.appendChild(descRow);
             }
             
-            // Credits
-            if (course.credits) {
-                const creditsRow = document.createElement('div');
-                creditsRow.className = 'course-details-row';
-                creditsRow.innerHTML = `<div class="course-details-label">Credits</div><div class="course-details-value">${course.credits}</div>`;
-                detailsDiv.appendChild(creditsRow);
-            }
-            
-            // Course Type
-            if (course.type) {
-                const typeRow = document.createElement('div');
-                typeRow.className = 'course-details-row';
-                typeRow.innerHTML = `<div class="course-details-label">Type</div><div class="course-details-value">${course.type}</div>`;
-                detailsDiv.appendChild(typeRow);
-            }
-            
             // Prerequisites
-            if (course.prerequisites && course.prerequisites.length > 0) {
+            if (course.prereqs && course.prereqs.length > 0) {
                 const prereqRow = document.createElement('div');
                 prereqRow.className = 'course-details-row';
-                prereqRow.innerHTML = `<div class="course-details-label">Prerequisites</div><div class="course-details-value">${course.prerequisites.join(', ')}</div>`;
+                const prereqCodes = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
+                prereqRow.innerHTML = `<div class="course-details-label">Prerequisites</div><div class="course-details-value">${prereqCodes}</div>`;
                 detailsDiv.appendChild(prereqRow);
             }
             
             // Co-requisites
-            if (course.corequisites && course.corequisites.length > 0) {
+            if (course.coreqs && course.coreqs.length > 0) {
                 const coreqRow = document.createElement('div');
                 coreqRow.className = 'course-details-row';
-                coreqRow.innerHTML = `<div class="course-details-label">Co-requisites</div><div class="course-details-value">${course.corequisites.join(', ')}</div>`;
+                const coreqCodes = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
+                coreqRow.innerHTML = `<div class="course-details-label">Co-requisites</div><div class="course-details-value">${coreqCodes}</div>`;
                 detailsDiv.appendChild(coreqRow);
             }
-            
-            if (detailsDiv.children.length === 0) {
-                detailsDiv.innerHTML = '<p>No additional details available.</p>';
-            }
-            
-            detailsContent.appendChild(detailsDiv);
 
-            // Populate notes tab
-            notesContent.textContent = '';
+            // Add Notes section if available
             if (hasNotes) {
+                const notesSection = document.createElement('div');
+                notesSection.style.marginTop = '15px';
+                notesSection.style.paddingTop = '15px';
+                notesSection.style.borderTop = '1px solid #ddd';
+                
+                const notesLabel = document.createElement('div');
+                notesLabel.className = 'course-details-label';
+                notesLabel.textContent = 'Notes';
+                notesLabel.style.marginBottom = '8px';
+                notesSection.appendChild(notesLabel);
+                
                 const safeContent = createSafeLinksFromText(course.notes);
-                notesContent.appendChild(safeContent);
-            } else {
-                notesContent.textContent = 'No notes available.';
+                notesSection.appendChild(safeContent);
+                detailsDiv.appendChild(notesSection);
             }
 
-            // Populate alternatives tab
-            alternativesContent.textContent = '';
+            // Add Alternatives section if available
             if (hasAlternatives) {
+                const altSection = document.createElement('div');
+                altSection.style.marginTop = '15px';
+                altSection.style.paddingTop = '15px';
+                altSection.style.borderTop = '1px solid #ddd';
+                
+                const altLabel = document.createElement('div');
+                altLabel.className = 'course-details-label';
+                altLabel.textContent = 'Alternatives';
+                altLabel.style.marginBottom = '8px';
+                altSection.appendChild(altLabel);
+                
                 if (course.alternatives.length === 1) {
-                    alternativesContent.textContent = course.alternatives[0];
+                    const altText = document.createElement('div');
+                    altText.className = 'course-details-value';
+                    altText.textContent = course.alternatives[0];
+                    altSection.appendChild(altText);
                 } else {
                     course.alternatives.forEach((alt, index) => {
                         const optionDiv = document.createElement('div');
-                        optionDiv.style.marginBottom = '10px';
-
-                        const strong = document.createElement('strong');
-                        strong.textContent = `Option ${index + 1}: `;
-                        optionDiv.appendChild(strong);
-
-                        const textNode = document.createTextNode(alt);
-                        optionDiv.appendChild(textNode);
-
-                        alternativesContent.appendChild(optionDiv);
+                        optionDiv.className = 'course-details-value';
+                        optionDiv.style.marginBottom = '8px';
+                        optionDiv.innerHTML = `<strong>Option ${index + 1}:</strong> ${alt}`;
+                        altSection.appendChild(optionDiv);
                     });
                 }
-            } else {
-                alternativesContent.textContent = 'No alternatives available.';
+                detailsDiv.appendChild(altSection);
             }
-
-            // Update tab visibility and selection
-            const detailsTab = document.getElementById('details-tab');
-            const notesTab = document.getElementById('notes-tab');
-            const alternativesTab = document.getElementById('alternatives-tab');
-            const detailsPanel = document.getElementById('details-panel');
-            const notesPanel = document.getElementById('notes-panel');
-            const alternativesPanel = document.getElementById('alternatives-panel');
-
-            // Details tab always shows, others show only if content exists
-            if (detailsTab) detailsTab.style.display = 'block';
-            if (notesTab) notesTab.style.display = hasNotes ? 'block' : 'none';
-            if (alternativesTab) alternativesTab.style.display = hasAlternatives ? 'block' : 'none';
-
-            // Set active tab - use requested tab if visible, otherwise use Details
-            let activeTab = tab;
-            if (tab === 'notes' && !hasNotes) {
-                activeTab = 'details';
-            } else if (tab === 'alternatives' && !hasAlternatives) {
-                activeTab = 'details';
+            
+            if (detailsDiv.children.length === 0) {
+                detailsDiv.innerHTML = '<p>No details available.</p>';
             }
-
-            // Update tab panels and attributes
-            if (detailsPanel && notesPanel && alternativesPanel && detailsTab && notesTab && alternativesTab) {
-                const showDetails = activeTab === 'details';
-                const showNotes = activeTab === 'notes';
-                const showAlternatives = activeTab === 'alternatives';
-
-                detailsPanel.classList.toggle('active', showDetails);
-                notesPanel.classList.toggle('active', showNotes);
-                alternativesPanel.classList.toggle('active', showAlternatives);
-
-                detailsTab.setAttribute('aria-selected', showDetails.toString());
-                notesTab.setAttribute('aria-selected', showNotes.toString());
-                alternativesTab.setAttribute('aria-selected', showAlternatives.toString());
-            }
+            
+            detailsContent.appendChild(detailsDiv);
 
             // Show pane
             pane.setAttribute('aria-hidden', 'false');
@@ -1129,27 +1071,13 @@
             let courseInfoTrigger = document.activeElement;
             window.courseInfoTrigger = courseInfoTrigger;
 
-            // Focus on active tab
-            let activeTabElement = null;
-            if (activeTab === 'details') {
-                activeTabElement = detailsTab;
-            } else if (activeTab === 'notes') {
-                activeTabElement = notesTab;
-            } else if (activeTab === 'alternatives') {
-                activeTabElement = alternativesTab;
-            }
-            
-            if (activeTabElement) {
-                setTimeout(() => activeTabElement.focus(), 100);
-            }
-
             // Announce to screen readers
             if (announcer) {
                 let announcement = `${course.code} - ${course.name}. `;
                 if (course.credits) announcement += `${course.credits} credits. `;
                 if (hasNotes) announcement += `Notes available. `;
                 if (hasAlternatives) announcement += `Alternatives available. `;
-                announcement += 'Press Escape to close. Use arrow keys to switch tabs.';
+                announcement += 'Press Escape to close.';
                 announcer.textContent = announcement;
             }
         }
@@ -1177,43 +1105,6 @@
             }
         };
         
-        /**
-         * Switch active tab in course info pane
-         */
-        function switchCourseInfoTab(tabName) {
-            const detailsTab = document.getElementById('details-tab');
-            const notesTab = document.getElementById('notes-tab');
-            const alternativesTab = document.getElementById('alternatives-tab');
-            const detailsPanel = document.getElementById('details-panel');
-            const notesPanel = document.getElementById('notes-panel');
-            const alternativesPanel = document.getElementById('alternatives-panel');
-
-            // Hide all panels first
-            if (detailsPanel) detailsPanel.classList.remove('active');
-            if (notesPanel) notesPanel.classList.remove('active');
-            if (alternativesPanel) alternativesPanel.classList.remove('active');
-
-            // Deselect all tabs
-            if (detailsTab) detailsTab.setAttribute('aria-selected', 'false');
-            if (notesTab) notesTab.setAttribute('aria-selected', 'false');
-            if (alternativesTab) alternativesTab.setAttribute('aria-selected', 'false');
-
-            // Show and select the requested tab
-            if (tabName === 'details' && detailsTab && detailsTab.style.display !== 'none') {
-                if (detailsPanel) detailsPanel.classList.add('active');
-                detailsTab.setAttribute('aria-selected', 'true');
-                detailsTab.focus();
-            } else if (tabName === 'notes' && notesTab && notesTab.style.display !== 'none') {
-                if (notesPanel) notesPanel.classList.add('active');
-                notesTab.setAttribute('aria-selected', 'true');
-                notesTab.focus();
-            } else if (tabName === 'alternatives' && alternativesTab && alternativesTab.style.display !== 'none') {
-                if (alternativesPanel) alternativesPanel.classList.add('active');
-                alternativesTab.setAttribute('aria-selected', 'true');
-                alternativesTab.focus();
-            }
-        }
-
         // Utility function to safely create links from text and render HTML
         function createSafeLinksFromText(text) {
             // Create a container
@@ -4961,77 +4852,6 @@ function drawAllConnections() {
         }
 
         // Add click handlers to course boxes
-        /**
-         * Attach event listeners to course info tooltip tabs and close button
-         */
-        function attachCourseInfoTooltipHandlers() {
-            const detailsTab = document.getElementById('details-tab');
-            const notesTab = document.getElementById('notes-tab');
-            const alternativesTab = document.getElementById('alternatives-tab');
-            const closeBtn = document.getElementById('closeCourseInfoBtn');
-            const pane = domCache.courseInfoPane;
-
-            // Details tab handler
-            if (detailsTab) {
-                detailsTab.addEventListener('click', () => {
-                    switchCourseInfoTab('details');
-                });
-                
-                detailsTab.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        switchCourseInfoTab('details');
-                    }
-                });
-            }
-
-            // Notes tab handler
-            if (notesTab) {
-                notesTab.addEventListener('click', () => {
-                    switchCourseInfoTab('notes');
-                });
-                
-                notesTab.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        switchCourseInfoTab('notes');
-                    }
-                });
-            }
-
-            // Alternatives tab handler
-            if (alternativesTab) {
-                alternativesTab.addEventListener('click', () => {
-                    switchCourseInfoTab('alternatives');
-                });
-                
-                alternativesTab.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        switchCourseInfoTab('alternatives');
-                    }
-                });
-            }
-
-            // Close button handler
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => {
-                    window.closeCourseInfo();
-                });
-            }
-
-            // Close pane when clicking outside
-            if (pane) {
-                document.addEventListener('click', (e) => {
-                    if (!pane.contains(e.target) && !e.target.closest('.course')) {
-                        if (pane.getAttribute('aria-hidden') === 'false') {
-                            window.closeCourseInfo();
-                        }
-                    }
-                });
-            }
-        }
-
         function attachCourseClickHandlers() {
             const courseDivs = document.querySelectorAll('.course[data-course-key]');
             courseDivs.forEach(courseDiv => {
@@ -5061,7 +4881,6 @@ function drawAllConnections() {
 
         window.addEventListener('DOMContentLoaded', () => {
             attachCourseClickHandlers();
-            attachCourseInfoTooltipHandlers();
             setupKeyboardNavigation();
         });
 
