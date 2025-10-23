@@ -2863,17 +2863,31 @@
 
                 // Just show the visual view and apply centering - don't rebuild
                 setTimeout(() => {
+                    console.log('=== TOGGLE TO VISUAL VIEW ===');
+                    console.log('Window innerWidth:', window.innerWidth);
+                    console.log('Wrapper justifyContent before:', window.getComputedStyle(visualView).justifyContent);
+                    console.log('Wrapper scrollLeft before:', visualView.scrollLeft);
+                    
                     // Force the media query to re-evaluate by toggling a class
                     visualView.classList.remove('visible');
                     void visualView.offsetHeight;  // Trigger reflow
                     visualView.classList.add('visible');
                     
+                    console.log('Wrapper justifyContent after class toggle:', window.getComputedStyle(visualView).justifyContent);
+                    
                     // Ensure centering styles are applied
                     if (window.innerWidth >= 1700) {
                         visualView.style.justifyContent = 'center';
+                        console.log('Applied inline justifyContent: center');
                     } else {
                         visualView.style.justifyContent = 'flex-start';
+                        console.log('Applied inline justifyContent: flex-start');
                     }
+                    
+                    console.log('Wrapper justifyContent after inline:', window.getComputedStyle(visualView).justifyContent);
+                    console.log('Wrapper scrollLeft after:', visualView.scrollLeft);
+                    console.log('Wrapper offsetWidth:', visualView.offsetWidth);
+                    console.log('Container offsetWidth:', domCache.flowchartContainer.offsetWidth);
                     
                     // Move focus to the first course in visual view
                     const firstCourse = visualView.querySelector('.course');
