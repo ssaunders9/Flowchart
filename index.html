@@ -2478,6 +2478,25 @@
                     applyCenteringLogic();  // Apply centering on initial load
                     // Update Static Flow link with current program
                     updateStaticFlowLink();
+                    
+                    // Log initial state for debugging
+                    setTimeout(() => {
+                        const visualView = domCache.visualView;
+                        const container = domCache.flowchartContainer;
+                        const containerStyles = window.getComputedStyle(container);
+                        console.log('=== INITIAL LOAD ===');
+                        console.log('Window innerWidth:', window.innerWidth);
+                        console.log('Wrapper justifyContent:', window.getComputedStyle(visualView).justifyContent);
+                        console.log('Wrapper scrollLeft:', visualView.scrollLeft);
+                        console.log('Container margin:', containerStyles.margin);
+                        console.log('Container marginLeft:', containerStyles.marginLeft);
+                        console.log('Container marginRight:', containerStyles.marginRight);
+                        console.log('Container position:', containerStyles.position);
+                        console.log('Container left:', containerStyles.left);
+                        console.log('Container transform:', containerStyles.transform);
+                        console.log('Wrapper offsetWidth:', visualView.offsetWidth);
+                        console.log('Container offsetWidth:', container.offsetWidth);
+                    }, 100);
                 } catch (error) {
                     console.error('Error building flowchart:', error);
                     alert('Error loading flowchart. Please refresh the page.');
@@ -2868,6 +2887,15 @@
                     console.log('Wrapper justifyContent before:', window.getComputedStyle(visualView).justifyContent);
                     console.log('Wrapper scrollLeft before:', visualView.scrollLeft);
                     
+                    const container = domCache.flowchartContainer;
+                    const containerStyles = window.getComputedStyle(container);
+                    console.log('Container margin:', containerStyles.margin);
+                    console.log('Container marginLeft:', containerStyles.marginLeft);
+                    console.log('Container marginRight:', containerStyles.marginRight);
+                    console.log('Container position:', containerStyles.position);
+                    console.log('Container left:', containerStyles.left);
+                    console.log('Container transform:', containerStyles.transform);
+                    
                     // Force the media query to re-evaluate by toggling a class
                     visualView.classList.remove('visible');
                     void visualView.offsetHeight;  // Trigger reflow
@@ -2887,7 +2915,7 @@
                     console.log('Wrapper justifyContent after inline:', window.getComputedStyle(visualView).justifyContent);
                     console.log('Wrapper scrollLeft after:', visualView.scrollLeft);
                     console.log('Wrapper offsetWidth:', visualView.offsetWidth);
-                    console.log('Container offsetWidth:', domCache.flowchartContainer.offsetWidth);
+                    console.log('Container offsetWidth:', container.offsetWidth);
                     
                     // Move focus to the first course in visual view
                     const firstCourse = visualView.querySelector('.course');
