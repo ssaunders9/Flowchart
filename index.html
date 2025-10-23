@@ -2861,7 +2861,7 @@
 
                 currentView = 'visual';
 
-                // Rebuild the flowchart to ensure proper styling
+                // Rebuild the flowchart to ensure proper styling - exactly like initial load
                 setTimeout(() => {
                     const flowchartContainer = domCache.flowchartContainer;
                     const svg = domCache.connectionsSvg;
@@ -2882,17 +2882,13 @@
                         flowchartContainer.appendChild(svgElement);
                     }
                     
-                    // Rebuild flowchart
+                    // Rebuild flowchart (this calls centerFlowchartOnInit internally when not a program switch)
                     leadsToMap = buildLeadsToMap();
-                    buildFlowchart();
+                    buildFlowchart(false);  // false = not a program switch, so it will call centerFlowchartOnInit
                     setupScrollIndicators();
                     createArrowMarkers();
                     updateSVGSize();
-                    
-                    // Reset scroll and apply centering
-                    centerFlowchartOnInit();
                     applyCenteringLogic();
-                    drawAllConnections();
                     
                     // Move focus to the first course in visual view
                     const firstCourse = visualView.querySelector('.course');
