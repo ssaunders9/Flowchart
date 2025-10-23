@@ -125,6 +125,10 @@
         .connection-indicator.highlighted { opacity: 1 !important; }
         .connection-indicator.faded { opacity: 0.15 !important; }
         .course.highlighted { box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); }
+        .course.selected { 
+            border: 5px solid #000 !important; 
+            box-shadow: 0 0 0 3px #A60F2D !important;
+        }
         .course.dimmed { opacity: 0.2; filter: grayscale(80%); transition: opacity 0.2s ease, filter 0.2s ease; }
 
         .notes-indicator:hover {
@@ -158,71 +162,199 @@
             background: #424242;
         }
         
-        .notes-tooltip {
+        /* Side Pane for Course Information */
+        .course-info-pane {
             position: fixed;
+            right: -380px;
+            top: 0;
+            width: 350px;
+            height: 100vh;
             background: white;
-            border: 2px solid #757575;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            width: 400px;
-            max-width: calc(100vw - 40px);
+            border-left: 2px solid #757575;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.2);
             z-index: 10000;
-            display: none;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s ease;
+            overflow-y: auto;
         }
         
-        .notes-tooltip.visible {
-            display: block;
+        .course-info-pane[aria-hidden="false"] {
+            right: 0;
         }
         
-        .notes-tooltip[role="tooltip"] {
-            outline: none;
+        /* Responsive: Bottom drawer on narrow screens */
+        @media (max-width: 1024px) {
+            .course-info-pane {
+                position: fixed;
+                right: auto;
+                top: auto;
+                bottom: -500px;
+                left: 0;
+                width: 100%;
+                height: auto;
+                max-height: 60vh;
+                border-left: none;
+                border-top: 2px solid #757575;
+                box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+                transition: bottom 0.3s ease;
+                border-radius: 12px 12px 0 0;
+            }
+            
+            .course-info-pane[aria-hidden="false"] {
+                right: auto;
+                bottom: 0;
+            }
         }
         
-        .notes-tooltip-header {
+        .course-info-pane-header {
+            position: relative;
+            padding: 20px 20px 16px 20px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+        
+        .course-info-pane-title {
             font-weight: bold;
             color: #424242;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e0e0e0;
+            font-size: 1.2em;
+            margin: 0;
+            padding-right: 32px;
         }
         
-        .notes-tooltip-content {
-            color: #333;
-            line-height: 1.5;
-        }
-        
-        .notes-tooltip-close {
+        .course-info-pane-close {
             position: absolute;
-            top: 8px;
-            right: 8px;
+            top: 12px;
+            right: 12px;
             background: none;
             border: none;
-            font-size: 1.2em;
+            font-size: 1.5em;
             color: #666;
             cursor: pointer;
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 4px;
+            transition: all 0.2s ease;
+            padding: 0;
         }
         
-        .notes-tooltip-close:hover {
+        .course-info-pane-close:hover {
             background: #f0f0f0;
             color: #333;
         }
-
-        .alternatives-tooltip {
-            border-color: #616161;
-        }
-
-        .alternatives-tooltip .notes-tooltip-header {
-            color: #424242;
-            border-bottom-color: #616161;
+        
+        .course-info-pane-close:focus-visible {
+            outline: 2px solid #0d47a1;
         }
         
+        .course-info-tabs {
+            display: flex;
+            gap: 0;
+            padding: 0 20px;
+            border-bottom: 2px solid #e0e0e0;
+            background: #fafafa;
+            flex-shrink: 0;
+        }
+        
+        .course-info-tab {
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            cursor: pointer;
+            color: #666;
+            font-weight: 500;
+            font-size: 0.95em;
+            position: relative;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .course-info-tab:hover {
+            color: #333;
+            background: #efefef;
+        }
+        
+        .course-info-tab[aria-selected="true"] {
+            color: #0d47a1;
+            border-bottom-color: #0d47a1;
+        }
+        
+        .course-info-tab:focus-visible {
+            outline: 2px solid #0d47a1;
+            outline-offset: -3px;
+        }
+        
+        .course-info-panel {
+            display: none;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .course-info-panel.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .course-info-content {
+            color: #333;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        
+        .course-info-content p {
+            margin: 0 0 12px 0;
+        }
+        
+        .course-info-content strong {
+            color: #424242;
+        }
+        
+        .course-details-row {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .course-details-label {
+            font-weight: 600;
+            color: #0d47a1;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+        
+        .course-details-value {
+            color: #333;
+            padding-left: 8px;
+        }
+        
+        /* Responsive tab styles for narrow screens */
+        @media (max-width: 1024px) {
+            .course-info-tabs {
+                padding: 0 12px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            
+            .course-info-tab {
+                padding: 10px 12px;
+                font-size: 0.9em;
+                flex-shrink: 0;
+            }
+            
+            .course-info-panel {
+                padding: 16px;
+            }
+        }
         .text-semester { margin-bottom: 40px; }
         .text-semester h3 { color: #A60F2D; font-size: 1.4em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #A60F2D; }
         .text-semester h4 { font-size: 1.1em; margin-bottom: 8px; color: #333; }
@@ -428,8 +560,7 @@
             }
 
             /* Hide tooltips */
-            .notes-tooltip,
-            .alternatives-tooltip {
+            .course-info-tooltip {
                 display: none !important;
             }
         }
@@ -515,6 +646,144 @@
         </div>
         <div id="announcements" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" aria-live="polite" aria-atomic="true"></div>
 
+        <!-- Side Pane for Course Information -->
+        <aside id="courseInfoPane" class="course-info-pane" role="complementary" aria-label="Course information details" aria-hidden="true">
+            <div class="course-info-pane-header">
+                <h2 id="courseInfoHeader" class="course-info-pane-title"></h2>
+                <button class="course-info-pane-close" aria-label="Close course information" id="closeCourseInfoBtn">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            
+            <!-- Tab Container -->
+            <div class="course-info-tabs" role="tablist">
+                <button class="course-info-tab" role="tab" aria-selected="true" aria-controls="details-panel" id="details-tab" data-tab="details">
+                    Details
+                </button>
+                <button class="course-info-tab" role="tab" aria-selected="false" aria-controls="notes-panel" id="notes-tab" data-tab="notes">
+                    Notes
+                </button>
+                <button class="course-info-tab" role="tab" aria-selected="false" aria-controls="alternatives-panel" id="alternatives-tab" data-tab="alternatives">
+                    Alternatives
+                </button>
+            </div>
+            
+            <!-- Tab Content Panels -->
+            <div class="course-info-panel active" role="tabpanel" id="details-panel" aria-labelledby="details-tab">
+                <div class="course-info-content" id="detailsContent"></div>
+            </div>
+            
+            <div class="course-info-panel" role="tabpanel" id="notes-panel" aria-labelledby="notes-tab">
+                <div class="course-info-content" id="notesContent"></div>
+            </div>
+            
+            <div class="course-info-panel" role="tabpanel" id="alternatives-panel" aria-labelledby="alternatives-tab">
+                <div class="course-info-content" id="alternativesContent"></div>
+            </div>
+        </aside>
+
+        <!-- User Guide / Legend -->
+        <div class="legend">
+            <button id="guideToggle" class="collapsed" aria-expanded="false">
+                <span><span aria-hidden="true">📖</span> How to Use This Tool</span>
+            </button>
+
+            <div class="legend-content hidden" id="guideContent">
+            <h3 class="visually-hidden">User Guide</h3>
+            
+            <div class="legend-section">
+                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Course Types:</h4>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-box engineering"></div>
+                        <span class="legend-label">Engineering</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box science"></div>
+                        <span class="legend-label">Science/Math</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box ucore"></div>
+                        <span class="legend-label">UCORE</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box technical"></div>
+                        <span class="legend-label">Technical Elective</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend-section">
+                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Course Relationships (click any course to see):</h4>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 5px solid #000; background: #fff; box-shadow: 0 0 0 3px #A60F2D; border-radius: 4px; margin: 8px;"></div>
+                        <span class="legend-label">Selected Course</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 5px solid #ff9800; background: #fff3e0; box-shadow: 0 0 10px rgba(255, 152, 0, 0.6); border-radius: 4px; margin: 8px; position: relative;">
+                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #c44100; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">PRE</div>
+                        </div>
+                        <span class="legend-label">Prerequisites (must take first)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 5px solid #2196f3; background: #e3f2fd; box-shadow: 0 0 10px rgba(33, 150, 243, 0.6); border-radius: 4px; margin: 8px; position: relative;">
+                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #0d47a1; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">CO</div>
+                        </div>
+                        <span class="legend-label">Co-requisites (take together)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 5px solid #4caf50; background: #e8f5e9; box-shadow: 0 0 10px rgba(76, 175, 80, 0.6); border-radius: 4px; margin: 8px; position: relative;">
+                            <div style="position: absolute; top: 0; right: 0; transform: translate(50%, -50%); background: #1b5e20; color: white; border-radius: 3px; padding: 0.1rem 0.25rem; font-size: 0.55em; font-weight: bold; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">▶</div>
+                        </div>
+                        <span class="legend-label">Leads to (unlocks these courses)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend-section">
+                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Additional Indicators:</h4>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
+                            <div style="position: absolute; top: -8px; left: -8px; background: #757575; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; border: 2px solid white;">i</div>
+                        </div>
+                        <span class="legend-label">Course has notes (click to view)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
+                            <div style="position: absolute; bottom: -8px; left: -8px; background: #616161; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; font-weight: bold; border: 2px solid white;">OR</div>
+                        </div>
+                        <span class="legend-label">Course has alternatives (click to view)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
+                            <div style="position: absolute; bottom: -8px; right: -8px; background: #8B4513; color: white; border-radius: 4px; padding: 3px 6px; font-size: 0.7em; font-weight: bold; border: 2px solid white;">F</div>
+                        </div>
+                        <span class="legend-label">Fall only</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 32px; height: 32px; border: 3px solid #ddd; background: #f5f5f5; border-radius: 4px; position: relative; margin: 10px;">
+                            <div style="position: absolute; bottom: -8px; right: -8px; background: #1b5e20; color: white; border-radius: 4px; padding: 3px 6px; font-size: 0.7em; font-weight: bold; border: 2px solid white;">Sp</div>
+                        </div>
+                        <span class="legend-label">Spring only</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend-section">
+                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Keyboard Navigation:</h4>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><kbd style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold;">Tab</kbd> - Navigate between courses and buttons</li>
+                    <li><kbd style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold;">Arrow Keys</kbd> - Move between courses in the grid</li>
+                    <li><kbd style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold;">Enter</kbd> or <kbd style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold;">Space</kbd> - Highlight course and show relationships</li>
+                    <li><kbd style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold;">I</kbd> - View info (notes and/or alternatives) for the focused course</li>
+                    <li><kbd style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px 6px; font-family: monospace; font-weight: bold;">Escape</kbd> - Close info panel or clear selection</li>
+                </ul>
+            </div>
+            </div>
+        </div>
+
         <div style="text-align: center; margin-bottom: 20px;">
             <button id="toggleBtn" style="padding: 12px 24px; font-size: 1em; font-weight: bold; background: #A60F2D; color: white; border: 2px solid #A60F2D; border-radius: 6px; cursor: pointer;">
                 Switch to Text-Only View
@@ -598,12 +867,11 @@
             textContent: null,
             connectionsSvg: null,
             scrollIndicators: null,
-            notesTooltip: null,
-            alternativesTooltip: null,
-            tooltipHeader: null,
-            tooltipContent: null,
-            alternativesHeader: null,
+            courseInfoPane: null,
+            detailsContent: null,
+            notesContent: null,
             alternativesContent: null,
+            courseInfoHeader: null,
             announcements: null,
             guideToggle: null,
             guideContent: null,
@@ -622,12 +890,11 @@
             domCache.textContent = document.getElementById('textContent');
             domCache.connectionsSvg = document.getElementById('connectionsSvg');
             domCache.scrollIndicators = document.getElementById('scrollIndicators');
-            domCache.notesTooltip = document.getElementById('notesTooltip');
-            domCache.alternativesTooltip = document.getElementById('alternativesTooltip');
-            domCache.tooltipHeader = document.getElementById('tooltipHeader');
-            domCache.tooltipContent = document.getElementById('tooltipContent');
-            domCache.alternativesHeader = document.getElementById('alternativesHeader');
+            domCache.courseInfoPane = document.getElementById('courseInfoPane');
+            domCache.detailsContent = document.getElementById('detailsContent');
+            domCache.notesContent = document.getElementById('notesContent');
             domCache.alternativesContent = document.getElementById('alternativesContent');
+            domCache.courseInfoHeader = document.getElementById('courseInfoHeader');
             domCache.announcements = document.getElementById('announcements');
             domCache.guideToggle = document.getElementById('guideToggle');
             domCache.guideContent = document.getElementById('guideContent');
@@ -704,240 +971,317 @@
             courseElementCache.clear();
         }
 
+        /**
+         * Show course information in side pane with Details, Notes, and Alternatives tabs
+         */
+        function showCourseInfo(courseKey, tab = 'details') {
+            const course = courseData[courseKey];
+            if (!course) return;
 
-        // Utility function to safely create links from text
+            // Check if course has any info to show
+            const hasNotes = course.notes && course.notes.trim() !== '';
+            const hasAlternatives = course.alternatives && course.alternatives.length > 0;
+
+            const pane = domCache.courseInfoPane;
+            const header = domCache.courseInfoHeader;
+            const detailsContent = domCache.detailsContent;
+            const notesContent = domCache.notesContent;
+            const alternativesContent = domCache.alternativesContent;
+            const announcer = domCache.announcements;
+
+            if (!pane || !header || !detailsContent || !notesContent || !alternativesContent) return;
+
+            // Set header
+            header.textContent = `${course.code} - ${course.name}`;
+
+            // Populate Details tab
+            detailsContent.innerHTML = '';
+            const detailsDiv = document.createElement('div');
+            
+            // Course Description (from catalog if available, otherwise full name)
+            if (course.description || course.name) {
+                const descRow = document.createElement('div');
+                descRow.className = 'course-details-row';
+                const descLabel = document.createElement('div');
+                descLabel.className = 'course-details-label';
+                descLabel.textContent = 'Description';
+                descRow.appendChild(descLabel);
+                const descValue = document.createElement('div');
+                descValue.className = 'course-details-value';
+                descValue.style.marginBottom = '12px';
+                descValue.textContent = course.description || course.name;
+                descRow.appendChild(descValue);
+                detailsDiv.appendChild(descRow);
+            }
+            
+            // Credits
+            if (course.credits) {
+                const creditsRow = document.createElement('div');
+                creditsRow.className = 'course-details-row';
+                creditsRow.innerHTML = `<div class="course-details-label">Credits</div><div class="course-details-value">${course.credits}</div>`;
+                detailsDiv.appendChild(creditsRow);
+            }
+            
+            // Course Type
+            if (course.type) {
+                const typeRow = document.createElement('div');
+                typeRow.className = 'course-details-row';
+                typeRow.innerHTML = `<div class="course-details-label">Type</div><div class="course-details-value">${course.type}</div>`;
+                detailsDiv.appendChild(typeRow);
+            }
+            
+            // Prerequisites
+            if (course.prerequisites && course.prerequisites.length > 0) {
+                const prereqRow = document.createElement('div');
+                prereqRow.className = 'course-details-row';
+                prereqRow.innerHTML = `<div class="course-details-label">Prerequisites</div><div class="course-details-value">${course.prerequisites.join(', ')}</div>`;
+                detailsDiv.appendChild(prereqRow);
+            }
+            
+            // Co-requisites
+            if (course.corequisites && course.corequisites.length > 0) {
+                const coreqRow = document.createElement('div');
+                coreqRow.className = 'course-details-row';
+                coreqRow.innerHTML = `<div class="course-details-label">Co-requisites</div><div class="course-details-value">${course.corequisites.join(', ')}</div>`;
+                detailsDiv.appendChild(coreqRow);
+            }
+            
+            if (detailsDiv.children.length === 0) {
+                detailsDiv.innerHTML = '<p>No additional details available.</p>';
+            }
+            
+            detailsContent.appendChild(detailsDiv);
+
+            // Populate notes tab
+            notesContent.textContent = '';
+            if (hasNotes) {
+                const safeContent = createSafeLinksFromText(course.notes);
+                notesContent.appendChild(safeContent);
+            } else {
+                notesContent.textContent = 'No notes available.';
+            }
+
+            // Populate alternatives tab
+            alternativesContent.textContent = '';
+            if (hasAlternatives) {
+                if (course.alternatives.length === 1) {
+                    alternativesContent.textContent = course.alternatives[0];
+                } else {
+                    course.alternatives.forEach((alt, index) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.style.marginBottom = '10px';
+
+                        const strong = document.createElement('strong');
+                        strong.textContent = `Option ${index + 1}: `;
+                        optionDiv.appendChild(strong);
+
+                        const textNode = document.createTextNode(alt);
+                        optionDiv.appendChild(textNode);
+
+                        alternativesContent.appendChild(optionDiv);
+                    });
+                }
+            } else {
+                alternativesContent.textContent = 'No alternatives available.';
+            }
+
+            // Update tab visibility and selection
+            const detailsTab = document.getElementById('details-tab');
+            const notesTab = document.getElementById('notes-tab');
+            const alternativesTab = document.getElementById('alternatives-tab');
+            const detailsPanel = document.getElementById('details-panel');
+            const notesPanel = document.getElementById('notes-panel');
+            const alternativesPanel = document.getElementById('alternatives-panel');
+
+            // Details tab always shows, others show only if content exists
+            if (detailsTab) detailsTab.style.display = 'block';
+            if (notesTab) notesTab.style.display = hasNotes ? 'block' : 'none';
+            if (alternativesTab) alternativesTab.style.display = hasAlternatives ? 'block' : 'none';
+
+            // Set active tab - use requested tab if visible, otherwise use Details
+            let activeTab = tab;
+            if (tab === 'notes' && !hasNotes) {
+                activeTab = 'details';
+            } else if (tab === 'alternatives' && !hasAlternatives) {
+                activeTab = 'details';
+            }
+
+            // Update tab panels and attributes
+            if (detailsPanel && notesPanel && alternativesPanel && detailsTab && notesTab && alternativesTab) {
+                const showDetails = activeTab === 'details';
+                const showNotes = activeTab === 'notes';
+                const showAlternatives = activeTab === 'alternatives';
+
+                detailsPanel.classList.toggle('active', showDetails);
+                notesPanel.classList.toggle('active', showNotes);
+                alternativesPanel.classList.toggle('active', showAlternatives);
+
+                detailsTab.setAttribute('aria-selected', showDetails.toString());
+                notesTab.setAttribute('aria-selected', showNotes.toString());
+                alternativesTab.setAttribute('aria-selected', showAlternatives.toString());
+            }
+
+            // Show pane
+            pane.setAttribute('aria-hidden', 'false');
+            currentNotesIndicator = document.querySelector(`.course[data-course-key="${courseKey}"]`);
+
+            // Store trigger for focus return
+            let courseInfoTrigger = document.activeElement;
+            window.courseInfoTrigger = courseInfoTrigger;
+
+            // Focus on active tab
+            let activeTabElement = null;
+            if (activeTab === 'details') {
+                activeTabElement = detailsTab;
+            } else if (activeTab === 'notes') {
+                activeTabElement = notesTab;
+            } else if (activeTab === 'alternatives') {
+                activeTabElement = alternativesTab;
+            }
+            
+            if (activeTabElement) {
+                setTimeout(() => activeTabElement.focus(), 100);
+            }
+
+            // Announce to screen readers
+            if (announcer) {
+                let announcement = `${course.code} - ${course.name}. `;
+                if (course.credits) announcement += `${course.credits} credits. `;
+                if (hasNotes) announcement += `Notes available. `;
+                if (hasAlternatives) announcement += `Alternatives available. `;
+                announcement += 'Press Escape to close. Use arrow keys to switch tabs.';
+                announcer.textContent = announcement;
+            }
+        }
+
+        /**
+         * Close course information pane and return focus
+         */
+        window.closeCourseInfo = function() {
+            const pane = domCache.courseInfoPane;
+            if (pane) {
+                pane.setAttribute('aria-hidden', 'true');
+                // Ensure the pane is actually hidden by removing any inline overrides
+                pane.style.removeProperty('right');
+                pane.style.removeProperty('bottom');
+            }
+
+            if (currentNotesIndicator) {
+                currentNotesIndicator = null;
+            }
+
+            // Return focus to trigger element
+            if (window.courseInfoTrigger && window.courseInfoTrigger.focus) {
+                window.courseInfoTrigger.focus();
+                window.courseInfoTrigger = null;
+            }
+        };
+        
+        /**
+         * Switch active tab in course info pane
+         */
+        function switchCourseInfoTab(tabName) {
+            const detailsTab = document.getElementById('details-tab');
+            const notesTab = document.getElementById('notes-tab');
+            const alternativesTab = document.getElementById('alternatives-tab');
+            const detailsPanel = document.getElementById('details-panel');
+            const notesPanel = document.getElementById('notes-panel');
+            const alternativesPanel = document.getElementById('alternatives-panel');
+
+            // Hide all panels first
+            if (detailsPanel) detailsPanel.classList.remove('active');
+            if (notesPanel) notesPanel.classList.remove('active');
+            if (alternativesPanel) alternativesPanel.classList.remove('active');
+
+            // Deselect all tabs
+            if (detailsTab) detailsTab.setAttribute('aria-selected', 'false');
+            if (notesTab) notesTab.setAttribute('aria-selected', 'false');
+            if (alternativesTab) alternativesTab.setAttribute('aria-selected', 'false');
+
+            // Show and select the requested tab
+            if (tabName === 'details' && detailsTab && detailsTab.style.display !== 'none') {
+                if (detailsPanel) detailsPanel.classList.add('active');
+                detailsTab.setAttribute('aria-selected', 'true');
+                detailsTab.focus();
+            } else if (tabName === 'notes' && notesTab && notesTab.style.display !== 'none') {
+                if (notesPanel) notesPanel.classList.add('active');
+                notesTab.setAttribute('aria-selected', 'true');
+                notesTab.focus();
+            } else if (tabName === 'alternatives' && alternativesTab && alternativesTab.style.display !== 'none') {
+                if (alternativesPanel) alternativesPanel.classList.add('active');
+                alternativesTab.setAttribute('aria-selected', 'true');
+                alternativesTab.focus();
+            }
+        }
+
+        // Utility function to safely create links from text and render HTML
         function createSafeLinksFromText(text) {
-            // Clear the container
+            // Create a container
             const container = document.createElement('div');
 
-            // Split text by URL pattern
-            const urlPattern = /(https?:\/\/[^\s<]+)/g;
-            const parts = text.split(urlPattern);
+            // Sanitize HTML - allow only <br>, <br/>, <strong>, <em>, <a> tags
+            // First, we'll use a temporary div to parse the HTML safely
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
 
-            parts.forEach((part, index) => {
-                if (index % 2 === 0) {
-                    // Text part - use textContent for safety
-                    if (part) {
-                        const textNode = document.createTextNode(part);
-                        container.appendChild(textNode);
-                    }
-                } else {
-                    // URL part - validate and create link
-                    try {
-                        const url = new URL(part);
-                        // Only allow http and https protocols
-                        if (url.protocol === 'http:' || url.protocol === 'https:') {
-                            const link = document.createElement('a');
-                            link.href = url.href;
-                            link.textContent = url.href; // Use textContent, not innerHTML
-                            link.target = '_blank';
-                            link.rel = 'noopener noreferrer';
-                            link.setAttribute('aria-label', `${url.href} (opens in new window)`);
-                            link.style.color = '#A60F2D';
-                            link.style.textDecoration = 'underline';
-                            container.appendChild(link);
-                        } else {
-                            // Invalid protocol - treat as text
-                            container.appendChild(document.createTextNode(part));
+            // Helper to recursively process nodes and sanitize
+            function sanitizeNode(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    return node.cloneNode(true);
+                }
+
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const tagName = node.tagName.toLowerCase();
+                    
+                    // Allow specific safe tags
+                    if (['br', 'strong', 'em', 'b', 'i', 'a', 'p', 'div'].includes(tagName)) {
+                        const newNode = document.createElement(tagName);
+                        
+                        // For links, validate href
+                        if (tagName === 'a' && node.href) {
+                            try {
+                                const url = new URL(node.href);
+                                if (url.protocol === 'http:' || url.protocol === 'https:') {
+                                    newNode.href = node.href;
+                                    newNode.target = '_blank';
+                                    newNode.rel = 'noopener noreferrer';
+                                }
+                            } catch (e) {
+                                // Invalid URL - skip href
+                            }
                         }
-                    } catch (e) {
-                        // Invalid URL - treat as text
-                        container.appendChild(document.createTextNode(part));
+                        
+                        // Copy allowed attributes
+                        if (tagName === 'a' && node.textContent) {
+                            newNode.textContent = node.textContent;
+                        } else {
+                            // Recursively sanitize child nodes
+                            Array.from(node.childNodes).forEach(child => {
+                                const sanitized = sanitizeNode(child);
+                                if (sanitized) {
+                                    newNode.appendChild(sanitized);
+                                }
+                            });
+                        }
+                        
+                        return newNode;
                     }
+                }
+
+                // Return null for disallowed nodes
+                return null;
+            }
+
+            // Process all child nodes
+            Array.from(tempDiv.childNodes).forEach(node => {
+                const sanitized = sanitizeNode(node);
+                if (sanitized) {
+                    container.appendChild(sanitized);
                 }
             });
 
             return container;
         }
-
-        function showNotesTooltip(courseKey, event, indicatorElement) {
-            event.stopPropagation();
-
-            // Close any open tooltips first
-            closeAlternativesTooltip();
-
-            const course = courseData[courseKey];
-            if (!course || !course.notes || course.notes.trim() === '') return;
-
-            // Use cached DOM elements
-            const tooltip = domCache.notesTooltip;
-            const header = domCache.tooltipHeader;
-            const content = domCache.tooltipContent;
-            const announcer = domCache.announcements;
-
-            if (!tooltip || !header || !content) return;
-
-            header.textContent = `${course.code} - ${course.name}`;
-
-            // Safely create links from notes text
-            content.textContent = ''; // Clear existing content
-            const safeContent = createSafeLinksFromText(course.notes);
-            content.appendChild(safeContent);
-
-            const x = event.clientX;
-            const y = event.clientY;
-
-            tooltip.style.left = `${x + 10}px`;
-            tooltip.style.top = `${y + 10}px`;
-
-            tooltip.classList.add('visible');
-
-            const tooltipId = 'notesTooltip';
-            indicatorElement.setAttribute('aria-describedby', tooltipId);
-            currentNotesIndicator = indicatorElement;
-
-            // Store trigger for focus return
-            notesTooltipTrigger = document.activeElement;
-            
-            if (announcer) {
-                announcer.textContent = `Notes for ${course.code}: ${course.notes}`;
-            }
-
-            // Position tooltip and set focus
-            const rect = tooltip.getBoundingClientRect();
-            if (rect.right > window.innerWidth) {
-                tooltip.style.left = `${window.innerWidth - rect.width - 20}px`;
-            }
-            if (rect.bottom > window.innerHeight) {
-                tooltip.style.top = `${window.innerHeight - rect.height - 20}px`;
-            }
-
-            const closeBtn = tooltip.querySelector('.notes-tooltip-close');
-            if (closeBtn) {
-                closeBtn.focus();
-                if (announcer) {
-                    announcer.textContent = `Notes for ${course.code}: ${course.notes}. Press Escape to close.`;
-                }
-            }
-        }
-        
-        let notesTooltipTrigger = null;
-
-        window.closeNotesTooltip = function() {
-            const tooltip = domCache.notesTooltip;
-            if (tooltip) {
-                tooltip.classList.remove('visible');
-            }
-
-            if (currentNotesIndicator) {
-                currentNotesIndicator.removeAttribute('aria-describedby');
-                currentNotesIndicator = null;
-            }
-
-            // Return focus to trigger element
-            if (notesTooltipTrigger && notesTooltipTrigger.focus) {
-                notesTooltipTrigger.focus();
-                notesTooltipTrigger = null;
-            }
-        };
-
-        let currentAlternativesIndicator = null;
-
-        function showAlternativesTooltip(courseKey, event, indicatorElement) {
-            event.stopPropagation();
-
-            // Close any open tooltips first
-            closeNotesTooltip();
-
-            const course = courseData[courseKey];
-            if (!course || !course.alternatives || course.alternatives.length === 0) return;
-
-            // Use cached DOM elements
-            const tooltip = domCache.alternativesTooltip;
-            const header = domCache.alternativesHeader;
-            const content = domCache.alternativesContent;
-            const announcer = domCache.announcements;
-
-            if (!tooltip || !header || !content) return;
-
-            header.textContent = `${course.code} - Alternative Courses`;
-
-            // Clear existing content
-            content.textContent = '';
-
-            if (course.alternatives.length === 1) {
-                content.textContent = course.alternatives[0];
-            } else {
-                // Safely build alternatives list using DOM manipulation
-                course.alternatives.forEach((alt, index) => {
-                    const optionDiv = document.createElement('div');
-                    optionDiv.style.marginBottom = '10px';
-
-                    const strong = document.createElement('strong');
-                    strong.textContent = `Option ${index + 1}: `;
-                    optionDiv.appendChild(strong);
-
-                    const textNode = document.createTextNode(alt);
-                    optionDiv.appendChild(textNode);
-
-                    content.appendChild(optionDiv);
-                });
-            }
-
-            const x = event.clientX;
-            const y = event.clientY;
-
-            tooltip.style.left = `${x + 10}px`;
-            tooltip.style.top = `${y + 10}px`;
-
-            tooltip.classList.add('visible');
-
-            const tooltipId = 'alternativesTooltip';
-            indicatorElement.setAttribute('aria-describedby', tooltipId);
-            currentAlternativesIndicator = indicatorElement;
-
-            // Store trigger for focus return
-            alternativesTooltipTrigger = document.activeElement;
-
-            if (announcer) {
-                if (course.alternatives.length === 1) {
-                    announcer.textContent = `Alternative course for ${course.code}: ${course.alternatives[0]}`;
-                } else {
-                    const altText = course.alternatives.map((alt, index) =>
-                        `Option ${index + 1}: ${alt}`
-                    ).join('. ');
-                    announcer.textContent = `Alternative courses for ${course.code}. ${altText}`;
-                }
-            }
-
-            // Position tooltip and set focus
-            const rect = tooltip.getBoundingClientRect();
-            if (rect.right > window.innerWidth) {
-                tooltip.style.left = `${window.innerWidth - rect.width - 20}px`;
-            }
-            if (rect.bottom > window.innerHeight) {
-                tooltip.style.top = `${window.innerHeight - rect.height - 20}px`;
-            }
-
-            const closeBtn = tooltip.querySelector('.notes-tooltip-close');
-            if (closeBtn) {
-                closeBtn.focus();
-                if (announcer) {
-                    announcer.textContent += '. Press Escape to close.';
-                }
-            }
-        }
-
-        let alternativesTooltipTrigger = null;
-
-        window.closeAlternativesTooltip = function() {
-            const tooltip = domCache.alternativesTooltip;
-            if (tooltip) {
-                tooltip.classList.remove('visible');
-            }
-
-            if (currentAlternativesIndicator) {
-                currentAlternativesIndicator.removeAttribute('aria-describedby');
-                currentAlternativesIndicator = null;
-            }
-
-            // Return focus to trigger element
-            if (alternativesTooltipTrigger && alternativesTooltipTrigger.focus) {
-                alternativesTooltipTrigger.focus();
-                alternativesTooltipTrigger = null;
-            }
-        };
-        
         window.clearHighlights = function() {
             // Batch DOM reads and writes for better performance
             // Query once and reuse
@@ -962,7 +1306,6 @@
                     svg.removeChild(svg.firstChild);
                 }
             }
-
             connectionCounts = {};
             sourceConnectionCounts = {};
 
@@ -974,6 +1317,9 @@
             }
 
             selectedCourseKey = null;
+            
+            // Close the course info pane when clearing highlights
+            window.closeCourseInfo();
         };
         
         function updateSVGSize() {
@@ -3218,7 +3564,7 @@ function drawAllConnections() {
                         : '';
 
                     const alternativesText = course.alternatives && course.alternatives.length > 0
-                        ? ` Has ${course.alternatives.length} alternative course${course.alternatives.length > 1 ? 's' : ''}, press A to view.`
+                        ? ` Has ${course.alternatives.length} alternative course${course.alternatives.length > 1 ? 's' : ''}, press I to view.`
                         : '';
 
                     const semesterRestrictionText = course.semesterRestriction
@@ -3259,16 +3605,19 @@ function drawAllConnections() {
                         notesIndicator.setAttribute('tabindex', '0');
                         notesIndicator.style.cursor = 'pointer';
 
-                        // Add click handler for notes tooltip
+                        // Add click handler for unified info tooltip
                         notesIndicator.addEventListener('click', (e) => {
-                            showNotesTooltip(course.key, e, notesIndicator);
+                            e.stopPropagation();
+                            const courseKey = courseDiv.getAttribute('data-course-key');
+                            showCourseInfo(courseKey, 'notes');
                         });
 
                         // Add keyboard handler
                         notesIndicator.addEventListener('keydown', (e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                showNotesTooltip(course.key, e, notesIndicator);
+                                const courseKey = courseDiv.getAttribute('data-course-key');
+                                showCourseInfo(courseKey, 'notes');
                             }
                         });
 
@@ -3309,37 +3658,19 @@ function drawAllConnections() {
                         alternativesIndicator.setAttribute('role', 'button');
                         alternativesIndicator.setAttribute('tabindex', '0');
 
-                        // Add click handler for alternatives tooltip
+                        // Add click handler for unified info tooltip
                         alternativesIndicator.addEventListener('click', (e) => {
                             e.stopPropagation();
-
-                            // Check if clicking the same indicator to toggle off
-                            const tooltip = domCache.alternativesTooltip;
-                            if (tooltip && tooltip.classList.contains('visible') && currentAlternativesIndicator === alternativesIndicator) {
-                                closeAlternativesTooltip();
-                                return;
-                            }
-
-                            const rect = courseDiv.getBoundingClientRect();
-                            const syntheticEvent = {
-                                clientX: rect.left + rect.width / 2,
-                                clientY: rect.bottom,
-                                stopPropagation: () => {}
-                            };
-                            showAlternativesTooltip(course.key, syntheticEvent, alternativesIndicator);
+                            const courseKey = courseDiv.getAttribute('data-course-key');
+                            showCourseInfo(courseKey, 'alternatives');
                         });
 
                         // Add keyboard handler
                         alternativesIndicator.addEventListener('keydown', (e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                const rect = courseDiv.getBoundingClientRect();
-                                const syntheticEvent = {
-                                    clientX: rect.left + rect.width / 2,
-                                    clientY: rect.bottom,
-                                    stopPropagation: () => {}
-                                };
-                                showAlternativesTooltip(course.key, syntheticEvent, alternativesIndicator);
+                                const courseKey = courseDiv.getAttribute('data-course-key');
+                                showCourseInfo(courseKey, 'alternatives');
                             }
                         });
 
@@ -3443,8 +3774,7 @@ function drawAllConnections() {
             const savedScrollLeft = wrapper ? wrapper.scrollLeft : 0;
 
             // Close any open tooltips
-            closeNotesTooltip();
-            closeAlternativesTooltip();
+            window.closeCourseInfo();
 
             // Clear highlights
             window.clearHighlights();
@@ -3653,7 +3983,7 @@ function drawAllConnections() {
             }
         }
 
-        // Allow Escape key to close modal
+        // Allow Escape key to close modal or tooltips
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const modal = domCache.disclaimerModal;
@@ -3665,16 +3995,11 @@ function drawAllConnections() {
 
             const focusedElement = document.activeElement;
 
-            const notesTooltip = domCache.notesTooltip;
-            const alternativesTooltip = domCache.alternativesTooltip;
+            const courseInfoPane = domCache.courseInfoPane;
 
             if (e.key === 'Escape') {
-                if (notesTooltip && notesTooltip.classList.contains('visible')) {
-                    closeNotesTooltip();
-                }
-
-                if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
-                    closeAlternativesTooltip();
+                if (courseInfoPane && courseInfoPane.getAttribute('aria-hidden') === 'false') {
+                    window.closeCourseInfo();
                 }
 
                 window.clearHighlights();
@@ -3946,35 +4271,18 @@ function drawAllConnections() {
                         toggleBtn.addEventListener('click', toggleView);
                     }
 
-                    const closeNotesBtn = domCache.notesTooltip?.querySelector('#closeNotesBtn');
-                    if (closeNotesBtn) {
-                        closeNotesBtn.addEventListener('click', closeNotesTooltip);
-                    }
-
-                    const closeAlternativesBtn = domCache.alternativesTooltip?.querySelector('#closeAlternativesBtn');
-                    if (closeAlternativesBtn) {
-                        closeAlternativesBtn.addEventListener('click', closeAlternativesTooltip);
-                    }
-
                     const programSelect = domCache.programSelect;
                     if (programSelect) {
                         programSelect.addEventListener('change', switchProgram);
                     }
 
                     document.addEventListener('click', (e) => {
-                        // Close tooltips if clicking outside
-                        const notesTooltip = domCache.notesTooltip;
-                        const alternativesTooltip = domCache.alternativesTooltip;
+                        // Close pane if clicking outside
+                        const courseInfoPane = domCache.courseInfoPane;
 
-                        if (notesTooltip && notesTooltip.classList.contains('visible')) {
-                            if (!e.target.closest('#notesTooltip') && !e.target.closest('.notes-indicator')) {
-                                closeNotesTooltip();
-                            }
-                        }
-
-                        if (alternativesTooltip && alternativesTooltip.classList.contains('visible')) {
-                            if (!e.target.closest('#alternativesTooltip') && !e.target.closest('.alternatives-indicator')) {
-                                closeAlternativesTooltip();
+                        if (courseInfoPane && courseInfoPane.getAttribute('aria-hidden') === 'false') {
+                            if (!e.target.closest('#courseInfoPane') && !e.target.closest('.course')) {
+                                window.closeCourseInfo();
                             }
                         }
 
@@ -4174,6 +4482,16 @@ function drawAllConnections() {
                     heading.textContent = `${course.code} - ${course.name} (${course.credits} credits)`;
                     courseDiv.appendChild(heading);
 
+                    // Add description if available
+                    if (course.description) {
+                        const descP = document.createElement('p');
+                        descP.innerHTML = `<em>${course.description}</em>`;
+                        descP.style.color = '#555';
+                        descP.style.marginTop = '5px';
+                        descP.style.marginBottom = '10px';
+                        courseDiv.appendChild(descP);
+                    }
+
                     if (course.semesterRestriction) {
                         const restrictionP = document.createElement('p');
                         restrictionP.innerHTML = `<strong>Availability:</strong> ${course.semesterRestriction} only`;
@@ -4332,6 +4650,7 @@ function drawAllConnections() {
             courseDivs.forEach(courseDiv => {
                 if (courseDiv.getAttribute('data-course-key') === courseKey) {
                     courseDiv.classList.add('highlighted');
+                    courseDiv.classList.add('selected');
                     courseDiv.setAttribute('aria-pressed', 'true');
                 }
             });
@@ -4479,6 +4798,7 @@ function drawAllConnections() {
 
             courseDivs.forEach(courseDiv => {
                 courseDiv.classList.remove('highlighted');
+                courseDiv.classList.remove('selected');
                 courseDiv.classList.remove('dimmed');
                 courseDiv.setAttribute('aria-pressed', 'false');
                 
@@ -4595,6 +4915,21 @@ function drawAllConnections() {
                     return;
                 }
 
+                // Escape closes pane first
+                if (e.key === 'Escape') {
+                    const courseInfoPane = domCache.courseInfoPane;
+                    
+                    if (courseInfoPane && courseInfoPane.getAttribute('aria-hidden') === 'false') {
+                        window.closeCourseInfo();
+                        return;
+                    }
+                    
+                    // If no pane open, clear highlights
+                    window.clearHighlights();
+                    focusedCourseKey = null;
+                    return;
+                }
+
                 switch(e.key) {
                     case 'ArrowRight':
                     case 'ArrowDown':
@@ -4606,11 +4941,6 @@ function drawAllConnections() {
                         e.preventDefault();
                         navigateCourses(e.key === 'ArrowLeft' ? 'left' : 'up');
                         break;
-                    case 'Escape':
-                        // Clear highlights on Escape
-                        window.clearHighlights();
-                        focusedCourseKey = null;
-                        break;
                     case 'Enter':
                     case ' ':
                         // If a course is focused, highlight it
@@ -4618,18 +4948,108 @@ function drawAllConnections() {
                             window.highlightCourseLines(focusedCourseKey);
                         }
                         break;
+                    case 'i':
+                    case 'I':
+                        // Show course info pane for focused course
+                        if (focusedCourseKey) {
+                            e.preventDefault();
+                            showCourseInfo(focusedCourseKey, 'details');
+                        }
+                        break;
                 }
             });
         }
 
         // Add click handlers to course boxes
+        /**
+         * Attach event listeners to course info tooltip tabs and close button
+         */
+        function attachCourseInfoTooltipHandlers() {
+            const detailsTab = document.getElementById('details-tab');
+            const notesTab = document.getElementById('notes-tab');
+            const alternativesTab = document.getElementById('alternatives-tab');
+            const closeBtn = document.getElementById('closeCourseInfoBtn');
+            const pane = domCache.courseInfoPane;
+
+            // Details tab handler
+            if (detailsTab) {
+                detailsTab.addEventListener('click', () => {
+                    switchCourseInfoTab('details');
+                });
+                
+                detailsTab.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        switchCourseInfoTab('details');
+                    }
+                });
+            }
+
+            // Notes tab handler
+            if (notesTab) {
+                notesTab.addEventListener('click', () => {
+                    switchCourseInfoTab('notes');
+                });
+                
+                notesTab.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        switchCourseInfoTab('notes');
+                    }
+                });
+            }
+
+            // Alternatives tab handler
+            if (alternativesTab) {
+                alternativesTab.addEventListener('click', () => {
+                    switchCourseInfoTab('alternatives');
+                });
+                
+                alternativesTab.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        switchCourseInfoTab('alternatives');
+                    }
+                });
+            }
+
+            // Close button handler
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    window.closeCourseInfo();
+                });
+            }
+
+            // Close pane when clicking outside
+            if (pane) {
+                document.addEventListener('click', (e) => {
+                    if (!pane.contains(e.target) && !e.target.closest('.course')) {
+                        if (pane.getAttribute('aria-hidden') === 'false') {
+                            window.closeCourseInfo();
+                        }
+                    }
+                });
+            }
+        }
+
         function attachCourseClickHandlers() {
             const courseDivs = document.querySelectorAll('.course[data-course-key]');
             courseDivs.forEach(courseDiv => {
                 courseDiv.addEventListener('click', (e) => {
                     const courseKey = courseDiv.getAttribute('data-course-key');
+                    
+                    // If clicking the same course, deselect it
+                    if (focusedCourseKey === courseKey) {
+                        window.clearHighlights();
+                        // Explicitly ensure pane closes
+                        setTimeout(() => window.closeCourseInfo(), 0);
+                        return;
+                    }
+                    
                     focusedCourseKey = courseKey;
                     window.highlightCourseLines(courseKey);
+                    // Show course info pane when clicking on course
+                    showCourseInfo(courseKey, 'details');
                 });
                 
                 // Make courses keyboard focusable
@@ -4641,6 +5061,7 @@ function drawAllConnections() {
 
         window.addEventListener('DOMContentLoaded', () => {
             attachCourseClickHandlers();
+            attachCourseInfoTooltipHandlers();
             setupKeyboardNavigation();
         });
 
