@@ -44,7 +44,7 @@
         .semester-column { flex: 0 0 180px; display: flex; flex-direction: column; gap: 20px; scroll-snap-align: start; }
         .semester-header { font-size: 1em; font-weight: bold; color: white; background: #A60F2D; padding: 0.625rem; border-radius: 0.375rem; text-align: center; margin-bottom: 0.313rem; }
         .semester-header .credits { font-weight: normal; font-size: 0.85em; opacity: 0.9; }
-        .course { padding: 0.625rem; border-radius: 0.375rem; border: 3px solid #333; min-height: 4.688rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; position: relative; z-index: 10; transition: all 0.2s ease; }
+        .course { padding: 0.625rem; border-radius: 0.375rem; border: 3px solid #333; min-height: 4.688rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; position: relative; z-index: 8; transition: all 0.2s ease; }
         .course:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         /* .course:focus removed for static version - no interaction */
         .course.engineering { background: #8fc9f7; border-color: #1565c0; color: #002942; }
@@ -120,16 +120,17 @@
 
         /* Line highlighting styles */
         .connection-path { cursor: pointer; }
-        .connection-path.highlighted { stroke-width: 3 !important; opacity: 1 !important; }
+        .connection-path.highlighted { stroke-width: 3 !important; opacity: 1 !important; z-index: 7 !important; }
         .connection-path.faded { opacity: 0.15 !important; }
-        .connection-indicator.highlighted { opacity: 1 !important; }
+        .connection-indicator.highlighted { opacity: 1 !important; z-index: 7 !important; }
         .connection-indicator.faded { opacity: 0.15 !important; }
-        .course.highlighted { box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); }
+        .course.highlighted { box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); z-index: 9; }
         .course.selected { 
             border: 5px solid #000 !important; 
             box-shadow: 0 0 0 3px #A60F2D !important;
+            z-index: 10;
         }
-        .course.dimmed { opacity: 0.2; filter: grayscale(80%); transition: opacity 0.2s ease, filter 0.2s ease; z-index: 0; }
+        .course.dimmed { opacity: 0.2; filter: grayscale(80%); transition: opacity 0.2s ease, filter 0.2s ease; z-index: 3; }
 
         .notes-indicator:hover {
             background: #616161;
@@ -193,12 +194,13 @@
                 left: 0;
                 width: 100%;
                 height: auto;
-                max-height: 40vh;
+                max-height: 30vh;
                 border-left: none;
                 border-top: 2px solid #757575;
                 box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
                 transition: bottom 0.3s ease;
                 border-radius: 12px 12px 0 0;
+                z-index: 9998;
             }
             
             .course-info-pane[aria-hidden="false"] {
@@ -382,8 +384,15 @@
         .legend-box.technical { background: #bdbdbd; border-color: #616161; }
         .legend-label { font-size: 0.9em; font-weight: 500; }
         
-        .scroll-indicators { display: flex; justify-content: center; gap: 0.625rem; margin-top: 0.938rem; padding: 0.625rem; }
-        .scroll-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; cursor: pointer; transition: all 0.3s ease; border: 2px solid #ff5252; }
+        .scroll-indicators { display: flex; justify-content: center; align-items: center; gap: 0.625rem; margin-top: 0.938rem; padding: 0.625rem; }
+        .scroll-arrow { position: fixed; background: rgba(255, 255, 255, 0.95); border: 2px solid #A60F2D; color: #A60F2D; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: none; }
+        .course-info-pane[aria-hidden="false"] ~ .scroll-arrow { display: flex; }
+        .scroll-arrow:hover { background: #A60F2D; color: white; box-shadow: 0 4px 12px rgba(166, 15, 45, 0.3); }
+        .scroll-arrow:focus-visible { outline: 2px solid #0d47a1; outline-offset: 2px; }
+        .scroll-arrow:disabled { opacity: 0.5; cursor: not-allowed; }
+        .scroll-left { left: 12px; top: 50%; transform: translateY(-50%); }
+        .scroll-right { right: 12px; top: 50%; transform: translateY(-50%); }
+        .scroll-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; cursor: pointer; border: 2px solid #ff5252; }
         .scroll-dot:hover { background: #A60F2D; border-color: #8a0c24; transform: scale(1.2); }
         .scroll-dot.active { background: #A60F2D; width: 14px; height: 14px; border: 3px solid #8a0c24; box-shadow: 0 0 8px rgba(166, 15, 45, 0.5); }
         .scroll-dot.out-of-view { background: white; border: 2px solid #333; opacity: 1; }
@@ -391,6 +400,21 @@
         
         @media (max-width: 768px) {
             .scroll-hint { font-size: 0.85em; }
+        }
+
+        /* Position scroll controls on narrow screens */
+        @media (max-width: 1024px) {
+            main {
+                padding-bottom: 0;
+            }
+
+            .scroll-controls {
+                position: relative;
+                z-index: 100;
+                background: white;
+                padding: 10px;
+                border-top: 1px solid #e0e0e0;
+            }
         }
         
         @media (prefers-reduced-motion: reduce) {
@@ -780,8 +804,20 @@
             <div class="scroll-indicators" role="navigation" aria-label="Semester navigation">
                 <div id="scrollIndicators"></div>
             </div>
-            <div class="scroll-hint"><span aria-hidden="true">💡</span> Swipe or scroll horizontally to view all semesters • Click dots to jump to a semester</div>
+            <div class="scroll-hint"><span aria-hidden="true">💡</span> Use arrows, swipe, or scroll horizontally to view all semesters • Click dots to jump to a semester</div>
         </div>
+        
+        <!-- Fixed position scroll arrow buttons -->
+        <button class="scroll-arrow scroll-left" id="scrollLeftBtn" aria-label="Scroll left to previous semesters" title="Previous semesters">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true" style="margin-right: 2px;">
+                <polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button class="scroll-arrow scroll-right" id="scrollRightBtn" aria-label="Scroll right to next semesters" title="Next semesters">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true" style="margin-left: 2px;">
+                <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
         
         <div id="textView" style="display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             <h2 style="color: #A60F2D; margin-bottom: 20px;">Text-Based Course Listing</h2>
@@ -849,6 +885,9 @@
             courseInfoPane: null,
             detailsContent: null,
             courseInfoHeader: null,
+            closeCourseInfoBtn: null,
+            scrollLeftBtn: null,
+            scrollRightBtn: null,
             announcements: null,
             guideToggle: null,
             guideContent: null,
@@ -870,6 +909,9 @@
             domCache.courseInfoPane = document.getElementById('courseInfoPane');
             domCache.detailsContent = document.getElementById('detailsContent');
             domCache.courseInfoHeader = document.getElementById('courseInfoHeader');
+            domCache.closeCourseInfoBtn = document.getElementById('closeCourseInfoBtn');
+            domCache.scrollLeftBtn = document.getElementById('scrollLeftBtn');
+            domCache.scrollRightBtn = document.getElementById('scrollRightBtn');
             domCache.announcements = document.getElementById('announcements');
             domCache.guideToggle = document.getElementById('guideToggle');
             domCache.guideContent = document.getElementById('guideContent');
@@ -4162,6 +4204,43 @@ function drawAllConnections() {
                         toggleBtn.addEventListener('click', toggleView);
                     }
 
+                    const closeCourseInfoBtn = domCache.closeCourseInfoBtn;
+                    if (closeCourseInfoBtn) {
+                        closeCourseInfoBtn.addEventListener('click', window.closeCourseInfo);
+                    }
+
+                    const scrollLeftBtn = domCache.scrollLeftBtn;
+                    const scrollRightBtn = domCache.scrollRightBtn;
+                    if (scrollLeftBtn && scrollRightBtn) {
+                        function scrollStep(direction) {
+                            const wrapper = domCache.visualView;
+                            if (!wrapper) return;
+                            
+                            // Calculate scroll amount (approximately one semester width)
+                            const scrollAmount = 250;
+                            const currentScroll = wrapper.scrollLeft;
+                            const targetScroll = direction === 'left' 
+                                ? Math.max(0, currentScroll - scrollAmount)
+                                : currentScroll + scrollAmount;
+                            
+                            wrapper.scrollTo({
+                                left: targetScroll,
+                                behavior: 'auto'
+                            });
+                        }
+                        
+                        scrollLeftBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            scrollStep('left');
+                        });
+                        scrollRightBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            scrollStep('right');
+                        });
+                    }
+
                     const programSelect = domCache.programSelect;
                     if (programSelect) {
                         programSelect.addEventListener('change', switchProgram);
@@ -4172,7 +4251,8 @@ function drawAllConnections() {
                         const courseInfoPane = domCache.courseInfoPane;
 
                         if (courseInfoPane && courseInfoPane.getAttribute('aria-hidden') === 'false') {
-                            if (!e.target.closest('#courseInfoPane') && !e.target.closest('.course')) {
+                            // Don't close pane if clicking on program selector, scroll arrows, or scroll dots (they have their own handlers)
+                            if (!e.target.closest('#courseInfoPane') && !e.target.closest('.course') && !e.target.closest('.program-selector') && !e.target.closest('.scroll-arrow') && !e.target.closest('.scroll-dot')) {
                                 window.closeCourseInfo();
                             }
                         }
@@ -4550,6 +4630,7 @@ function drawAllConnections() {
             const highlightedPaths = new Set();
             const highlightedIndicators = new Set();
             const matchedPaths = [];
+            const svg = domCache.connectionsSvg;
             allPaths.forEach(path => {
                 const fromCourse = path.getAttribute('data-from-course');
                 const toCourse = path.getAttribute('data-to-course');
@@ -4559,6 +4640,10 @@ function drawAllConnections() {
                     matchedPaths.push({fromCourse, toCourse});
                     path.classList.add('highlighted');
                     highlightedPaths.add(path);
+                    // Move to end of SVG so it renders on top
+                    if (svg) {
+                        svg.appendChild(path);
+                    }
                     
                     // Track connected courses as relevant
                     relevantCourses.add(fromCourse);
@@ -4571,6 +4656,10 @@ function drawAllConnections() {
                         if (indFromCourse === fromCourse && indToCourse === toCourse) {
                             indicator.classList.add('highlighted');
                             highlightedIndicators.add(indicator);
+                            // Move indicator to end of SVG so it renders on top
+                            if (svg) {
+                                svg.appendChild(indicator);
+                            }
                         }
                     });
 
@@ -4857,10 +4946,13 @@ function drawAllConnections() {
             courseDivs.forEach(courseDiv => {
                 courseDiv.addEventListener('click', (e) => {
                     const courseKey = courseDiv.getAttribute('data-course-key');
+                    const pane = domCache.courseInfoPane;
+                    const isPaneOpen = pane && pane.getAttribute('aria-hidden') !== 'true';
                     
-                    // If clicking the same course, deselect it
-                    if (focusedCourseKey === courseKey) {
+                    // If clicking the same course and pane is open, deselect it
+                    if (focusedCourseKey === courseKey && isPaneOpen) {
                         window.clearHighlights();
+                        focusedCourseKey = null;
                         // Explicitly ensure pane closes
                         setTimeout(() => window.closeCourseInfo(), 0);
                         return;
