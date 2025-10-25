@@ -705,7 +705,9 @@
 </head>
 <body>
     <!-- Skip Navigation Link -->
-    <a href="#flowchart-container" class="skip-link">Skip to flowchart</a>
+    <header role="banner" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10000; background: transparent; padding: 0; margin: 0;">
+        <a href="#flowchart-container" class="skip-link" style="pointer-events: auto;">Skip to flowchart</a>
+    </header>
     
     <!-- Disclaimer Modal -->
     <div id="disclaimerModal" class="modal-overlay" role="dialog" aria-labelledby="disclaimerTitle" aria-modal="true">
@@ -748,7 +750,7 @@
         <!-- Side Pane for Course Information -->
         <aside id="courseInfoPane" class="course-info-pane" role="complementary" aria-label="Course information details" aria-hidden="true" inert>
             <div class="course-info-pane-header">
-                <h2 id="courseInfoHeader" class="course-info-pane-title"></h2>
+                <h2 id="courseInfoHeader" class="course-info-pane-title">Course Information</h2>
                 <button class="course-info-pane-close" aria-label="Close course information" id="closeCourseInfoBtn">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -4062,7 +4064,6 @@ function drawAllConnections() {
 
                         restrictionBadge.textContent = displayText;
                         restrictionBadge.setAttribute('aria-hidden', 'true');
-                        restrictionBadge.setAttribute('aria-label', `Only offered in ${course.semesterRestriction}`);
                         restrictionBadge.setAttribute('title', `Only offered in ${course.semesterRestriction}`);
 
                         courseDiv.appendChild(restrictionBadge);
