@@ -746,7 +746,7 @@
         <div id="announcements" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" aria-live="polite" aria-atomic="true"></div>
 
         <!-- Side Pane for Course Information -->
-        <aside id="courseInfoPane" class="course-info-pane" role="complementary" aria-label="Course information details" aria-hidden="true">
+        <aside id="courseInfoPane" class="course-info-pane" role="complementary" aria-label="Course information details" aria-hidden="true" inert>
             <div class="course-info-pane-header">
                 <h2 id="courseInfoHeader" class="course-info-pane-title"></h2>
                 <button class="course-info-pane-close" aria-label="Close course information" id="closeCourseInfoBtn">
@@ -1466,6 +1466,7 @@
 
             // Show pane
             pane.setAttribute('aria-hidden', 'false');
+            pane.removeAttribute('inert'); // Make pane and its contents focusable
             currentNotesIndicator = document.querySelector(`.course[data-course-key="${courseKey}"]`);
 
             // Store trigger for focus return
@@ -1514,6 +1515,7 @@
             const pane = domCache.courseInfoPane;
             if (pane) {
                 pane.setAttribute('aria-hidden', 'true');
+                pane.setAttribute('inert', ''); // Make pane and its contents unfocusable
                 // Ensure the pane is actually hidden by removing any inline overrides
                 pane.style.removeProperty('right');
                 pane.style.removeProperty('bottom');
@@ -4968,7 +4970,7 @@ function drawAllConnections() {
                     if (course.semesterRestriction) {
                         const restrictionP = document.createElement('p');
                         restrictionP.innerHTML = `<strong>Availability:</strong> ${course.semesterRestriction} only`;
-                        restrictionP.style.color = '#D2691E';
+                        restrictionP.style.color = '#8B4513'; // Darkened for AA contrast
                         restrictionP.style.fontWeight = '600';
                         courseDiv.appendChild(restrictionP);
                     }
