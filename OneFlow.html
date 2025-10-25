@@ -3972,11 +3972,11 @@ function drawAllConnections() {
                     courseDiv.setAttribute('data-course-key', course.key);
                     
                     const prereqText = course.prereqs.length > 0
-                        ? `Prereq: ${course.prereqs.map(p => courseData[p]?.code || p).join(', ')}`
+                        ? ` Prereq: ${course.prereqs.map(p => courseData[p]?.code || p).join(', ')}.`
                         : '';
 
                     const coreqText = course.coreqs.length > 0
-                        ? `Coreq: ${course.coreqs.map(c => courseData[c]?.code || c).join(', ')}`
+                        ? ` Coreq: ${course.coreqs.map(c => courseData[c]?.code || c).join(', ')}.`
                         : '';
 
                     // Calculate "required for" courses (outgoing connections)
@@ -3999,7 +3999,7 @@ function drawAllConnections() {
                         ? ` Only offered in ${course.semesterRestriction}.`
                         : '';
 
-                    const ariaLabel = `${course.code}, ${course.credits} credits.${semesterRestrictionText} ${prereqText}${coreqText}${requiredForText}${alternativesText}`;
+                    const ariaLabel = `${course.code}, ${course.credits} credits.${semesterRestrictionText}${prereqText}${coreqText}${requiredForText}${alternativesText}`;
                     courseDiv.setAttribute('aria-label', ariaLabel);
 
                     // Build tooltip text for hover
@@ -4027,26 +4027,16 @@ function drawAllConnections() {
                         notesIndicator.textContent = 'i';
                         // Convert <br> tags to newlines for plain text attributes
                         const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, '\n');
-                        notesIndicator.setAttribute('aria-label', `Note: ${plainTextNotes}`);
+                        notesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-label
                         notesIndicator.setAttribute('title', plainTextNotes);
-                        notesIndicator.setAttribute('role', 'button');
-                        notesIndicator.setAttribute('tabindex', '0');
+                        // Removed role="button" and tabindex - not independently interactive
                         notesIndicator.style.cursor = 'pointer';
 
-                        // Add click handler for unified info tooltip
+                        // Click handler - but stops propagation handled by parent
                         notesIndicator.addEventListener('click', (e) => {
                             e.stopPropagation();
                             const courseKey = courseDiv.getAttribute('data-course-key');
                             showCourseInfo(courseKey, 'notes');
-                        });
-
-                        // Add keyboard handler
-                        notesIndicator.addEventListener('keydown', (e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                const courseKey = courseDiv.getAttribute('data-course-key');
-                                showCourseInfo(courseKey, 'notes');
-                            }
                         });
 
                         courseDiv.appendChild(notesIndicator);
@@ -4080,26 +4070,15 @@ function drawAllConnections() {
                         const alternativesIndicator = document.createElement('div');
                         alternativesIndicator.className = 'alternatives-indicator';
                         alternativesIndicator.textContent = 'OR';
-                        alternativesIndicator.setAttribute('aria-hidden', 'true');
-                        alternativesIndicator.setAttribute('aria-label', `Alternative: ${course.alternatives.join(', ')}`);
+                        alternativesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-label
                         alternativesIndicator.setAttribute('title', `Alternative: ${course.alternatives.join(', ')}`);
-                        alternativesIndicator.setAttribute('role', 'button');
-                        alternativesIndicator.setAttribute('tabindex', '0');
+                        // Removed role="button" and tabindex - not independently interactive
 
-                        // Add click handler for unified info tooltip
+                        // Click handler - but stops propagation handled by parent
                         alternativesIndicator.addEventListener('click', (e) => {
                             e.stopPropagation();
                             const courseKey = courseDiv.getAttribute('data-course-key');
                             showCourseInfo(courseKey, 'alternatives');
-                        });
-
-                        // Add keyboard handler
-                        alternativesIndicator.addEventListener('keydown', (e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                const courseKey = courseDiv.getAttribute('data-course-key');
-                                showCourseInfo(courseKey, 'alternatives');
-                            }
                         });
 
                         courseDiv.appendChild(alternativesIndicator);
