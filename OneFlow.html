@@ -143,6 +143,12 @@
         .connection-indicator.highlighted { fill-opacity: 1 !important; }
         .connection-indicator.faded { display: none; }
         .course.highlighted { box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); z-index: 7; }
+        
+        /* Colored glows for different relationship types */
+        .course.highlighted.prereq-glow { box-shadow: 0 0 16px rgba(184, 54, 0, 0.7); } /* Orange glow for prerequisites */
+        .course.highlighted.coreq-glow { box-shadow: 0 0 16px rgba(10, 47, 110, 0.7); } /* Blue glow for co-requisites */
+        .course.highlighted.leadsto-glow { box-shadow: 0 0 16px rgba(22, 68, 23, 0.7); } /* Green glow for "leads to" */
+        
         .course.selected { 
             border: 5px solid #000 !important; 
             box-shadow: 0 0 0 3px #A60F2D !important;
@@ -1484,9 +1490,9 @@
                 
                 // Calculate and announce "required for"
                 const requiredForKeys = [];
-                Object.values(courseData).forEach(otherCourse => {
+                Object.entries(courseData).forEach(([otherKey, otherCourse]) => {
                     if (otherCourse.prereqs && otherCourse.prereqs.includes(courseKey)) {
-                        requiredForKeys.push(otherCourse.key);
+                        requiredForKeys.push(otherKey);
                     }
                 });
                 if (requiredForKeys.length > 0) {
@@ -3975,9 +3981,9 @@ function drawAllConnections() {
 
                     // Calculate "required for" courses (outgoing connections)
                     const requiredForKeys = [];
-                    Object.values(courseData).forEach(otherCourse => {
+                    Object.entries(courseData).forEach(([otherKey, otherCourse]) => {
                         if (otherCourse.prereqs && otherCourse.prereqs.includes(course.key)) {
-                            requiredForKeys.push(otherCourse.key);
+                            requiredForKeys.push(otherKey);
                         }
                     });
 
@@ -4993,6 +4999,7 @@ function drawAllConnections() {
                     if (course.prereqs.length > 0) {
                         const prereqNames = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
                         prereqP.innerHTML = `<strong>Prerequisites:</strong> ${prereqNames}`;
+                        prereqP.style.color = '#b83600'; // Match PRE badge color
                     } else {
                         prereqP.innerHTML = `<strong>Prerequisites:</strong> None`;
                     }
@@ -5003,14 +5010,15 @@ function drawAllConnections() {
                         const coreqP = document.createElement('p');
                         const coreqNames = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
                         coreqP.innerHTML = `<strong>Co-requisites:</strong> ${coreqNames}`;
+                        coreqP.style.color = '#0a2f6e'; // Match CO badge color
                         courseDiv.appendChild(coreqP);
                     }
 
                     // Required For (outgoing connections)
                     const requiredForKeys = [];
-                    Object.values(courseData).forEach(otherCourse => {
+                    Object.entries(courseData).forEach(([otherKey, otherCourse]) => {
                         if (otherCourse.prereqs && otherCourse.prereqs.includes(course.key)) {
-                            requiredForKeys.push(otherCourse.key);
+                            requiredForKeys.push(otherKey);
                         }
                     });
                     
@@ -5257,6 +5265,7 @@ function drawAllConnections() {
                                     badge.textContent = 'CO';
                                     badge.title = 'Co-requisite for selected course';
                                     coreqDiv.appendChild(badge);
+                                    coreqDiv.classList.add('coreq-glow'); // Add blue glow
                                     badgesAdded.add(coreqKey);
                                 }
                             }
@@ -5274,6 +5283,7 @@ function drawAllConnections() {
                                     badge.textContent = 'PRE';
                                     badge.title = 'Prerequisite for selected course';
                                     prereqDiv.appendChild(badge);
+                                    prereqDiv.classList.add('prereq-glow'); // Add orange glow
                                     badgesAdded.add(prereqKey);
                                 }
                             }
@@ -5295,6 +5305,7 @@ function drawAllConnections() {
                                     badge.textContent = '▶';
                                     badge.title = 'This course leads to: ' + otherCourse.code;
                                     otherDiv.appendChild(badge);
+                                    otherDiv.classList.add('leadsto-glow'); // Add green glow
                                     badgesAdded.add(otherKey);
                                 }
                             }
@@ -5335,6 +5346,9 @@ function drawAllConnections() {
                 courseDiv.classList.remove('highlighted');
                 courseDiv.classList.remove('selected');
                 courseDiv.classList.remove('dimmed');
+                courseDiv.classList.remove('prereq-glow');
+                courseDiv.classList.remove('coreq-glow');
+                courseDiv.classList.remove('leadsto-glow');
                 courseDiv.setAttribute('aria-pressed', 'false');
                 
                 // Remove relationship badges (PRE, CO, ▶)
