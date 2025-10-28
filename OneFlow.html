@@ -13,7 +13,7 @@
         
         .skip-link {
             position: absolute;
-            top: -40px;
+            top: -100px;
             left: 0;
             background: #A60F2D;
             color: white;
@@ -22,10 +22,14 @@
             z-index: 10000;
             border-radius: 0 0 4px 0;
             font-weight: bold;
+            opacity: 0;
+            transform: translateY(-100%);
         }
         
         .skip-link:focus {
             top: 0;
+            opacity: 1;
+            transform: translateY(0);
         }
         
         header { background: #A60F2D; color: white; padding: 1.25rem; margin-bottom: 1.875rem; border-radius: 0.5rem; }
@@ -72,6 +76,12 @@
         .course-name { font-size: 0.9em; font-weight: 600; display: block; margin-bottom: 0.25rem; text-align: center; line-height: 1.3; }
         .course-credits { font-size: 0.8em; display: block; text-align: center; }
         
+        /* AAA Compliance: Abbreviation - semantic only, no visual styling */
+        abbr[title] {
+            text-decoration: none;
+            cursor: inherit;
+        }
+        
         .relationship-badge {
             position: absolute;
             top: -8px;
@@ -93,7 +103,7 @@
         
         .relationship-badge.prereq { background: #b83600; } /* Darkened for better contrast */
         .relationship-badge.coreq { background: #0a2f6e; } /* Darkened for better contrast */
-        .relationship-badge.leadsto { background: #164417; } /* Darkened for better contrast */
+        .relationship-badge.leadsto { background: #7b1fa2; } /* Purple - distinct from all other badges */
 
         .semester-restriction-badge {
             position: absolute;
@@ -281,6 +291,17 @@
             }
         }
         
+        /* Adjust flowchart when pane is open on desktop */
+        @media (min-width: 1025px) {
+            #flowchart-container {
+                transition: margin-right 0.3s ease;
+            }
+            
+            body.pane-open #flowchart-container {
+                margin-right: 380px;
+            }
+        }
+        
         .course-info-pane-header {
             position: relative;
             padding: 20px 20px 16px 20px;
@@ -457,13 +478,20 @@
         .legend-label { font-size: 0.9em; font-weight: 500; }
         
         .scroll-indicators { display: flex; justify-content: center; align-items: center; gap: 0.625rem; margin-top: 0.938rem; padding: 0.625rem; }
-        .scroll-arrow { position: fixed; background: rgba(255, 255, 255, 0.95); border: 2px solid #A60F2D; color: #A60F2D; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: none; }
+        .scroll-arrow { position: fixed; background: rgba(255, 255, 255, 0.95); border: 2px solid #A60F2D; color: #A60F2D; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: right 0.3s ease, left 0.3s ease; }
         .course-info-pane[aria-hidden="false"] ~ .scroll-arrow { display: flex; }
         .scroll-arrow:hover { background: #A60F2D; color: white; box-shadow: 0 4px 12px rgba(166, 15, 45, 0.3); }
         .scroll-arrow:focus-visible { outline: 2px solid #0d47a1; outline-offset: 2px; }
         .scroll-arrow:disabled { opacity: 0.5; cursor: not-allowed; }
         .scroll-left { left: 12px; top: 50%; transform: translateY(-50%); }
         .scroll-right { right: 12px; top: 50%; transform: translateY(-50%); }
+        
+        /* Adjust right button when pane is open on desktop */
+        @media (min-width: 1025px) {
+            .course-info-pane[aria-hidden="false"] ~ .scroll-right {
+                right: 370px;
+            }
+        }
         .scroll-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; cursor: pointer; border: 2px solid #ff5252; }
         .scroll-dot:hover { background: #A60F2D; border-color: #8a0c24; transform: scale(1.2); }
         .scroll-dot.active { background: #A60F2D; width: 14px; height: 14px; border: 3px solid #8a0c24; box-shadow: 0 0 8px rgba(166, 15, 45, 0.5); }
@@ -489,15 +517,22 @@
             }
         }
         
+        /* AAA Compliance: Respect user motion preferences */
         @media (prefers-reduced-motion: reduce) {
-            * {
+            *, *::before, *::after {
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
+                transition-delay: 0ms !important;
                 scroll-behavior: auto !important;
             }
-            .course:hover { transform: none; }
-            .scroll-dot { transition: none; }
+            .course:hover { 
+                transform: none !important; 
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+            }
+            .scroll-dot { transition: none !important; }
+            .skip-link { transition: none !important; }
+            .modal-overlay { animation: none !important; }
         }
 
         /* Disclaimer Modal Styles */
@@ -705,7 +740,7 @@
 </head>
 <body>
     <!-- Skip Navigation Link -->
-    <header role="banner" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10000; background: transparent; padding: 0; margin: 0;">
+    <header style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10000; background: transparent; padding: 0; margin: 0;">
         <a href="#flowchart-container" class="skip-link" style="pointer-events: auto;">Skip to flowchart</a>
     </header>
     
@@ -713,12 +748,12 @@
     <div id="disclaimerModal" class="modal-overlay" role="dialog" aria-labelledby="disclaimerTitle" aria-modal="true">
         <div class="modal-content">
             <h2 id="disclaimerTitle">Important: Planning Tool Disclaimer</h2>
-            <p>This flowchart is provided for <strong>convenience only</strong> to help you visualize your degree plan. The official <a href="https://catalog.wsu.edu/" target="_blank" rel="noopener noreferrer" aria-label="WSU catalog (opens in new window)">WSU catalog</a> is the authoritative reference for all degree requirements.</p>
+            <p>This flowchart is provided for <strong>convenience only</strong> to help you visualize your degree plan. The official <a href="https://catalog.wsu.edu/" target="_blank" rel="noopener noreferrer">WSU Course Catalog (opens in new window)</a> is the authoritative reference for all degree requirements.</p>
 
             <p><strong>Students are responsible for:</strong></p>
             <ul>
                 <li>Verifying all course information against the official catalog</li>
-                <li>Following <a href="https://registrar.wsu.edu/academic-regulations/#108" target="_blank" rel="noopener noreferrer" aria-label="WSU academic regulations (opens in new window)">WSU academic regulations</a></li>
+                <li>Following <a href="https://registrar.wsu.edu/academic-regulations/#108" target="_blank" rel="noopener noreferrer">WSU Academic Regulations (opens in new window)</a></li>
                 <li>Consulting with their academic advisor for questions or concerns</li>
             </ul>
 
@@ -728,7 +763,7 @@
         </div>
     </div>
     
-    <header role="banner">
+    <header>
         <h1>Washington State University</h1>
         <p class="subtitle">Voiland School of Chemical Engineering and Bioengineering</p>
         <p class="subtitle" id="programTitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</p>
@@ -740,7 +775,7 @@
         </div>
     </header>
     
-    <main role="main" id="main-content">
+    <main id="main-content">
         <h2 class="visually-hidden">Curriculum Flowchart</h2>
         <div class="visually-hidden" role="status" aria-live="assertive">
             <p>This is a static visual representation of the curriculum flowchart. For full accessibility features including keyboard navigation, course details, prerequisite relationships, and interactive functionality, please visit the full flowchart page. This static version provides a complete visual overview but has limited interactive and accessibility capabilities.</p>
@@ -748,7 +783,7 @@
         <div id="announcements" style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" aria-live="polite" aria-atomic="true"></div>
 
         <!-- Side Pane for Course Information -->
-        <aside id="courseInfoPane" class="course-info-pane" role="complementary" aria-label="Course information details" aria-hidden="true" inert>
+        <aside id="courseInfoPane" class="course-info-pane" aria-label="Course information details" aria-hidden="true" inert>
             <div class="course-info-pane-header">
                 <h2 id="courseInfoHeader" class="course-info-pane-title">Course Information</h2>
                 <button class="course-info-pane-close" aria-label="Close course information" id="closeCourseInfoBtn">
@@ -911,6 +946,30 @@
     <script src="programsData.js?v=20251021"></script>
 
     <script>
+        // AAA Compliance: Department abbreviation mappings for accessibility
+        const DEPT_ABBREVIATIONS = {
+            'CHE': 'Chemical Engineering',
+            'CHEM': 'Chemistry',
+            'MATH': 'Mathematics',
+            'PHYS': 'Physics',
+            'BIOLOGY': 'Biology',
+            'ENGL': 'English',
+            'HIST': 'History',
+            'ECONS': 'Economics',
+            'ELEC': 'Elective'
+        };
+        
+        // Helper function to wrap course code with abbreviation tag for AAA compliance
+        function formatCourseCodeWithAbbr(courseCode) {
+            const match = courseCode.match(/^([A-Z]+)[\s-]?(\d+.*)$/);
+            if (match && DEPT_ABBREVIATIONS[match[1]]) {
+                const dept = match[1];
+                const number = match[2];
+                return `<abbr title="${DEPT_ABBREVIATIONS[dept]}">${dept}</abbr> ${number}`;
+            }
+            return courseCode;
+        }
+        
         (function checkBrowserCompatibility() {
             try {
                 const testArrow = () => true;
@@ -1412,6 +1471,19 @@
                 detailsDiv.appendChild(coreqRow);
             }
 
+            // Required For (courses that require this one as prerequisite or corequisite)
+            const leadsTo = leadsToMap[courseKey];
+            if (leadsTo) {
+                const requiredForKeys = [...leadsTo.asPrereq, ...leadsTo.asCoreq];
+                if (requiredForKeys.length > 0) {
+                    const requiredForRow = document.createElement('div');
+                    requiredForRow.className = 'course-details-row';
+                    const requiredForCodes = requiredForKeys.map(k => courseData[k]?.code || k).join(', ');
+                    requiredForRow.innerHTML = `<div class="course-details-label">Required For</div><div class="course-details-value">${requiredForCodes}</div>`;
+                    detailsDiv.appendChild(requiredForRow);
+                }
+            }
+
             // Add Notes section if available
             if (hasNotes) {
                 const notesSection = document.createElement('div');
@@ -1469,7 +1541,25 @@
             // Show pane
             pane.setAttribute('aria-hidden', 'false');
             pane.removeAttribute('inert'); // Make pane and its contents focusable
+            document.body.classList.add('pane-open'); // Add class for CSS adjustments
             currentNotesIndicator = document.querySelector(`.course[data-course-key="${courseKey}"]`);
+
+            // Scroll selected course into view when pane opens (with slight delay for CSS transition)
+            setTimeout(() => {
+                const selectedCourseDiv = getCourseElement(courseKey);
+                const wrapper = domCache.visualView;
+                if (selectedCourseDiv && wrapper) {
+                    const courseRect = selectedCourseDiv.getBoundingClientRect();
+                    const wrapperRect = wrapper.getBoundingClientRect();
+                    
+                    // Check if course is out of view horizontally
+                    if (courseRect.right > wrapperRect.right || courseRect.left < wrapperRect.left) {
+                        // Scroll to center the course in the viewport with some padding
+                        const courseScrollLeft = selectedCourseDiv.offsetLeft - (wrapperRect.width / 2) + (courseRect.width / 2);
+                        wrapper.scrollLeft = courseScrollLeft;
+                    }
+                }
+            }, 310); // Match the CSS transition duration (0.3s = 300ms, +10ms buffer)
 
             // Store trigger for focus return
             let courseInfoTrigger = document.activeElement;
@@ -1518,6 +1608,7 @@
             if (pane) {
                 pane.setAttribute('aria-hidden', 'true');
                 pane.setAttribute('inert', ''); // Make pane and its contents unfocusable
+                document.body.classList.remove('pane-open'); // Remove class for CSS adjustments
                 // Ensure the pane is actually hidden by removing any inline overrides
                 pane.style.removeProperty('right');
                 pane.style.removeProperty('bottom');
@@ -4019,8 +4110,10 @@ function drawAllConnections() {
                     }
                     courseDiv.setAttribute('title', tooltipText);
 
+                    // AAA Compliance: Use abbreviation tags for course prefixes
+                    const formattedCode = formatCourseCodeWithAbbr(course.code);
                     courseDiv.innerHTML = `
-                        <span class="course-code">${course.code}</span>
+                        <span class="course-code">${formattedCode}</span>
                         <span class="course-name">${course.shortName || course.name}</span>
                         <span class="course-credits">${course.credits} cr</span>
                     `;
@@ -4788,12 +4881,16 @@ function drawAllConnections() {
                 dot.className = 'scroll-dot';
                 dot.setAttribute('type', 'button');
 
+                // Add visually-hidden text for visible label requirement
+                const label = document.createElement('span');
+                label.className = 'visually-hidden';
                 if (index === 0) {
                     dot.classList.add('active');
-                    dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
+                    label.textContent = `Jump to ${semester} (current)`;
                 } else {
-                    dot.setAttribute('aria-label', `Jump to ${semester}`);
+                    label.textContent = `Jump to ${semester}`;
                 }
+                dot.appendChild(label);
                 
                 dot.addEventListener('click', () => {
                     const columns = container.querySelectorAll('.semester-column');
@@ -4955,7 +5052,9 @@ function drawAllConnections() {
                     courseDiv.className = `text-course ${course.type}`;
 
                     const heading = document.createElement('h4');
-                    heading.textContent = `${course.code} - ${course.name} (${course.credits} credits)`;
+                    // AAA Compliance: Format course code with abbreviation
+                    const formattedCode = formatCourseCodeWithAbbr(course.code);
+                    heading.innerHTML = `${formattedCode} - ${course.name} (${course.credits} credits)`;
                     courseDiv.appendChild(heading);
 
                     // Add description if available
@@ -5008,7 +5107,7 @@ function drawAllConnections() {
                         const requiredForP = document.createElement('p');
                         const requiredForNames = requiredForKeys.map(k => courseData[k]?.code || k).join(', ');
                         requiredForP.innerHTML = `<strong>Required For:</strong> ${requiredForNames}`;
-                        requiredForP.style.color = '#1b5e20';
+                        requiredForP.style.color = '#7b1fa2'; // Match purple leadsto badge color
                         courseDiv.appendChild(requiredForP);
                     }
 
@@ -5497,21 +5596,16 @@ function drawAllConnections() {
             courseDivs.forEach(courseDiv => {
                 courseDiv.addEventListener('click', (e) => {
                     const courseKey = courseDiv.getAttribute('data-course-key');
-                    const pane = domCache.courseInfoPane;
-                    const isPaneOpen = pane && pane.getAttribute('aria-hidden') !== 'true';
                     
-                    // If clicking the same course and pane is open, deselect it
-                    if (focusedCourseKey === courseKey && isPaneOpen) {
+                    // If clicking the same course that's currently highlighted, deselect it
+                    if (currentlyHighlightedCourse === courseKey) {
                         window.clearHighlights();
-                        focusedCourseKey = null;
-                        // Explicitly ensure pane closes
-                        setTimeout(() => window.closeCourseInfo(), 0);
+                        window.closeCourseInfo();
                         return;
                     }
                     
-                    focusedCourseKey = courseKey;
+                    // Highlight the new course and show pane
                     window.highlightCourseLines(courseKey);
-                    // Show course info pane when clicking on course
                     showCourseInfo(courseKey, 'details');
                 });
                 
