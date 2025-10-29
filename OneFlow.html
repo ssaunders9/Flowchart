@@ -630,9 +630,14 @@
             #toggleBtn,
             #guideToggle,
             .modal-overlay,
-            .course-info-pane,
+            .course-info-pane {
+                display: none !important;
+            }
+
+            /* Hide non-essential legend sections: Course Relationships, Additional Indicators, Keyboard Navigation */
             .legend-section:nth-child(2),
-            .legend-section:last-child {
+            .legend-section:nth-child(4),
+            .legend-section:nth-child(5) {
                 display: none !important;
             }
 
