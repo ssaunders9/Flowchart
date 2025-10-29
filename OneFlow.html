@@ -649,41 +649,47 @@
             }
 
             .legend-content {
-                display: block !important;
+                display: flex !important;
                 visibility: visible !important;
                 height: auto !important;
                 max-height: none !important;
                 opacity: 1 !important;
                 margin: 0.08in 0 !important;
+                gap: 30px;
+                flex-wrap: nowrap;
             }
 
             .legend-content.hidden {
-                display: block !important;
+                display: flex !important;
                 visibility: visible !important;
                 height: auto !important;
                 max-height: none !important;
                 opacity: 1 !important;
                 margin: 0.08in 0 !important;
+                gap: 30px;
+                flex-wrap: nowrap;
             }
 
             .legend-section {
                 display: block !important;
                 page-break-inside: avoid;
-                margin-bottom: 0.1in;
+                margin-bottom: 0;
+                flex-shrink: 0;
             }
 
             .legend-items {
                 display: flex !important;
                 flex-wrap: wrap;
-                gap: 6px;
+                gap: 12px;
             }
 
             .legend-item {
                 display: flex !important;
                 align-items: center;
                 gap: 4px;
-                margin-bottom: 2px;
+                margin-bottom: 0;
                 font-size: 0.85em;
+                white-space: nowrap;
             }
 
             /* Keep body and main container as-is */
