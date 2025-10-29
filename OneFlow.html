@@ -640,38 +640,49 @@
                 display: block !important;
                 page-break-inside: avoid;
                 page-break-after: avoid;
-                margin-top: 0.2in;
-                margin-bottom: 0.1in;
-                padding: 0.1in;
+                margin: 0.15in 0 0 0;
+                padding: 0.08in;
                 border-top: 1px solid #ccc;
-                font-size: 0.85em;
+                font-size: 0.8em;
+                position: relative;
             }
 
             .legend-content {
                 display: block !important;
+                visibility: visible !important;
+                height: auto !important;
+                max-height: none !important;
+                opacity: 1 !important;
+                margin: 0.08in 0 !important;
             }
 
             .legend-content.hidden {
                 display: block !important;
+                visibility: visible !important;
+                height: auto !important;
+                max-height: none !important;
+                opacity: 1 !important;
+                margin: 0.08in 0 !important;
             }
 
             .legend-section {
                 display: block !important;
                 page-break-inside: avoid;
-                margin-bottom: 0.15in;
+                margin-bottom: 0.1in;
             }
 
             .legend-items {
                 display: flex !important;
                 flex-wrap: wrap;
-                gap: 10px;
+                gap: 6px;
             }
 
             .legend-item {
                 display: flex !important;
                 align-items: center;
-                gap: 8px;
-                margin-bottom: 5px;
+                gap: 4px;
+                margin-bottom: 2px;
+                font-size: 0.85em;
             }
 
             /* Keep body and main container as-is */
@@ -684,8 +695,6 @@
                 page-break-after: avoid;
             }
 
-            /* Legend - keep visible but compact */
-
             /* Main flowchart container */
             main {
                 padding: 0;
@@ -694,10 +703,11 @@
             .diagram-wrapper {
                 overflow: visible !important;
                 box-shadow: none !important;
-                /* Scale down to fit all semesters on one page */
-                transform: scale(0.72);
+                /* Scale down to fit all semesters on one page with legend */
+                transform: scale(0.68);
                 transform-origin: top left;
                 page-break-inside: avoid;
+                margin-bottom: 1.2in;
             }
 
             /* Ensure SVG connections are visible */
