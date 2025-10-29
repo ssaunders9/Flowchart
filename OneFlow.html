@@ -639,7 +639,9 @@
             .legend {
                 display: block !important;
                 page-break-inside: avoid;
+                page-break-after: avoid;
                 margin-top: 0.2in;
+                margin-bottom: 0.1in;
                 padding: 0.1in;
                 border-top: 1px solid #ccc;
                 font-size: 0.85em;
@@ -653,6 +655,25 @@
                 display: block !important;
             }
 
+            .legend-section {
+                display: block !important;
+                page-break-inside: avoid;
+                margin-bottom: 0.15in;
+            }
+
+            .legend-items {
+                display: flex !important;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .legend-item {
+                display: flex !important;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 5px;
+            }
+
             /* Keep body and main container as-is */
             body {
                 background: white;
@@ -664,10 +685,6 @@
             }
 
             /* Legend - keep visible but compact */
-            .legend {
-                page-break-after: avoid;
-                margin-bottom: 0.1in;
-            }
 
             /* Main flowchart container */
             main {
