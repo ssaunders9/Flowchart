@@ -628,10 +628,29 @@
             .scroll-indicators,
             .scroll-hint,
             #toggleBtn,
+            #guideToggle,
             .modal-overlay,
             .course-info-pane,
-            .legend {
+            .legend-section:last-child {
                 display: none !important;
+            }
+
+            /* Keep legend visible but hidden content shown */
+            .legend {
+                display: block !important;
+                page-break-inside: avoid;
+                margin-top: 0.2in;
+                padding: 0.1in;
+                border-top: 1px solid #ccc;
+                font-size: 0.85em;
+            }
+
+            .legend-content {
+                display: block !important;
+            }
+
+            .legend-content.hidden {
+                display: block !important;
             }
 
             /* Keep body and main container as-is */
