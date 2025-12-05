@@ -2,16 +2,19 @@
 // This file contains curriculum information for all engineering programs at WSU
 // Supports multiple curriculum versions for each program
 // Status values: 'current', 'proposed', 'archived'
-// Last updated: October 21, 2025
+// Schema version: 1.0
+// Last updated: December 3, 2025
+
+'use strict';
 
 const programsData = {
-            'CHE-V1': {
-                name: 'Chemical Engineering',
-                fullTitle: 'Bachelor of Science - Chemical Engineering (4 Year Plan)',
-                version: '1.0',
-                effectiveDate: 'Fall 2025',
-                status: 'current',  // 'current', 'proposed', or 'archived'
-                courseData: {
+    'CHE-V1': {
+        name: 'Chemical Engineering',
+        fullTitle: 'Bachelor of Science - Chemical Engineering (4 Year Plan)',
+        version: '1.0',
+        effectiveDate: 'Fall 2025',
+        status: 'current',  // 'current', 'proposed', or 'archived'
+        courseData: {
             'CHE-101': { code: 'CHE 101', name: 'Overview of Chemical Engineering', shortName: 'CHE Overview', credits: 1, type: 'engineering', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', description: 'Current topics, issues, and career options in Chemical Engineering.', semesterRestriction: 'Fall' },
             'CHEM-105': { code: 'CHEM 105', name: 'Principles of Chemistry I [PSCI]', shortName: 'Gen Chem I (PSCI)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: ['MATH-171'], alternatives: ['CHEM 115 - Honors General Chemistry I [PSCI]. Prereqs: Admitted to Honors College; MATH 171 or concurrent enrollment.'], notes: '', description: 'Atomic and molecular structure, states of matter, quantitative relationships, thermodynamics, quantum mechanics, periodicity, bonding.' },
             'MATH-171': { code: 'MATH 171', name: 'Calculus I [QUAN]', shortName: 'Calculus I (QUAN)', credits: 4, type: 'science', semester: 'Year 1 Fall', prereqs: [], coreqs: [], alternatives: [], notes: '', description: 'Differential and integral calculus of one variable with associated analytic geometry.' },
@@ -585,4 +588,88 @@ const programsData = {
                     'Year 4 Fall', 'Year 4 Spring'
                 ]
             }
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // TEMPLATE: Copy this block to add a new program
+        // ═══════════════════════════════════════════════════════════════════════════
+        /*
+        'PROGRAM-CODE-V1': {
+            name: 'Program Display Name',
+            fullTitle: 'Bachelor of Science - Full Program Title (4 Year Plan)',
+            version: '1.0',
+            effectiveDate: 'Fall 2025',      // When this curriculum takes effect
+            effectiveUntil: '',              // Optional: When this curriculum expires (for archived)
+            status: 'current',               // 'current', 'proposed', or 'archived'
+            courseData: {
+                // ─────────────────────────────────────────────────────────────────
+                // YEAR 1 FALL
+                // ─────────────────────────────────────────────────────────────────
+                'COURSE-KEY': {
+                    code: 'DEPT 101',           // Display code (e.g., "CHE 101", "MATH 171")
+                    name: 'Full Course Name',   // Official course name
+                    shortName: 'Short Name',    // Abbreviated name for display
+                    credits: 3,                 // Credit hours
+                    type: 'engineering',        // 'engineering', 'science', 'ucore', or 'technical'
+                    semester: 'Year 1 Fall',    // Must match semesterOrder values
+                    prereqs: [],                // Array of course keys: ['MATH-171', 'CHEM-105']
+                    coreqs: [],                 // Array of course keys for co-requisites
+                    alternatives: [],           // Array of strings describing alternative courses
+                    notes: '',                  // Additional notes (HTML allowed: <br>, <strong>)
+                    description: '',            // Course description from catalog
+                    semesterRestriction: ''     // Optional: 'Fall', 'Spring', or 'Summer'
+                },
+
+                // ─────────────────────────────────────────────────────────────────
+                // YEAR 1 SPRING
+                // ─────────────────────────────────────────────────────────────────
+
+                // ─────────────────────────────────────────────────────────────────
+                // YEAR 2 FALL
+                // ─────────────────────────────────────────────────────────────────
+
+                // ─────────────────────────────────────────────────────────────────
+                // YEAR 2 SPRING
+                // ─────────────────────────────────────────────────────────────────
+
+                // ─────────────────────────────────────────────────────────────────
+                // YEAR 3 FALL
+                // ─────────────────────────────────────────────────────────────────
+
+                // ─────────────────────────────────────────────────────────────────
+                // YEAR 3 SPRING
+                // ─────────────────────────────────────────────────────────────────
+
+                // ─────────────────────────────────────────────────────────────────
+                // YEAR 4 FALL
+                // ─────────────────────────────────────────────────────────────────
+
+                // ─────────────────────────────────────────────────────────────────
+                // YEAR 4 SPRING
+                // ─────────────────────────────────────────────────────────────────
+            },
+            semesterOrder: [
+                'Year 1 Fall', 'Year 1 Spring',
+                'Year 2 Fall', 'Year 2 Spring',
+                'Year 3 Fall', 'Year 3 Spring',
+                'Year 4 Fall', 'Year 4 Spring'
+            ]
+        },
+        */
+
+        // ═══════════════════════════════════════════════════════════════════════════
+        // COURSE TYPE REFERENCE:
+        //   'engineering' - Blue   - Core engineering courses (CHE, BIO ENG, etc.)
+        //   'science'     - Green  - Math and science courses (MATH, CHEM, PHYS, etc.)
+        //   'ucore'       - Purple - University Core requirements (HIST, ENGL, ECONS)
+        //   'technical'   - Gray   - Technical electives
+        //
+        // STATUS VALUES:
+        //   'current'  - Active curriculum (shown by default)
+        //   'proposed' - Future curriculum under review
+        //   'archived' - Previous curriculum no longer active
+        //
+        // COURSE KEY NAMING CONVENTION:
+        //   Format: DEPT-NUMBER (e.g., 'CHE-101', 'MATH-171', 'BIOENG-140')
+        //   Electives: ELEC-TYPE-NUMBER (e.g., 'ELEC-INQ-1', 'ELEC-TECH-2')
+        // ═══════════════════════════════════════════════════════════════════════════
         };
