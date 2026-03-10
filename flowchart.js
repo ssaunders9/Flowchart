@@ -673,9 +673,6 @@ window.closeCourseInfo = function() {
         announcer.textContent = 'Course details panel closed.';
     }
 
-    // Clear course highlighting so Enter reopens in one press
-    window.clearHighlights();
-
     // Return focus to trigger element
     if (window.courseInfoTrigger && window.courseInfoTrigger.focus) {
         window.courseInfoTrigger.focus();
@@ -4606,10 +4603,10 @@ function setupKeyboardNavigation() {
                 if (activeCourse) {
                     e.preventDefault();
                     const courseKey = activeCourse.getAttribute('data-course-key');
-                    // Always open the pane — user presses Escape to close
-                    // (no toggle-off: arrow nav already highlights, so toggling
-                    //  would require two presses to reopen)
-                    window.highlightCourseLines(courseKey);
+                    // Only highlight if not already highlighted (arrow nav already did it)
+                    if (currentlyHighlightedCourse !== courseKey) {
+                        window.highlightCourseLines(courseKey);
+                    }
                     showCourseInfo(courseKey, 'details');
                 }
                 break;
