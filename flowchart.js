@@ -3115,7 +3115,10 @@ function buildFlowchart(isProgramSwitch = false) {
         const header = document.createElement('h3');
         header.className = 'semester-header';
         const parts = semester.split(' ');
-        header.innerHTML = `${parts[0]} ${parts[1]}<br>${parts[2]}<br><span class="credits">${totalCredits} Credits</span>`;
+        const creditWord = totalCredits === 1 ? 'Credit' : 'Credits';
+        // aria-label gives SR a single clean reading; visual uses line breaks
+        header.setAttribute('aria-label', `${parts[0]} ${parts[1]} ${parts[2]}, ${totalCredits} ${creditWord}`);
+        header.innerHTML = `${parts[0]} ${parts[1]}<br>${parts[2]}<br><span class="credits">${totalCredits} ${creditWord}</span>`;
         column.appendChild(header);
 
         courseBySemester[semester].forEach(course => {
@@ -3535,9 +3538,15 @@ function checkAndShowDisclaimer() {
         const headerEl = document.querySelector('header');
         if (hasSeenDisclaimer === true) {
             modal.classList.add('hidden');
-            // Remove inert from background (set in HTML to prevent SR race condition)
+            // Remove inert from background (set by inline script to prevent SR race condition)
             if (mainEl) mainEl.removeAttribute('inert');
             if (headerEl) headerEl.removeAttribute('inert');
+            // Set focus to page title so SR starts at the top
+            const h1 = document.querySelector('h1');
+            if (h1) {
+                h1.setAttribute('tabindex', '-1');
+                h1.focus({ preventScroll: true });
+            }
         } else {
             modal.classList.remove('hidden');
             // Store current focus
