@@ -3531,27 +3531,25 @@ function checkAndShowDisclaimer() {
     const modal = domCache.disclaimerModal;
     if (modal) {
         // Show modal if user hasn't seen it (null or false)
+        const mainEl = document.getElementById('main-content');
+        const headerEl = document.querySelector('header');
         if (hasSeenDisclaimer === true) {
             modal.classList.add('hidden');
+            // Remove inert from background (set in HTML to prevent SR race condition)
+            if (mainEl) mainEl.removeAttribute('inert');
+            if (headerEl) headerEl.removeAttribute('inert');
         } else {
             modal.classList.remove('hidden');
             // Store current focus
             modalPreviousFocus = document.activeElement;
-            // Prevent background interaction for assistive technology
-            const mainEl = document.getElementById('main-content');
-            const headerEl = document.querySelector('header');
-            if (mainEl) mainEl.setAttribute('inert', '');
-            if (headerEl) headerEl.setAttribute('inert', '');
+            // Background already has inert from HTML — no need to set it again
             // Set up focus trap
             trapFocus(modal);
-            // Focus the heading so screen readers read the disclaimer title first,
-            // then user can arrow through the content and Tab to the button
+            // Focus the dialog container so NVDA announces "Disclaimer, dialog"
+            // then user arrows through the heading and content naturally
             setTimeout(() => {
-                const heading = modal.querySelector('#disclaimerTitle');
-                if (heading) {
-                    heading.setAttribute('tabindex', '-1');
-                    heading.focus();
-                }
+                modal.setAttribute('tabindex', '-1');
+                modal.focus();
             }, 100);
         }
     }
