@@ -3544,10 +3544,14 @@ function checkAndShowDisclaimer() {
             if (headerEl) headerEl.setAttribute('inert', '');
             // Set up focus trap
             trapFocus(modal);
-            // Focus the button for keyboard accessibility
+            // Focus the heading so screen readers read the disclaimer title first,
+            // then user can arrow through the content and Tab to the button
             setTimeout(() => {
-                const button = modal.querySelector('.modal-button');
-                if (button) button.focus();
+                const heading = modal.querySelector('#disclaimerTitle');
+                if (heading) {
+                    heading.setAttribute('tabindex', '-1');
+                    heading.focus();
+                }
             }, 100);
         }
     }
