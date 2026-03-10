@@ -4579,10 +4579,7 @@ function setupKeyboardNavigation() {
         // Remaining keys only apply in visual view
         if (currentView !== 'visual') return;
 
-        // Don't process arrow keys or Enter when focus is inside the course info pane
-        const pane = domCache.courseInfoPane;
-        if (pane && pane.contains(document.activeElement)) return;
-
+        // Handle Escape before the pane guard — Escape must work INSIDE the pane
         if (e.key === 'Escape') {
             const courseInfoPane = domCache.courseInfoPane;
             if (courseInfoPane && courseInfoPane.getAttribute('aria-hidden') === 'false') {
@@ -4592,6 +4589,10 @@ function setupKeyboardNavigation() {
             }
             return;
         }
+
+        // Don't process arrow keys or Enter when focus is inside the course info pane
+        const pane = domCache.courseInfoPane;
+        if (pane && pane.contains(document.activeElement)) return;
 
         switch (e.key) {
             case 'ArrowRight':
