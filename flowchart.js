@@ -4606,14 +4606,11 @@ function setupKeyboardNavigation() {
                 if (activeCourse) {
                     e.preventDefault();
                     const courseKey = activeCourse.getAttribute('data-course-key');
-                    // Toggle off if this course is already selected (matches mouse-click behavior)
-                    if (currentlyHighlightedCourse === courseKey) {
-                        window.clearHighlights();
-                        window.closeCourseInfo();
-                    } else {
-                        window.highlightCourseLines(courseKey);
-                        showCourseInfo(courseKey, 'details');
-                    }
+                    // Always open the pane — user presses Escape to close
+                    // (no toggle-off: arrow nav already highlights, so toggling
+                    //  would require two presses to reopen)
+                    window.highlightCourseLines(courseKey);
+                    showCourseInfo(courseKey, 'details');
                 }
                 break;
             }
