@@ -673,6 +673,9 @@ window.closeCourseInfo = function() {
         announcer.textContent = 'Course details panel closed.';
     }
 
+    // Clear course highlighting so Enter reopens in one press
+    window.clearHighlights();
+
     // Return focus to trigger element
     if (window.courseInfoTrigger && window.courseInfoTrigger.focus) {
         window.courseInfoTrigger.focus();
@@ -4575,6 +4578,7 @@ function setupKeyboardNavigation() {
             const courseInfoPane = domCache.courseInfoPane;
             if (courseInfoPane && courseInfoPane.getAttribute('aria-hidden') === 'false') {
                 window.closeCourseInfo();
+                window.clearHighlights();
             } else {
                 window.clearHighlights();
             }
