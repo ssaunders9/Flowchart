@@ -3542,7 +3542,7 @@ function checkAndShowDisclaimer() {
             modal.classList.remove('hidden');
             // Store current focus
             modalPreviousFocus = document.activeElement;
-            // Background already has inert from HTML — no need to set it again
+            // Background inert is already set by inline script in HTML
             // Set up focus trap
             trapFocus(modal);
             // Focus the dialog container so NVDA announces "Disclaimer, dialog"
