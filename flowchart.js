@@ -625,53 +625,27 @@ function showCourseInfo(courseKey, tab = 'details') {
         }
     }, 310); // Match the CSS transition duration (0.3s = 300ms, +10ms buffer)
 
-    // Store trigger for focus return
-    let courseInfoTrigger = document.activeElement;
-    window.courseInfoTrigger = courseInfoTrigger;
+    // Store trigger for focus return — use the course element directly
+    // (document.activeElement can be unreliable, especially on click)
+    const triggerElement = getCourseElement(courseKey);
+    window.courseInfoTrigger = triggerElement || document.activeElement;
 
-    // Move focus into the pane after transition completes
+    // Move focus to the pane heading so SR reads course title,
+    // then user can arrow through all pane content
     setTimeout(() => {
-        const closeBtn = document.getElementById('closeCourseInfoBtn');
-        if (closeBtn) {
-            closeBtn.focus();
+        if (header) {
+            header.setAttribute('tabindex', '-1');
+            header.focus();
         }
     }, 320);
 
     // Set up focus trap within the pane
     setupPaneFocusTrap(pane);
 
-    // Announce to screen readers with full relationship context
+    // Announce to screen readers — keep it brief since heading + content
+    // will be read naturally when focus moves to the pane heading
     if (announcer) {
-        let announcement = `${course.code} - ${course.name}. `;
-        if (course.credits) announcement += `${course.credits} ${course.credits === 1 ? 'credit' : 'credits'}. `;
-        
-        // Add relationship information
-        if (course.prereqs && course.prereqs.length > 0) {
-            const prereqCodes = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
-            announcement += `Prerequisites: ${prereqCodes}. `;
-        }
-        
-        if (course.coreqs && course.coreqs.length > 0) {
-            const coreqCodes = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
-            announcement += `Corequisites: ${coreqCodes}. `;
-        }
-        
-        // Calculate and announce "required for"
-        const requiredForKeys = [];
-        Object.entries(courseData).forEach(([otherKey, otherCourse]) => {
-            if (otherCourse.prereqs && otherCourse.prereqs.includes(courseKey)) {
-                requiredForKeys.push(otherKey);
-            }
-        });
-        if (requiredForKeys.length > 0) {
-            const requiredForCodes = requiredForKeys.map(k => courseData[k]?.code || k).join(', ');
-            announcement += `Required for: ${requiredForCodes}. `;
-        }
-        
-        if (hasNotes) announcement += `Notes available. `;
-        if (hasAlternatives) announcement += `Alternatives available. `;
-        announcement += 'Press Escape to close.';
-        announcer.textContent = announcement;
+        announcer.textContent = `Course details panel opened. Press Escape to close.`;
     }
 }
 
@@ -691,6 +665,12 @@ window.closeCourseInfo = function() {
 
     if (currentNotesIndicator) {
         currentNotesIndicator = null;
+    }
+
+    // Announce closure to screen readers
+    const announcer = domCache.announcements;
+    if (announcer) {
+        announcer.textContent = 'Course details panel closed.';
     }
 
     // Return focus to trigger element
