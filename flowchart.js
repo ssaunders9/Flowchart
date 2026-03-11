@@ -3141,7 +3141,7 @@ function buildFlowchart(isProgramSwitch = false) {
         const creditWord = totalCredits === 1 ? 'Credit' : 'Credits';
         // aria-label gives SR a single clean reading; visual uses line breaks
         header.setAttribute('aria-label', `${parts[0]} ${parts[1]} ${parts[2]}, ${totalCredits} ${creditWord}`);
-        header.innerHTML = `${parts[0]} ${parts[1]}<br>${parts[2]}<br><span class="credits">${totalCredits} ${creditWord}</span>`;
+        header.innerHTML = `<span class="semester-year">${parts[0]} ${parts[1]}</span><span class="semester-season">${parts[2]}</span><span class="credits">${totalCredits} ${creditWord}</span>`;
         column.appendChild(header);
 
         courseBySemester[semester].forEach(course => {
@@ -3224,6 +3224,7 @@ function buildFlowchart(isProgramSwitch = false) {
                 // Convert <br> tags to newlines for plain text attributes
                 const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, '\n');
                 notesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-describedby
+                notesIndicator.setAttribute('role', 'presentation');
                 notesIndicator.setAttribute('title', plainTextNotes);
 
                 courseDiv.appendChild(notesIndicator);
@@ -3247,6 +3248,7 @@ function buildFlowchart(isProgramSwitch = false) {
 
                 restrictionBadge.textContent = displayText;
                 restrictionBadge.setAttribute('aria-hidden', 'true');
+                restrictionBadge.setAttribute('role', 'presentation');
                 restrictionBadge.setAttribute('title', `Only offered in ${course.semesterRestriction}`);
 
                 courseDiv.appendChild(restrictionBadge);
@@ -3257,6 +3259,7 @@ function buildFlowchart(isProgramSwitch = false) {
                 alternativesIndicator.className = 'alternatives-indicator';
                 alternativesIndicator.textContent = 'OR';
                 alternativesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-describedby
+                alternativesIndicator.setAttribute('role', 'presentation');
                 alternativesIndicator.setAttribute('title', `Alternative: ${course.alternatives.join(', ')}`);
 
                 courseDiv.appendChild(alternativesIndicator);
