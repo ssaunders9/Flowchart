@@ -3220,7 +3220,6 @@ function buildFlowchart(isProgramSwitch = false) {
             if (course.notes && course.notes.trim() !== '') {
                 const notesIndicator = document.createElement('div');
                 notesIndicator.className = 'notes-indicator';
-                notesIndicator.textContent = 'i';
                 // Convert <br> tags to newlines for plain text attributes
                 const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, '\n');
                 notesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-describedby
@@ -3236,17 +3235,6 @@ function buildFlowchart(isProgramSwitch = false) {
                 const semester = course.semesterRestriction.toLowerCase();
                 restrictionBadge.className = `semester-restriction-badge ${semester}`;
 
-                // Display text: "F" for Fall, "Sp" for Spring, "Su" for Summer
-                let displayText = course.semesterRestriction;
-                if (course.semesterRestriction === 'Fall') {
-                    displayText = 'F';
-                } else if (course.semesterRestriction === 'Spring') {
-                    displayText = 'Sp';
-                } else if (course.semesterRestriction === 'Summer') {
-                    displayText = 'Su';
-                }
-
-                restrictionBadge.textContent = displayText;
                 restrictionBadge.setAttribute('aria-hidden', 'true');
                 restrictionBadge.setAttribute('role', 'presentation');
                 restrictionBadge.setAttribute('title', `Only offered in ${course.semesterRestriction}`);
@@ -3257,7 +3245,6 @@ function buildFlowchart(isProgramSwitch = false) {
             if (course.alternatives && course.alternatives.length > 0) {
                 const alternativesIndicator = document.createElement('div');
                 alternativesIndicator.className = 'alternatives-indicator';
-                alternativesIndicator.textContent = 'OR';
                 alternativesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-describedby
                 alternativesIndicator.setAttribute('role', 'presentation');
                 alternativesIndicator.setAttribute('title', `Alternative: ${course.alternatives.join(', ')}`);
