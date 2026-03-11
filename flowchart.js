@@ -626,15 +626,16 @@ function showCourseInfo(courseKey, tab = 'details') {
     window.courseInfoTrigger = triggerElement || document.activeElement;
     if (header) header.setAttribute('tabindex', '-1');
 
-    // After CSS transition, scroll course into view if clipped by pane
+    // After CSS transition, scroll course into view ONLY if covered by the pane (right side)
+    // Never scroll left — the user just clicked it so it was visible
     setTimeout(() => {
         const selectedCourseDiv = getCourseElement(courseKey);
         if (selectedCourseDiv && wrapper) {
             const courseRect = selectedCourseDiv.getBoundingClientRect();
             const wrapperRect = wrapper.getBoundingClientRect();
-            if (courseRect.right > wrapperRect.right || courseRect.left < wrapperRect.left) {
-                const courseScrollLeft = selectedCourseDiv.offsetLeft - (wrapperRect.width / 2) + (courseRect.width / 2);
-                wrapper.scrollLeft = courseScrollLeft;
+            if (courseRect.right > wrapperRect.right) {
+                // Course is hidden behind the pane — scroll right just enough to reveal it
+                wrapper.scrollLeft += courseRect.right - wrapperRect.right + 20;
             }
         }
     }, 350);
