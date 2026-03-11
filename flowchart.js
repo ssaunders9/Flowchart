@@ -626,18 +626,26 @@ function showCourseInfo(courseKey, tab = 'details') {
     window.courseInfoTrigger = triggerElement || document.activeElement;
     if (header) header.setAttribute('tabindex', '-1');
 
-    // After CSS transition, scroll course into view ONLY if covered by the pane (right side)
-    // Never scroll left — the user just clicked it so it was visible
+    // After CSS transition, ensure the selected course isn't covered by the pane.
+    // Use rAF inside the timeout to get truly fresh post-transition layout values.
     setTimeout(() => {
-        const selectedCourseDiv = getCourseElement(courseKey);
-        if (selectedCourseDiv && wrapper) {
-            const courseRect = selectedCourseDiv.getBoundingClientRect();
-            const wrapperRect = wrapper.getBoundingClientRect();
-            if (courseRect.right > wrapperRect.right) {
-                // Course is hidden behind the pane — scroll right just enough to reveal it
-                wrapper.scrollLeft += courseRect.right - wrapperRect.right + 20;
+        requestAnimationFrame(() => {
+            const selectedCourseDiv = getCourseElement(courseKey);
+            if (selectedCourseDiv && wrapper) {
+                const courseRect = selectedCourseDiv.getBoundingClientRect();
+                const wrapperRect = wrapper.getBoundingClientRect();
+                // On desktop, pane is 350px wide fixed at the right edge of the viewport.
+                // Ensure the course has clearance from both the wrapper boundary and the pane.
+                const paneWidth = window.innerWidth >= 1025 ? 350 : 0;
+                const safeRight = Math.min(
+                    wrapperRect.right - 10,             // 10px inside wrapper edge
+                    window.innerWidth - paneWidth - 10  // 10px clear of pane left edge
+                );
+                if (courseRect.right > safeRight) {
+                    wrapper.scrollLeft += courseRect.right - safeRight;
+                }
             }
-        }
+        });
     }, 350);
 
     // Set up focus trap within the pane
