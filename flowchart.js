@@ -608,6 +608,8 @@ function showCourseInfo(courseKey, tab = 'details') {
     
     detailsContent.appendChild(detailsDiv);
 
+    const wrapper = domCache.visualView;
+
     // Show pane
     pane.setAttribute('aria-hidden', 'false');
     pane.removeAttribute('inert'); // Make pane and its contents focusable
@@ -619,36 +621,23 @@ function showCourseInfo(courseKey, tab = 'details') {
         cd.setAttribute('aria-expanded', cd.getAttribute('data-course-key') === courseKey ? 'true' : 'false');
     });
 
-    // Scroll selected course into view when pane opens (with slight delay for CSS transition)
+    // Store trigger for focus return; make header focusable for keyboard users
+    const triggerElement = getCourseElement(courseKey);
+    window.courseInfoTrigger = triggerElement || document.activeElement;
+    if (header) header.setAttribute('tabindex', '-1');
+
+    // After CSS transition, scroll course into view if clipped by pane
     setTimeout(() => {
         const selectedCourseDiv = getCourseElement(courseKey);
-        const wrapper = domCache.visualView;
         if (selectedCourseDiv && wrapper) {
             const courseRect = selectedCourseDiv.getBoundingClientRect();
             const wrapperRect = wrapper.getBoundingClientRect();
-            
-            // Check if course is out of view horizontally
             if (courseRect.right > wrapperRect.right || courseRect.left < wrapperRect.left) {
-                // Scroll to center the course in the viewport with some padding
                 const courseScrollLeft = selectedCourseDiv.offsetLeft - (wrapperRect.width / 2) + (courseRect.width / 2);
                 wrapper.scrollLeft = courseScrollLeft;
             }
         }
-    }, 310); // Match the CSS transition duration (0.3s = 300ms, +10ms buffer)
-
-    // Store trigger for focus return — use the course element directly
-    // (document.activeElement can be unreliable, especially on click)
-    const triggerElement = getCourseElement(courseKey);
-    window.courseInfoTrigger = triggerElement || document.activeElement;
-
-    // Move focus to the pane heading so SR reads course title,
-    // then user can arrow through all pane content
-    setTimeout(() => {
-        if (header) {
-            header.setAttribute('tabindex', '-1');
-            header.focus();
-        }
-    }, 320);
+    }, 350);
 
     // Set up focus trap within the pane
     setupPaneFocusTrap(pane);
@@ -665,11 +654,11 @@ function showCourseInfo(courseKey, tab = 'details') {
  */
 window.closeCourseInfo = function() {
     const pane = domCache.courseInfoPane;
+
     if (pane) {
         pane.setAttribute('aria-hidden', 'true');
         pane.setAttribute('inert', ''); // Make pane and its contents unfocusable
         document.body.classList.remove('pane-open'); // Remove class for CSS adjustments
-        // Ensure the pane is actually hidden by removing any inline overrides
         pane.style.removeProperty('right');
         pane.style.removeProperty('bottom');
     }
@@ -689,7 +678,7 @@ window.closeCourseInfo = function() {
         announcer.textContent = 'Course details panel closed.';
     }
 
-    // Return focus to trigger element
+    // Return focus to the course card that opened the pane
     if (window.courseInfoTrigger && window.courseInfoTrigger.focus) {
         window.courseInfoTrigger.focus();
         window.courseInfoTrigger = null;
