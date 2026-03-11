@@ -121,6 +121,9 @@ abbr[title] {
 .semester-restriction-badge.fall { background: #8B4513; }
 .semester-restriction-badge.spring { background: #1b5e20; }
 .semester-restriction-badge.summer { background: #c44100; }
+.semester-restriction-badge.fall::before { content: "F"; }
+.semester-restriction-badge.spring::before { content: "Sp"; }
+.semester-restriction-badge.summer::before { content: "Su"; }
 
 .notes-indicator {
     position: absolute;
@@ -140,6 +143,7 @@ abbr[title] {
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     z-index: 200;
 }
+.notes-indicator::before { content: "i"; }
 
 /* Line highlighting styles */
 .connection-path.highlighted { stroke-width: 2.5 !important; stroke-opacity: 1 !important; }
@@ -247,6 +251,7 @@ select:focus:not(:focus-visible) {
     transition: transform 0.2s ease;
     line-height: 1;
 }
+.alternatives-indicator::before { content: "OR"; }
 
 .alternatives-indicator:hover {
     transform: scale(1.1);
