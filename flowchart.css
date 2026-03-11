@@ -26,7 +26,7 @@ body { font-family: Arial, sans-serif; line-height: 1.6; padding: 1.25rem; backg
 
 header { background: #A60F2D; color: white; padding: 1.25rem; margin-bottom: 1.875rem; border-radius: 0.5rem; }
 h1 { font-size: 1.8em; margin-bottom: 0.625rem; }
-.subtitle { font-size: 1.1em; }
+.subtitle { font-size: 1.1em; font-weight: normal; margin: 0; line-height: 1.4; }
 
 .program-selector { margin-top: 0.938rem; }
 .program-selector label { font-size: 1em; font-weight: bold; margin-right: 0.625rem; display: inline-block; }
@@ -204,6 +204,21 @@ button:focus:not(:focus-visible),
 select:focus:not(:focus-visible) {
     outline: 2px solid #A60F2D;
     box-shadow: none;
+}
+
+/* Enhanced focus-visible for buttons with same-color borders */
+#toggleBtn:focus-visible,
+#guideToggle:focus-visible,
+#programSelect:focus-visible {
+    outline: 3px solid #000;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 1px white, 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.scroll-dot:focus-visible {
+    outline: 3px solid #000;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 1px white, 0 0 8px rgba(0, 0, 0, 0.4);
 }
 
 .notes-indicator:hover {
@@ -476,7 +491,7 @@ kbd { background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px
 .legend-box.technical { background: #bdbdbd; border-color: #616161; border-style: double; border-width: 4px; }
 .legend-label { font-size: 0.9em; font-weight: 500; }
 
-.scroll-indicators { display: flex; justify-content: center; align-items: center; gap: 0.625rem; margin-top: 0.938rem; padding: 0.625rem; }
+.scroll-indicators { display: flex; justify-content: center; align-items: center; gap: 2rem; margin-top: 0.938rem; padding: 0.625rem; }
 .scroll-arrow { position: fixed; background: rgba(255, 255, 255, 0.95); border: 2px solid #A60F2D; color: #A60F2D; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: right 0.3s ease, left 0.3s ease; }
 .course-info-pane[aria-hidden="false"] ~ .scroll-arrow { display: flex; }
 .scroll-arrow:hover { background: #A60F2D; color: white; box-shadow: 0 4px 12px rgba(166, 15, 45, 0.3); }
@@ -491,10 +506,10 @@ kbd { background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px
         right: 370px;
     }
 }
-.scroll-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; cursor: pointer; border: 2px solid #ff5252; position: relative; }
+.scroll-dot { width: 24px; height: 24px; border-radius: 50%; background: #ff6b6b; cursor: pointer; border: 2px solid #ff5252; position: relative; }
 .scroll-dot::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 50%; }
-.scroll-dot:hover { background: #A60F2D; border-color: #8a0c24; transform: scale(1.2); }
-.scroll-dot.active { background: #A60F2D; width: 14px; height: 14px; border: 3px solid #8a0c24; box-shadow: 0 0 8px rgba(166, 15, 45, 0.5); }
+.scroll-dot:hover { background: #A60F2D; border-color: #8a0c24; transform: scale(1.1); }
+.scroll-dot.active { background: #A60F2D; width: 28px; height: 28px; border: 3px solid #8a0c24; box-shadow: 0 0 8px rgba(166, 15, 45, 0.5); }
 .scroll-dot.out-of-view { background: white; border: 2px solid #333; opacity: 1; }
 .scroll-hint { text-align: center; color: #4a4a4a; font-size: 0.9em; margin-top: 0.625rem; padding: 0.5rem; background: #f9f9f9; border-radius: 0.25rem; }
 
