@@ -3180,8 +3180,17 @@ function buildFlowchart(isProgramSwitch = false) {
 
             const courseTypeLabel = COURSE_TYPE_LABELS[course.type] || course.type;
             const creditWord = course.credits === 1 ? 'credit' : 'credits';
-            const ariaLabel = `${semester}: ${course.code}, ${course.name}, ${courseTypeLabel}, ${course.credits} ${creditWord}.${semesterRestrictionText}${prereqText}${coreqText}${requiredForText}${alternativesText}`;
-            courseDiv.setAttribute('aria-label', ariaLabel);
+
+            // Build supplementary description for screen readers (WCAG 2.5.3 compliance)
+            // Accessible name comes from visible text content; extra context via aria-describedby
+            const descParts = [];
+            descParts.push(`${semester}. ${courseTypeLabel}.`);
+            if (semesterRestrictionText) descParts.push(semesterRestrictionText.trim());
+            if (prereqText) descParts.push(prereqText.trim());
+            if (coreqText) descParts.push(coreqText.trim());
+            if (requiredForText) descParts.push(requiredForText.trim());
+            if (alternativesText) descParts.push(alternativesText.trim());
+            const descId = `desc-${course.key}`;
 
             // Build tooltip text for hover
             let tooltipText = `${course.code} - ${course.name}\n${course.credits} ${course.credits === 1 ? 'credit' : 'credits'}`;
@@ -3202,9 +3211,11 @@ function buildFlowchart(isProgramSwitch = false) {
             courseDiv.innerHTML = `
                 <span class="course-code">${formattedCode}</span>
                 <span class="course-name">${course.shortName || course.name}</span>
-                <span class="course-credits">${course.credits} cr</span>
+                <span class="course-credits">${course.credits} ${creditWord}</span>
                 <span class="course-type-label" aria-hidden="true">${typeLabel}</span>
+                <span id="${descId}" class="visually-hidden" aria-hidden="true">${descParts.join(' ')}</span>
             `;
+            courseDiv.setAttribute('aria-describedby', descId);
             
             if (course.notes && course.notes.trim() !== '') {
                 const notesIndicator = document.createElement('div');
@@ -3212,7 +3223,7 @@ function buildFlowchart(isProgramSwitch = false) {
                 notesIndicator.textContent = 'i';
                 // Convert <br> tags to newlines for plain text attributes
                 const plainTextNotes = course.notes.replace(/<br\s*\/?>/gi, '\n');
-                notesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-label
+                notesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-describedby
                 notesIndicator.setAttribute('title', plainTextNotes);
 
                 courseDiv.appendChild(notesIndicator);
@@ -3245,7 +3256,7 @@ function buildFlowchart(isProgramSwitch = false) {
                 const alternativesIndicator = document.createElement('div');
                 alternativesIndicator.className = 'alternatives-indicator';
                 alternativesIndicator.textContent = 'OR';
-                alternativesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-label
+                alternativesIndicator.setAttribute('aria-hidden', 'true'); // Hidden from screen readers - info in parent aria-describedby
                 alternativesIndicator.setAttribute('title', `Alternative: ${course.alternatives.join(', ')}`);
 
                 courseDiv.appendChild(alternativesIndicator);
