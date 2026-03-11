@@ -26,9 +26,9 @@
     </noscript>
     
     <!-- Skip Navigation Link -->
-    <div style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10000; background: transparent; padding: 0; margin: 0;">
+    <nav aria-label="Skip navigation" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10000; background: transparent; padding: 0; margin: 0;">
         <a href="#flowchart-container" class="skip-link" style="pointer-events: auto;">Skip to flowchart</a>
-    </div>
+    </nav>
     
     <!-- Disclaimer Modal -->
     <div id="disclaimerModal" class="modal-overlay" role="dialog" aria-label="Disclaimer" aria-modal="true">
@@ -51,8 +51,8 @@
     
     <header>
         <h1>Washington State University</h1>
-        <p class="subtitle">Voiland School of Chemical Engineering and Bioengineering</p>
-        <p class="subtitle" id="programTitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</p>
+        <h2 class="subtitle">Voiland School of Chemical Engineering and Bioengineering</h2>
+        <h2 class="subtitle" id="programTitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</h2>
         <div class="program-selector">
             <label for="programSelect">Select Program:</label>
             <select id="programSelect">
@@ -186,7 +186,7 @@
         </div>
 
         <div style="text-align: center; margin-bottom: 20px;">
-            <button id="toggleBtn" style="padding: 12px 24px; font-size: 1em; font-weight: bold; background: #A60F2D; color: white; border: 2px solid #A60F2D; border-radius: 6px; cursor: pointer;">
+            <button id="toggleBtn" style="padding: 12px 24px; font-size: 1em; font-weight: bold; background: #A60F2D; color: white; border: 2px solid #A60F2D; border-radius: 6px; cursor: pointer;" aria-label="Switch to List View">
                 Switch to List View
             </button>
         </div>
@@ -208,7 +208,7 @@
                 <div id="scrollIndicators"></div>
             </div>
             <div class="scroll-hint" aria-hidden="true"><span>💡</span> Use arrows, swipe, or scroll horizontally to view all semesters • Click dots to jump to a semester</div>
-            <div class="visually-hidden">Use the semester navigation buttons above to jump between semesters, or press V to switch to list view for easier browsing.</div>
+            <div class="visually-hidden">Use the semester navigation buttons to jump between semesters, or press V to switch to list view for easier browsing.</div>
         </div>
         
         <!-- Fixed position scroll arrow buttons -->
