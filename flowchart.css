@@ -500,7 +500,7 @@ kbd { background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 2px
 
 .scroll-indicators { display: flex; justify-content: center; align-items: center; gap: 2rem; margin-top: 0.938rem; padding: 0.625rem; }
 .scroll-arrow { position: fixed; background: rgba(255, 255, 255, 0.95); border: 2px solid #A60F2D; color: #A60F2D; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: right 0.3s ease, left 0.3s ease; }
-.course-info-pane[aria-hidden="false"] ~ .scroll-arrow { display: flex; }
+body.pane-open .scroll-arrow { display: flex; }
 .scroll-arrow:hover { background: #A60F2D; color: white; box-shadow: 0 4px 12px rgba(166, 15, 45, 0.3); }
 .scroll-arrow:focus-visible { outline: 2px solid #A60F2D; outline-offset: 2px; }
 .scroll-arrow:disabled { opacity: 0.5; cursor: not-allowed; }
