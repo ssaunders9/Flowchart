@@ -477,7 +477,13 @@ function clearCourseElementCache() {
  */
 function showCourseInfo(courseKey, tab = 'details') {
     const course = courseData[courseKey];
-    if (!course) return;
+    if (!course) {
+        const announcer = domCache.announcements;
+        if (announcer) {
+            announcer.textContent = 'Course information unavailable.';
+        }
+        return;
+    }
 
     // Check if course has any info to show
     const hasNotes = course.notes && course.notes.trim() !== '';
@@ -608,6 +614,11 @@ function showCourseInfo(courseKey, tab = 'details') {
     document.body.classList.add('pane-open'); // Add class for CSS adjustments
     currentNotesIndicator = document.querySelector(`.course[data-course-key="${courseKey}"]`);
 
+    // Update aria-expanded state on course buttons
+    document.querySelectorAll('.course[data-course-key]').forEach(cd => {
+        cd.setAttribute('aria-expanded', cd.getAttribute('data-course-key') === courseKey ? 'true' : 'false');
+    });
+
     // Scroll selected course into view when pane opens (with slight delay for CSS transition)
     setTimeout(() => {
         const selectedCourseDiv = getCourseElement(courseKey);
@@ -666,6 +677,11 @@ window.closeCourseInfo = function() {
     if (currentNotesIndicator) {
         currentNotesIndicator = null;
     }
+
+    // Reset aria-expanded on all course buttons
+    document.querySelectorAll('.course[data-course-key]').forEach(cd => {
+        cd.setAttribute('aria-expanded', 'false');
+    });
 
     // Announce closure to screen readers
     const announcer = domCache.announcements;
@@ -770,6 +786,13 @@ function createSafeLinksFromText(text) {
                 // Copy allowed attributes
                 if (tagName === 'a' && node.textContent) {
                     newNode.textContent = node.textContent;
+                    // Add screen reader text for external links
+                    if (newNode.target === '_blank') {
+                        const srSpan = document.createElement('span');
+                        srSpan.className = 'visually-hidden';
+                        srSpan.textContent = ' (opens in new window)';
+                        newNode.appendChild(srSpan);
+                    }
                 } else {
                     // Recursively sanitize child nodes
                     Array.from(node.childNodes).forEach(child => {
@@ -3875,9 +3898,11 @@ function setupScrollIndicators() {
         label.className = 'visually-hidden';
         if (index === 0) {
             dot.classList.add('active');
+            dot.setAttribute('aria-current', 'true');
             label.textContent = `Jump to ${semester} (current)`;
             dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
         } else {
+            dot.removeAttribute('aria-current');
             label.textContent = `Jump to ${semester}`;
             dot.setAttribute('aria-label', `Jump to ${semester}`);
         }
@@ -3935,10 +3960,12 @@ function updateActiveIndicator() {
             const spanLabel = dot.querySelector('.visually-hidden');
             if (index === dots.length - 1) {
                 dot.classList.add('active');
+                dot.setAttribute('aria-current', 'true');
                 dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
                 if (spanLabel) spanLabel.textContent = `Jump to ${semester} (current)`;
             } else {
                 dot.classList.remove('active');
+                dot.removeAttribute('aria-current');
                 dot.setAttribute('aria-label', `Jump to ${semester}`);
                 if (spanLabel) spanLabel.textContent = `Jump to ${semester}`;
             }
@@ -3963,10 +3990,12 @@ function updateActiveIndicator() {
             const spanLabel = dot.querySelector('.visually-hidden');
             if (index === 0) {
                 dot.classList.add('active');
+                dot.setAttribute('aria-current', 'true');
                 dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
                 if (spanLabel) spanLabel.textContent = `Jump to ${semester} (current)`;
             } else {
                 dot.classList.remove('active');
+                dot.removeAttribute('aria-current');
                 dot.setAttribute('aria-label', `Jump to ${semester}`);
                 if (spanLabel) spanLabel.textContent = `Jump to ${semester}`;
             }
@@ -4003,10 +4032,12 @@ function updateActiveIndicator() {
         const spanLabel = dot.querySelector('.visually-hidden');
         if (index === activeIndex) {
             dot.classList.add('active');
+            dot.setAttribute('aria-current', 'true');
             dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
             if (spanLabel) spanLabel.textContent = `Jump to ${semester} (current)`;
         } else {
             dot.classList.remove('active');
+            dot.removeAttribute('aria-current');
             dot.setAttribute('aria-label', `Jump to ${semester}`);
             if (spanLabel) spanLabel.textContent = `Jump to ${semester}`;
         }
@@ -4051,6 +4082,21 @@ function buildTextView() {
         courseBySemester[semester].forEach(course => {
             const courseDiv = document.createElement('div');
             courseDiv.className = `text-course ${course.type}`;
+            courseDiv.setAttribute('tabindex', '0');
+            courseDiv.setAttribute('role', 'button');
+            courseDiv.setAttribute('data-course-key', course.key);
+            courseDiv.setAttribute('aria-expanded', 'false');
+            courseDiv.addEventListener('click', () => {
+                window.highlightCourseLines(course.key);
+                showCourseInfo(course.key, 'details');
+            });
+            courseDiv.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    window.highlightCourseLines(course.key);
+                    showCourseInfo(course.key, 'details');
+                }
+            });
 
             const heading = document.createElement('h4');
             // AAA Compliance: Format course code with abbreviation
@@ -4431,6 +4477,7 @@ window.clearHighlights = function() {
         courseDiv.classList.remove('prereq-glow');
         courseDiv.classList.remove('coreq-glow');
         courseDiv.classList.remove('leadsto-glow');
+        courseDiv.setAttribute('aria-expanded', 'false');
         
         // Remove relationship badges (PRE, CO, ▶)
         const badges = courseDiv.querySelectorAll('.relationship-badge');
@@ -4598,7 +4645,8 @@ function setupKeyboardNavigation() {
                 navigateCourses(dir);
                 break;
             }
-            case 'Enter': {
+            case 'Enter':
+            case ' ': {
                 const activeCourse = document.activeElement.closest('.course[data-course-key]');
                 if (activeCourse) {
                     e.preventDefault();
@@ -4611,7 +4659,6 @@ function setupKeyboardNavigation() {
                 }
                 break;
             }
-            // Space: no case → falls through to browser default (page scroll)
         }
     });
 }
@@ -4635,8 +4682,10 @@ function attachCourseClickHandlers() {
             showCourseInfo(courseKey, 'details');
         });
         
-        // Make courses keyboard focusable
+        // Make courses keyboard focusable and announce as buttons
         courseDiv.setAttribute('tabindex', '0');
+        courseDiv.setAttribute('role', 'button');
+        courseDiv.setAttribute('aria-expanded', 'false');
     });
 }
 
