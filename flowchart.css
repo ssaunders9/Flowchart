@@ -509,7 +509,7 @@ body.pane-open .scroll-arrow { display: flex; }
 
 /* Adjust right button when pane is open on desktop */
 @media (min-width: 1025px) {
-    .course-info-pane[aria-hidden="false"] ~ .scroll-right {
+    body.pane-open .scroll-right {
         right: 370px;
     }
 }
