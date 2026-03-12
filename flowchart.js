@@ -626,24 +626,39 @@ function showCourseInfo(courseKey, tab = 'details') {
     window.courseInfoTrigger = triggerElement || document.activeElement;
     if (header) header.setAttribute('tabindex', '-1');
 
-    // After CSS transition, ensure the selected course isn't covered by the pane.
-    // Use rAF inside the timeout to get truly fresh post-transition layout values.
+    // After CSS transition, scroll only enough to fully reveal the selected course.
+    // Works in scroll-space coordinates to handle justify-content:center offsets correctly.
     setTimeout(() => {
         requestAnimationFrame(() => {
             const selectedCourseDiv = getCourseElement(courseKey);
             if (selectedCourseDiv && wrapper) {
                 const courseRect = selectedCourseDiv.getBoundingClientRect();
                 const wrapperRect = wrapper.getBoundingClientRect();
-                // On desktop, pane is 350px wide fixed at the right edge of the viewport.
-                // Ensure the course has clearance from both the wrapper boundary and the pane.
-                const paneWidth = window.innerWidth >= 1025 ? 350 : 0;
-                const safeRight = Math.min(
-                    wrapperRect.right - 10,             // 10px inside wrapper edge
-                    window.innerWidth - paneWidth - 10  // 10px clear of pane left edge
-                );
-                if (courseRect.right > safeRight) {
-                    wrapper.scrollLeft += courseRect.right - safeRight;
+                const PADDING = 40;
+
+                // Convert course viewport position → scroll-space position.
+                // courseRect.left is in viewport px; subtract wrapperRect.left (wrapper's
+                // viewport offset) then add current scrollLeft to get content-space coord.
+                const courseScrollLeft  = courseRect.left  - wrapperRect.left + wrapper.scrollLeft;
+                const courseScrollRight = courseScrollLeft + courseRect.width;
+
+                // Visible window in scroll-space
+                const paneWidth    = window.innerWidth >= 1025 ? 350 : 0;
+                const visibleWidth = wrapper.clientWidth - paneWidth;  // space left of pane
+                const visibleStart = wrapper.scrollLeft;
+                const visibleEnd   = visibleStart + visibleWidth;
+
+                let newScrollLeft = wrapper.scrollLeft;
+
+                if (courseScrollRight > visibleEnd - PADDING) {
+                    // Right edge is past the safe zone — scroll right to bring it in
+                    newScrollLeft = courseScrollRight - visibleWidth + PADDING;
+                } else if (courseScrollLeft < visibleStart + PADDING) {
+                    // Left edge is before the safe zone — scroll left to bring it in
+                    newScrollLeft = courseScrollLeft - PADDING;
                 }
+
+                wrapper.scrollLeft = Math.max(0, newScrollLeft);
             }
         });
     }, 350);
