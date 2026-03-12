@@ -453,6 +453,30 @@ select:focus:not(:focus-visible) {
     padding-left: 8px;
 }
 
+/* Definition-list structure for course details (screen reader friendly) */
+.course-details-list {
+    margin: 0;
+    padding: 0;
+}
+
+.course-details-list dt {
+    font-weight: 600;
+    color: #0d47a1;
+    font-size: 0.9em;
+    margin: 0 0 4px 0;
+}
+
+.course-details-list dd {
+    color: #333;
+    margin: 0 0 12px 8px;
+}
+
+.course-details-list dt.course-details-separator {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
 /* Responsive tab styles for narrow screens */
 @media (max-width: 1024px) {
     .course-info-tabs {
