@@ -425,7 +425,11 @@ const courseElementCache = {
     
     rebuild() {
         this.data.clear();
-        const courseDivs = document.querySelectorAll('[data-course-key]');
+        // Scope to flowchartContainer only — text view also has [data-course-key]
+        // elements that are display:none and would overwrite visible ones.
+        const container = document.getElementById('flowchartContainer');
+        if (!container) return;
+        const courseDivs = container.querySelectorAll('[data-course-key]');
         courseDivs.forEach(div => {
             const key = div.getAttribute('data-course-key');
             if (key) {
@@ -621,13 +625,17 @@ function showCourseInfo(courseKey, tab = 'details') {
         cd.setAttribute('aria-expanded', cd.getAttribute('data-course-key') === courseKey ? 'true' : 'false');
     });
 
-    // Store trigger for focus return; make header focusable for keyboard users
+    // Store trigger for focus return; make header focusable and move focus into pane
     const triggerElement = getCourseElement(courseKey);
     window.courseInfoTrigger = triggerElement || document.activeElement;
-    if (header) header.setAttribute('tabindex', '-1');
+    if (header) {
+        header.setAttribute('tabindex', '-1');
+        header.focus();
+    }
 
     // After CSS transition, scroll only enough to fully reveal the selected course.
-    // Works in scroll-space coordinates to handle justify-content:center offsets correctly.
+    // Works in scroll-space coordinates. Note: clientWidth already reflects the
+    // margin-right:380px pushed by body.pane-open, so no need to subtract paneWidth.
     setTimeout(() => {
         requestAnimationFrame(() => {
             const selectedCourseDiv = getCourseElement(courseKey);
@@ -636,25 +644,22 @@ function showCourseInfo(courseKey, tab = 'details') {
                 const wrapperRect = wrapper.getBoundingClientRect();
                 const PADDING = 40;
 
-                // Convert course viewport position → scroll-space position.
-                // courseRect.left is in viewport px; subtract wrapperRect.left (wrapper's
-                // viewport offset) then add current scrollLeft to get content-space coord.
+                // Convert viewport coords → scroll-space coords
                 const courseScrollLeft  = courseRect.left  - wrapperRect.left + wrapper.scrollLeft;
                 const courseScrollRight = courseScrollLeft + courseRect.width;
 
-                // Visible window in scroll-space
-                const paneWidth    = window.innerWidth >= 1025 ? 350 : 0;
-                const visibleWidth = wrapper.clientWidth - paneWidth;  // space left of pane
+                // Visible window in scroll-space (clientWidth already accounts for open pane margin)
+                const visibleWidth = wrapper.clientWidth;
                 const visibleStart = wrapper.scrollLeft;
                 const visibleEnd   = visibleStart + visibleWidth;
 
                 let newScrollLeft = wrapper.scrollLeft;
 
                 if (courseScrollRight > visibleEnd - PADDING) {
-                    // Right edge is past the safe zone — scroll right to bring it in
+                    // Right edge past safe zone — scroll right just enough
                     newScrollLeft = courseScrollRight - visibleWidth + PADDING;
                 } else if (courseScrollLeft < visibleStart + PADDING) {
-                    // Left edge is before the safe zone — scroll left to bring it in
+                    // Left edge before safe zone — scroll left just enough
                     newScrollLeft = courseScrollLeft - PADDING;
                 }
 
