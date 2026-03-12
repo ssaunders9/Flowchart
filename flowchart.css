@@ -162,7 +162,15 @@ abbr[title] {
     box-shadow: 0 0 0 3px #A60F2D !important;
     z-index: 8;
 }
-.course.dimmed { opacity: 0.5; filter: grayscale(60%); transition: opacity 0.2s ease, filter 0.2s ease; z-index: 4 !important; position: relative; }
+.course.dimmed {
+    transition: background 0.2s ease;
+    z-index: 4 !important;
+    position: relative;
+}
+.course.dimmed.engineering { background: #f8fbff !important; color: #002942 !important; }
+.course.dimmed.science    { background: #f6faf6 !important; color: #003d0a !important; }
+.course.dimmed.ucore      { background: #faf6fb !important; color: #1f0030 !important; }
+.course.dimmed.technical  { background: #f7f7f7 !important; color: #212121 !important; }
 
 /* Enhanced focus indicators for accessibility */
 *:focus {
@@ -583,7 +591,9 @@ body.pane-open .scroll-arrow { display: flex; }
     }
 
     .course.dimmed {
-        opacity: 0.5;
+        opacity: 0.4;
+        filter: none;
+        forced-color-adjust: none;
     }
 
     .relationship-badge,
