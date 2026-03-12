@@ -18,6 +18,46 @@ const DEPT_ABBREVIATIONS = {
     'ELEC': 'Elective'
 };
 
+// Screen reader pronunciation map — how TTS should say each department abbreviation
+const DEPT_SPOKEN = {
+    'CHE': 'C. H. E.',
+    'CHEM': 'Chem',
+    'MATH': 'Math',
+    'PHYS': 'Physics',
+    'BIOLOGY': 'Biology',
+    'BIOENG': 'Bio Engineering',
+    'BIO': 'Bio',
+    'ENG': 'Engineering',
+    'ENGL': 'English',
+    'HIST': 'History',
+    'ECONS': 'Econ',
+    'ENGR': 'Engineering',
+    'MSE': 'M. S. E.',
+    'ME': 'M. E.',
+    'CE': 'C. E.',
+    'EE': 'E. E.',
+    'STAT': 'Stat'
+};
+
+/**
+ * Convert a course code to a screen-reader-friendly spoken form.
+ * E.g., "CHE 201" → "C. H. E. 201", "PHYS 201" → "Physics 201"
+ */
+function speakCourseCode(code) {
+    if (!code || code === 'Elective') return code;
+    // Match letter-only department prefix(es) followed by a course number
+    const match = code.match(/^([A-Za-z][A-Za-z\s]+?)\s+(\d+.*)$/);
+    if (!match) return code;
+    const dept = match[1].trim();
+    const number = match[2];
+    // Try concatenated key first ("BIO ENG" → "BIOENG")
+    const key = dept.replace(/\s+/g, '');
+    if (DEPT_SPOKEN[key]) return DEPT_SPOKEN[key] + ' ' + number;
+    // Fall back to word-by-word lookup
+    const words = dept.split(/\s+/);
+    return words.map(w => DEPT_SPOKEN[w] || w).join(' ') + ' ' + number;
+}
+
 // Accessible course type labels - provides text alternative to color coding (WCAG 1.4.1)
 const COURSE_TYPE_LABELS = {
     'engineering': 'Engineering',
@@ -506,43 +546,50 @@ function showCourseInfo(courseKey, tab = 'details') {
         headerText += ` (${course.credits} ${course.credits === 1 ? 'credit' : 'credits'})`;
     }
     header.textContent = headerText;
+    // Give screen readers a properly-pronounced version of the department abbreviation
+    let spokenHeader = `${speakCourseCode(course.code)} - ${course.name}`;
+    if (course.credits) {
+        spokenHeader += ` (${course.credits} ${course.credits === 1 ? 'credit' : 'credits'})`;
+    }
+    header.setAttribute('aria-label', spokenHeader);
 
-    // Populate Details tab
+    // Populate Details tab — use <dl>/<dt>/<dd> so screen readers treat
+    // each value as a cohesive definition block instead of reading
+    // line-by-line through generic <div> text.
     detailsContent.innerHTML = '';
-    const detailsDiv = document.createElement('div');
-    
+    const detailsList = document.createElement('dl');
+    detailsList.className = 'course-details-list';
+
     // Course Description (from catalog if available, otherwise full name)
     if (course.description || course.name) {
-        const descRow = document.createElement('div');
-        descRow.className = 'course-details-row';
-        const descLabel = document.createElement('div');
-        descLabel.className = 'course-details-label';
-        descLabel.textContent = 'Description';
-        descRow.appendChild(descLabel);
-        const descValue = document.createElement('div');
-        descValue.className = 'course-details-value';
-        descValue.style.marginBottom = '12px';
-        descValue.textContent = course.description || course.name;
-        descRow.appendChild(descValue);
-        detailsDiv.appendChild(descRow);
+        const descTerm = document.createElement('dt');
+        descTerm.textContent = 'Description';
+        detailsList.appendChild(descTerm);
+        const descDef = document.createElement('dd');
+        descDef.textContent = course.description || course.name;
+        detailsList.appendChild(descDef);
     }
-    
+
     // Prerequisites
     if (course.prereqs && course.prereqs.length > 0) {
-        const prereqRow = document.createElement('div');
-        prereqRow.className = 'course-details-row';
-        const prereqCodes = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
-        prereqRow.innerHTML = `<div class="course-details-label">Prerequisites</div><div class="course-details-value">${prereqCodes}</div>`;
-        detailsDiv.appendChild(prereqRow);
+        const prereqTerm = document.createElement('dt');
+        prereqTerm.textContent = 'Prerequisites';
+        detailsList.appendChild(prereqTerm);
+        const prereqDef = document.createElement('dd');
+        prereqDef.textContent = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
+        prereqDef.setAttribute('aria-label', course.prereqs.map(p => speakCourseCode(courseData[p]?.code || p)).join(', '));
+        detailsList.appendChild(prereqDef);
     }
-    
+
     // Co-requisites
     if (course.coreqs && course.coreqs.length > 0) {
-        const coreqRow = document.createElement('div');
-        coreqRow.className = 'course-details-row';
-        const coreqCodes = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
-        coreqRow.innerHTML = `<div class="course-details-label">Co-requisites</div><div class="course-details-value">${coreqCodes}</div>`;
-        detailsDiv.appendChild(coreqRow);
+        const coreqTerm = document.createElement('dt');
+        coreqTerm.textContent = 'Co-requisites';
+        detailsList.appendChild(coreqTerm);
+        const coreqDef = document.createElement('dd');
+        coreqDef.textContent = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
+        coreqDef.setAttribute('aria-label', course.coreqs.map(c => speakCourseCode(courseData[c]?.code || c)).join(', '));
+        detailsList.appendChild(coreqDef);
     }
 
     // Required For (courses that require this one as prerequisite or corequisite)
@@ -550,67 +597,55 @@ function showCourseInfo(courseKey, tab = 'details') {
     if (leadsTo) {
         const requiredForKeys = [...leadsTo.asPrereq, ...leadsTo.asCoreq];
         if (requiredForKeys.length > 0) {
-            const requiredForRow = document.createElement('div');
-            requiredForRow.className = 'course-details-row';
-            const requiredForCodes = requiredForKeys.map(k => courseData[k]?.code || k).join(', ');
-            requiredForRow.innerHTML = `<div class="course-details-label">Required For</div><div class="course-details-value">${requiredForCodes}</div>`;
-            detailsDiv.appendChild(requiredForRow);
+            const reqTerm = document.createElement('dt');
+            reqTerm.textContent = 'Required For';
+            detailsList.appendChild(reqTerm);
+            const reqDef = document.createElement('dd');
+            reqDef.textContent = requiredForKeys.map(k => courseData[k]?.code || k).join(', ');
+            reqDef.setAttribute('aria-label', requiredForKeys.map(k => speakCourseCode(courseData[k]?.code || k)).join(', '));
+            detailsList.appendChild(reqDef);
         }
     }
 
-    // Add Notes section if available
+    // Notes
     if (hasNotes) {
-        const notesSection = document.createElement('div');
-        notesSection.style.marginTop = '15px';
-        notesSection.style.paddingTop = '15px';
-        notesSection.style.borderTop = '1px solid #ddd';
-        
-        const notesLabel = document.createElement('div');
-        notesLabel.className = 'course-details-label';
-        notesLabel.textContent = 'Notes';
-        notesLabel.style.marginBottom = '8px';
-        notesSection.appendChild(notesLabel);
-        
+        const notesTerm = document.createElement('dt');
+        notesTerm.className = 'course-details-separator';
+        notesTerm.textContent = 'Notes';
+        detailsList.appendChild(notesTerm);
+        const notesDef = document.createElement('dd');
         const safeContent = createSafeLinksFromText(course.notes);
-        notesSection.appendChild(safeContent);
-        detailsDiv.appendChild(notesSection);
+        notesDef.appendChild(safeContent);
+        detailsList.appendChild(notesDef);
     }
 
-    // Add Alternatives section if available
+    // Alternatives
     if (hasAlternatives) {
-        const altSection = document.createElement('div');
-        altSection.style.marginTop = '15px';
-        altSection.style.paddingTop = '15px';
-        altSection.style.borderTop = '1px solid #ddd';
-        
-        const altLabel = document.createElement('div');
-        altLabel.className = 'course-details-label';
-        altLabel.textContent = 'Alternatives';
-        altLabel.style.marginBottom = '8px';
-        altSection.appendChild(altLabel);
-        
+        const altTerm = document.createElement('dt');
+        altTerm.className = 'course-details-separator';
+        altTerm.textContent = 'Alternatives';
+        detailsList.appendChild(altTerm);
+        const altDef = document.createElement('dd');
         if (course.alternatives.length === 1) {
-            const altText = document.createElement('div');
-            altText.className = 'course-details-value';
-            altText.textContent = course.alternatives[0];
-            altSection.appendChild(altText);
+            altDef.textContent = course.alternatives[0];
         } else {
             course.alternatives.forEach((alt, index) => {
-                const optionDiv = document.createElement('div');
-                optionDiv.className = 'course-details-value';
-                optionDiv.style.marginBottom = '8px';
-                optionDiv.innerHTML = `<strong>Option ${index + 1}:</strong> ${alt}`;
-                altSection.appendChild(optionDiv);
+                const optionP = document.createElement('p');
+                optionP.style.marginBottom = '8px';
+                optionP.innerHTML = `<strong>Option ${index + 1}:</strong> ${alt}`;
+                altDef.appendChild(optionP);
             });
         }
-        detailsDiv.appendChild(altSection);
+        detailsList.appendChild(altDef);
     }
-    
-    if (detailsDiv.children.length === 0) {
-        detailsDiv.innerHTML = '<p>No details available.</p>';
+
+    if (detailsList.children.length === 0) {
+        const noInfo = document.createElement('p');
+        noInfo.textContent = 'No details available.';
+        detailsContent.appendChild(noInfo);
+    } else {
+        detailsContent.appendChild(detailsList);
     }
-    
-    detailsContent.appendChild(detailsDiv);
 
     const wrapper = domCache.visualView;
 
@@ -3061,7 +3096,7 @@ function announceSelection(courseKey, course, leadsTo) {
     const coreqCount = course.coreqs.length;
     const leadsToCount = leadsTo.length;
     
-    let message = `${courseInfo.code} ${courseInfo.name} selected. `;
+    let message = `${speakCourseCode(courseInfo.code)} ${courseInfo.name} selected. `;
     
     if (prereqCount === 0 && coreqCount === 0 && leadsToCount === 0) {
         message += 'This course has no prerequisites, co-requisites, or courses it leads to.';
@@ -3069,17 +3104,17 @@ function announceSelection(courseKey, course, leadsTo) {
         const parts = [];
         
         if (prereqCount > 0) {
-            const prereqNames = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
+            const prereqNames = course.prereqs.map(p => speakCourseCode(courseData[p]?.code || p)).join(', ');
             parts.push(`${prereqCount} prerequisite${prereqCount > 1 ? 's' : ''}: ${prereqNames}`);
         }
         
         if (coreqCount > 0) {
-            const coreqNames = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
+            const coreqNames = course.coreqs.map(c => speakCourseCode(courseData[c]?.code || c)).join(', ');
             parts.push(`${coreqCount} co-requisite${coreqCount > 1 ? 's' : ''}: ${coreqNames}`);
         }
         
         if (leadsToCount > 0) {
-            const leadsToNames = leadsTo.map(l => courseData[l]?.code || l).join(', ');
+            const leadsToNames = leadsTo.map(l => speakCourseCode(courseData[l]?.code || l)).join(', ');
             parts.push(`leads to ${leadsToCount} course${leadsToCount > 1 ? 's' : ''}: ${leadsToNames}`);
         }
         
@@ -3169,11 +3204,11 @@ function buildFlowchart(isProgramSwitch = false) {
             courseDiv.setAttribute('data-course-key', course.key);
             
             const prereqText = course.prereqs.length > 0
-                ? ` Prereq: ${course.prereqs.map(p => courseData[p]?.code || p).join(', ')}.`
+                ? ` Prereq: ${course.prereqs.map(p => speakCourseCode(courseData[p]?.code || p)).join(', ')}.`
                 : '';
 
             const coreqText = course.coreqs.length > 0
-                ? ` Coreq: ${course.coreqs.map(c => courseData[c]?.code || c).join(', ')}.`
+                ? ` Coreq: ${course.coreqs.map(c => speakCourseCode(courseData[c]?.code || c)).join(', ')}.`
                 : '';
 
             // Calculate "required for" courses (outgoing connections)
@@ -3185,7 +3220,7 @@ function buildFlowchart(isProgramSwitch = false) {
             });
 
             const requiredForText = requiredForKeys.length > 0
-                ? ` Required for: ${requiredForKeys.map(k => courseData[k]?.code || k).join(', ')}.`
+                ? ` Required for: ${requiredForKeys.map(k => speakCourseCode(courseData[k]?.code || k)).join(', ')}.`
                 : '';
 
             const alternativesText = course.alternatives && course.alternatives.length > 0
@@ -4122,6 +4157,7 @@ function buildTextView() {
             const formattedCode = formatCourseCodeWithAbbr(course.code);
             const typeLabel = COURSE_TYPE_LABELS[course.type] || course.type;
             heading.innerHTML = `${formattedCode} - ${course.name} (${course.credits} ${course.credits === 1 ? 'credit' : 'credits'}) <span class="text-course-type ${course.type}">${typeLabel}</span>`;
+            heading.setAttribute('aria-label', `${speakCourseCode(course.code)} - ${course.name} (${course.credits} ${course.credits === 1 ? 'credit' : 'credits'}) ${typeLabel}`);
             courseDiv.appendChild(heading);
 
             // Add description if available
@@ -4146,7 +4182,8 @@ function buildTextView() {
             const prereqP = document.createElement('p');
             if (course.prereqs.length > 0) {
                 const prereqNames = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
-                prereqP.innerHTML = `<strong>Prerequisites:</strong> ${prereqNames}`;
+                const prereqSpoken = course.prereqs.map(p => speakCourseCode(courseData[p]?.code || p)).join(', ');
+                prereqP.innerHTML = `<strong>Prerequisites:</strong> <span aria-hidden="true">${prereqNames}</span><span class="visually-hidden">${prereqSpoken}</span>`;
                 prereqP.style.color = '#923000'; // Darkened for AAA contrast
             } else {
                 prereqP.innerHTML = `<strong>Prerequisites:</strong> None`;
@@ -4157,7 +4194,8 @@ function buildTextView() {
             if (course.coreqs.length > 0) {
                 const coreqP = document.createElement('p');
                 const coreqNames = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
-                coreqP.innerHTML = `<strong>Co-requisites:</strong> ${coreqNames}`;
+                const coreqSpoken = course.coreqs.map(c => speakCourseCode(courseData[c]?.code || c)).join(', ');
+                coreqP.innerHTML = `<strong>Co-requisites:</strong> <span aria-hidden="true">${coreqNames}</span><span class="visually-hidden">${coreqSpoken}</span>`;
                 coreqP.style.color = '#0a2f6e'; // Match CO badge color
                 courseDiv.appendChild(coreqP);
             }
@@ -4173,7 +4211,8 @@ function buildTextView() {
             if (requiredForKeys.length > 0) {
                 const requiredForP = document.createElement('p');
                 const requiredForNames = requiredForKeys.map(k => courseData[k]?.code || k).join(', ');
-                requiredForP.innerHTML = `<strong>Required For:</strong> ${requiredForNames}`;
+                const requiredForSpoken = requiredForKeys.map(k => speakCourseCode(courseData[k]?.code || k)).join(', ');
+                requiredForP.innerHTML = `<strong>Required For:</strong> <span aria-hidden="true">${requiredForNames}</span><span class="visually-hidden">${requiredForSpoken}</span>`;
                 requiredForP.style.color = '#7b1fa2'; // Match purple leadsto badge color
                 courseDiv.appendChild(requiredForP);
             }
