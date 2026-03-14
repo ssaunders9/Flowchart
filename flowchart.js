@@ -7,36 +7,41 @@
 
 // AAA Compliance: Department abbreviation mappings for accessibility
 const DEPT_ABBREVIATIONS = {
-    'CHE': 'Chemical Engineering',
-    'CHEM': 'Chemistry',
-    'MATH': 'Mathematics',
-    'PHYS': 'Physics',
+    'CHE':     'Chemical Engineering',
+    'CHEM':    'Chemistry',
+    'MATH':    'Mathematics',
+    'PHYS':    'Physics',
     'BIOLOGY': 'Biology',
-    'ENGL': 'English',
-    'HIST': 'History',
-    'ECONS': 'Economics',
-    'ELEC': 'Elective'
+    'MBIOS':   'Microbiology',
+    'ENGL':    'English',
+    'HIST':    'History',
+    'ECONS':   'Economics',
+    'ENGR':    'Engineering',
+    'STAT':    'Statistics',
+    'MSE':     'Materials Science Engineering',
+    'ELEC':    'Elective'
 };
 
 // Screen reader pronunciation map — how TTS should say each department abbreviation
 const DEPT_SPOKEN = {
-    'CHE': 'C. H. E.',
-    'CHEM': 'Chem',
-    'MATH': 'Math',
-    'PHYS': 'Physics',
+    'CHE':     'C. H. E.',
+    'CHEM':    'Chemistry',
+    'MATH':    'Math',
+    'PHYS':    'Physics',
     'BIOLOGY': 'Biology',
-    'BIOENG': 'Bio Engineering',
-    'BIO': 'Bio',
-    'ENG': 'Engineering',
-    'ENGL': 'English',
-    'HIST': 'History',
-    'ECONS': 'Econ',
-    'ENGR': 'Engineering',
-    'MSE': 'M. S. E.',
-    'ME': 'M. E.',
-    'CE': 'C. E.',
-    'EE': 'E. E.',
-    'STAT': 'Stat'
+    'BIOENG':  'Bioengineering',
+    'BIO':     'Bio',
+    'ENG':     'Engineering',
+    'ENGL':    'English',
+    'HIST':    'History',
+    'ECONS':   'Economics',
+    'ENGR':    'Engineering',
+    'MBIOS':   'Microbiology',
+    'MSE':     'M. S. E.',
+    'ME':      'M. E.',
+    'CE':      'C. E.',
+    'EE':      'E. E.',
+    'STAT':    'Statistics'
 };
 
 /**
@@ -45,8 +50,8 @@ const DEPT_SPOKEN = {
  */
 function speakCourseCode(code) {
     if (!code || code === 'Elective') return code;
-    // Match letter-only department prefix(es) followed by a course number
-    const match = code.match(/^([A-Za-z][A-Za-z\s]+?)\s+(\d+.*)$/);
+    // Match letter-only department prefix(es) followed by a course number or word (e.g. 'Elective')
+    const match = code.match(/^([A-Za-z][A-Za-z\s]+?)\s+(\S.*)$/);
     if (!match) return code;
     const dept = match[1].trim();
     const number = match[2];
@@ -56,6 +61,20 @@ function speakCourseCode(code) {
     // Fall back to word-by-word lookup
     const words = dept.split(/\s+/);
     return words.map(w => DEPT_SPOKEN[w] || w).join(' ') + ' ' + number;
+}
+
+/**
+ * Replace known department abbreviations and Roman numerals within a text string.
+ * E.g., "CHE Overview" → "C. H. E. Overview", "Calculus II" → "Calculus 2"
+ */
+const ROMAN_SPOKEN = { 'II': '2', 'III': '3', 'IV': '4', 'VI': '6', 'VII': '7', 'VIII': '8' };
+function speakName(text) {
+    if (!text) return text;
+    // Replace multi-char Roman numerals first (longest match first)
+    text = text.replace(/\b(VIII|VII|III|IV|VI|II)\b/g, (match) => ROMAN_SPOKEN[match] || match);
+    // Replace single "I" only at end of string or before [ or ( — avoids matching English "I"
+    text = text.replace(/\bI(?=\s*[\[\(]|$)/g, '1');
+    return text.replace(/\b([A-Z]{2,})\b/g, (match) => DEPT_SPOKEN[match] || match);
 }
 
 // Accessible course type labels - provides text alternative to color coding (WCAG 1.4.1)
@@ -540,6 +559,161 @@ function showCourseInfo(courseKey, tab = 'details') {
 
     if (!pane || !header || !detailsContent) return;
 
+    // ── Screen-reader buffer invalidation ──
+    // If the pane is already visible (user switching between courses while
+    // the SR is still reading), we must force the SR to discard its stale
+    // virtual buffer.  Setting aria-hidden + inert then removing them in a
+    // new frame makes every major SR (NVDA, JAWS, VoiceOver) rebuild its
+    // buffer from scratch so it reads the *new* course, not the old one.
+    const paneAlreadyOpen = pane.getAttribute('aria-hidden') === 'false';
+    if (paneAlreadyOpen) {
+        pane.setAttribute('aria-hidden', 'true');
+        pane.setAttribute('inert', '');
+        // Clear announcer so the old announcement doesn't replay
+        if (announcer) announcer.textContent = '';
+    }
+
+    // Clear and rebuild content *while* the pane is hidden from the SR
+    try {
+        _populateCoursePane(courseKey, course, hasNotes, hasAlternatives, header, detailsContent);
+    } catch (err) {
+        console.error('Error populating course pane:', err);
+        // Still show pane with at minimum the header
+        detailsContent.innerHTML = '<p>Error loading course details.</p>';
+    }
+
+    // Set the close button label while the pane is still hidden so NVDA
+    // doesn't see the attribute change after buffer rebuild — only the
+    // focus event fires, giving exactly one clean announcement.
+    const spokenCode = (header && header.getAttribute('aria-label')) ? header.getAttribute('aria-label').split(' - ')[0] : 'course';
+    let closeBtn = pane.querySelector('#closeCourseInfoBtn');
+    if (closeBtn) {
+        closeBtn.setAttribute('aria-label', `${spokenCode} details open, Close`);
+        if (paneAlreadyOpen) {
+            // Clone during the hidden phase so NVDA never sees the DOM mutation.
+            // Focusing a node NVDA has never seen makes it read name + role +
+            // description in full with no virtual buffer cache interference.
+            const freshBtn = closeBtn.cloneNode(true);
+            freshBtn.addEventListener('click', window.closeCourseInfo);
+            closeBtn.parentNode.replaceChild(freshBtn, closeBtn);
+            closeBtn = freshBtn;
+            domCache.closeCourseInfoBtn = freshBtn;
+        }
+    }
+
+    const wrapper = domCache.visualView;
+
+    // Reveal the pane (or re-reveal after buffer invalidation)
+    // Use a microtask so the SR sees hidden→visible as two distinct states
+    const revealAndFocus = () => {
+        pane.setAttribute('aria-hidden', 'false');
+        pane.removeAttribute('inert');
+        document.body.classList.add('pane-open');
+        // Make non-essential background elements inert so SR browse mode stays
+        // in the pane. Flowchart itself stays interactive so users can click
+        // between courses to compare.
+        const headerEl = document.querySelector('header');
+        const scrollControls = document.querySelector('.scroll-controls');
+        const viewToggle = document.querySelector('.view-toggle-wrapper');
+        const legend = document.querySelector('.legend');
+        [headerEl, scrollControls, viewToggle, legend].forEach(el => {
+            if (el) el.setAttribute('inert', '');
+        });
+        currentNotesIndicator = document.querySelector(`.course[data-course-key="${courseKey}"]`);
+
+        // Update aria-expanded state on course buttons
+        document.querySelectorAll('.course[data-course-key]').forEach(cd => {
+            cd.setAttribute('aria-expanded', cd.getAttribute('data-course-key') === courseKey ? 'true' : 'false');
+        });
+
+        // Always update the trigger so Escape returns to whichever course was most recently activated.
+        const triggerElement = getCourseElement(courseKey);
+        window.courseInfoTrigger = triggerElement || document.activeElement;
+        if (closeBtn) {
+            closeBtn.focus();
+        } else {
+            pane.setAttribute('tabindex', '-1');
+            pane.focus();
+        }
+        setupPaneFocusTrap(pane);
+    };
+
+    if (paneAlreadyOpen) {
+        // Allow the SR to process the hidden state before re-showing
+        requestAnimationFrame(revealAndFocus);
+    } else {
+        revealAndFocus();
+    }
+
+    // After CSS transition, scroll to fully reveal the selected course.
+    setTimeout(() => {
+        requestAnimationFrame(() => {
+            const selectedCourseDiv = getCourseElement(courseKey);
+            if (!selectedCourseDiv) return;
+
+            // ── Horizontal scroll within the flowchart wrapper ──
+            if (wrapper) {
+                const courseRect = selectedCourseDiv.getBoundingClientRect();
+                const wrapperRect = wrapper.getBoundingClientRect();
+                const PADDING = 40;
+
+                const courseScrollLeft  = courseRect.left  - wrapperRect.left + wrapper.scrollLeft;
+                const courseScrollRight = courseScrollLeft + courseRect.width;
+
+                const visibleWidth = wrapper.clientWidth;
+                const visibleStart = wrapper.scrollLeft;
+                const visibleEnd   = visibleStart + visibleWidth;
+
+                let newScrollLeft = wrapper.scrollLeft;
+
+                if (courseScrollRight > visibleEnd - PADDING) {
+                    newScrollLeft = courseScrollRight - visibleWidth + PADDING;
+                } else if (courseScrollLeft < visibleStart + PADDING) {
+                    newScrollLeft = courseScrollLeft - PADDING;
+                }
+
+                wrapper.scrollLeft = Math.max(0, newScrollLeft);
+            }
+
+            // ── Vertical scroll on mobile when bottom-drawer pane overlaps ──
+            // On narrow screens the pane is position:fixed at the bottom,
+            // so it eats into the visible viewport.  Make sure the selected
+            // course card is not hidden behind it.
+            if (pane && pane.getAttribute('aria-hidden') === 'false') {
+                const paneRect = pane.getBoundingClientRect();
+                const crRect   = selectedCourseDiv.getBoundingClientRect();
+                const VERT_PAD = 20;
+                const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+                // Pane is a bottom-drawer if its top < window.innerHeight
+                // (i.e., it occupies the bottom portion of the viewport)
+                if (paneRect.top < window.innerHeight && paneRect.top > 0) {
+                    // Course is partially or fully behind the drawer
+                    if (crRect.bottom > paneRect.top - VERT_PAD) {
+                        const overlap = crRect.bottom - paneRect.top + VERT_PAD;
+                        window.scrollBy({
+                            top: overlap,
+                            behavior: reducedMotion ? 'auto' : 'smooth'
+                        });
+                    }
+                    // Course is above the visible viewport
+                    else if (crRect.top < 0) {
+                        window.scrollBy({
+                            top: crRect.top - VERT_PAD,
+                            behavior: reducedMotion ? 'auto' : 'smooth'
+                        });
+                    }
+                }
+            }
+        });
+    }, 350);
+}
+
+/**
+ * Populate the course info pane header and details content.
+ * Extracted so it can run while the pane is aria-hidden (SR buffer invalidation).
+ */
+function _populateCoursePane(courseKey, course, hasNotes, hasAlternatives, header, detailsContent) {
     // Set header with code, name, and credits
     let headerText = `${course.code} - ${course.name}`;
     if (course.credits) {
@@ -552,91 +726,86 @@ function showCourseInfo(courseKey, tab = 'details') {
         spokenHeader += ` (${course.credits} ${course.credits === 1 ? 'credit' : 'credits'})`;
     }
     header.setAttribute('aria-label', spokenHeader);
+    // Dialog uses aria-labelledby="courseInfoHeader" — NVDA will read the spoken header
+    // as the dialog name (e.g. "C. H. E. 101 - Overview, dialog")
 
-    // Populate Details tab — use <dl>/<dt>/<dd> so screen readers treat
-    // each value as a cohesive definition block instead of reading
-    // line-by-line through generic <div> text.
+    // Populate Details — plain div rows (label + value) so NVDA reads
+    // straight through without announcing "list", "grouping", or "term".
     detailsContent.innerHTML = '';
-    const detailsList = document.createElement('dl');
+    const detailsList = document.createElement('div');
     detailsList.className = 'course-details-list';
 
-    // Course Description (from catalog if available, otherwise full name)
+    // Helper: add a label+value row
+    function addRow(label, valueText, valueAriaLabel, separator) {
+        const row = document.createElement('div');
+        row.className = 'course-detail-row' + (separator ? ' course-details-separator' : '');
+        const labelEl = document.createElement('span');
+        labelEl.className = 'course-detail-label';
+        labelEl.textContent = label + ': ';
+        row.appendChild(labelEl);
+        const valueEl = document.createElement('span');
+        valueEl.className = 'course-detail-value';
+        if (typeof valueText === 'string') {
+            valueEl.textContent = valueText;
+        } else {
+            valueEl.appendChild(valueText); // DocumentFragment for safe links
+        }
+        if (valueAriaLabel) valueEl.setAttribute('aria-label', valueAriaLabel);
+        row.appendChild(valueEl);
+        detailsList.appendChild(row);
+    }
+
+    // Course Description
     if (course.description || course.name) {
-        const descTerm = document.createElement('dt');
-        descTerm.textContent = 'Description';
-        detailsList.appendChild(descTerm);
-        const descDef = document.createElement('dd');
-        descDef.textContent = course.description || course.name;
-        detailsList.appendChild(descDef);
+        addRow('Description', course.description || course.name);
     }
 
     // Prerequisites
     if (course.prereqs && course.prereqs.length > 0) {
-        const prereqTerm = document.createElement('dt');
-        prereqTerm.textContent = 'Prerequisites';
-        detailsList.appendChild(prereqTerm);
-        const prereqDef = document.createElement('dd');
-        prereqDef.textContent = course.prereqs.map(p => courseData[p]?.code || p).join(', ');
-        prereqDef.setAttribute('aria-label', course.prereqs.map(p => speakCourseCode(courseData[p]?.code || p)).join(', '));
-        detailsList.appendChild(prereqDef);
+        addRow('Prerequisites',
+            course.prereqs.map(p => courseData[p]?.code || p).join(', '),
+            course.prereqs.map(p => speakCourseCode(courseData[p]?.code || p)).join(', '));
     }
 
     // Co-requisites
     if (course.coreqs && course.coreqs.length > 0) {
-        const coreqTerm = document.createElement('dt');
-        coreqTerm.textContent = 'Co-requisites';
-        detailsList.appendChild(coreqTerm);
-        const coreqDef = document.createElement('dd');
-        coreqDef.textContent = course.coreqs.map(c => courseData[c]?.code || c).join(', ');
-        coreqDef.setAttribute('aria-label', course.coreqs.map(c => speakCourseCode(courseData[c]?.code || c)).join(', '));
-        detailsList.appendChild(coreqDef);
+        addRow('Co-requisites',
+            course.coreqs.map(c => courseData[c]?.code || c).join(', '),
+            course.coreqs.map(c => speakCourseCode(courseData[c]?.code || c)).join(', '));
     }
 
-    // Required For (courses that require this one as prerequisite or corequisite)
+    // Required For
     const leadsTo = leadsToMap[courseKey];
     if (leadsTo) {
         const requiredForKeys = [...leadsTo.asPrereq, ...leadsTo.asCoreq];
         if (requiredForKeys.length > 0) {
-            const reqTerm = document.createElement('dt');
-            reqTerm.textContent = 'Required For';
-            detailsList.appendChild(reqTerm);
-            const reqDef = document.createElement('dd');
-            reqDef.textContent = requiredForKeys.map(k => courseData[k]?.code || k).join(', ');
-            reqDef.setAttribute('aria-label', requiredForKeys.map(k => speakCourseCode(courseData[k]?.code || k)).join(', '));
-            detailsList.appendChild(reqDef);
+            addRow('Required For',
+                requiredForKeys.map(k => courseData[k]?.code || k).join(', '),
+                requiredForKeys.map(k => speakCourseCode(courseData[k]?.code || k)).join(', '));
         }
     }
 
     // Notes
     if (hasNotes) {
-        const notesTerm = document.createElement('dt');
-        notesTerm.className = 'course-details-separator';
-        notesTerm.textContent = 'Notes';
-        detailsList.appendChild(notesTerm);
-        const notesDef = document.createElement('dd');
-        const safeContent = createSafeLinksFromText(course.notes);
-        notesDef.appendChild(safeContent);
-        detailsList.appendChild(notesDef);
+        addRow('Notes', createSafeLinksFromText(course.notes), null, true);
     }
 
     // Alternatives
     if (hasAlternatives) {
-        const altTerm = document.createElement('dt');
-        altTerm.className = 'course-details-separator';
-        altTerm.textContent = 'Alternatives';
-        detailsList.appendChild(altTerm);
-        const altDef = document.createElement('dd');
+        let altContent;
         if (course.alternatives.length === 1) {
-            altDef.textContent = course.alternatives[0];
+            altContent = course.alternatives[0];
         } else {
+            const frag = document.createDocumentFragment();
             course.alternatives.forEach((alt, index) => {
                 const optionP = document.createElement('p');
                 optionP.style.marginBottom = '8px';
                 optionP.innerHTML = `<strong>Option ${index + 1}:</strong> ${alt}`;
-                altDef.appendChild(optionP);
+                frag.appendChild(optionP);
             });
+            altContent = frag;
         }
-        detailsList.appendChild(altDef);
+        addRow('Alternatives', altContent, null, true);
     }
 
     if (detailsList.children.length === 0) {
@@ -645,71 +814,6 @@ function showCourseInfo(courseKey, tab = 'details') {
         detailsContent.appendChild(noInfo);
     } else {
         detailsContent.appendChild(detailsList);
-    }
-
-    const wrapper = domCache.visualView;
-
-    // Show pane
-    pane.setAttribute('aria-hidden', 'false');
-    pane.removeAttribute('inert'); // Make pane and its contents focusable
-    document.body.classList.add('pane-open'); // Add class for CSS adjustments
-    currentNotesIndicator = document.querySelector(`.course[data-course-key="${courseKey}"]`);
-
-    // Update aria-expanded state on course buttons
-    document.querySelectorAll('.course[data-course-key]').forEach(cd => {
-        cd.setAttribute('aria-expanded', cd.getAttribute('data-course-key') === courseKey ? 'true' : 'false');
-    });
-
-    // Store trigger for focus return; make header focusable and move focus into pane
-    const triggerElement = getCourseElement(courseKey);
-    window.courseInfoTrigger = triggerElement || document.activeElement;
-    if (header) {
-        header.setAttribute('tabindex', '-1');
-        header.focus();
-    }
-
-    // After CSS transition, scroll only enough to fully reveal the selected course.
-    // Works in scroll-space coordinates. Note: clientWidth already reflects the
-    // margin-right:380px pushed by body.pane-open, so no need to subtract paneWidth.
-    setTimeout(() => {
-        requestAnimationFrame(() => {
-            const selectedCourseDiv = getCourseElement(courseKey);
-            if (selectedCourseDiv && wrapper) {
-                const courseRect = selectedCourseDiv.getBoundingClientRect();
-                const wrapperRect = wrapper.getBoundingClientRect();
-                const PADDING = 40;
-
-                // Convert viewport coords → scroll-space coords
-                const courseScrollLeft  = courseRect.left  - wrapperRect.left + wrapper.scrollLeft;
-                const courseScrollRight = courseScrollLeft + courseRect.width;
-
-                // Visible window in scroll-space (clientWidth already accounts for open pane margin)
-                const visibleWidth = wrapper.clientWidth;
-                const visibleStart = wrapper.scrollLeft;
-                const visibleEnd   = visibleStart + visibleWidth;
-
-                let newScrollLeft = wrapper.scrollLeft;
-
-                if (courseScrollRight > visibleEnd - PADDING) {
-                    // Right edge past safe zone — scroll right just enough
-                    newScrollLeft = courseScrollRight - visibleWidth + PADDING;
-                } else if (courseScrollLeft < visibleStart + PADDING) {
-                    // Left edge before safe zone — scroll left just enough
-                    newScrollLeft = courseScrollLeft - PADDING;
-                }
-
-                wrapper.scrollLeft = Math.max(0, newScrollLeft);
-            }
-        });
-    }, 350);
-
-    // Set up focus trap within the pane
-    setupPaneFocusTrap(pane);
-
-    // Announce to screen readers — keep it brief since heading + content
-    // will be read naturally when focus moves to the pane heading
-    if (announcer) {
-        announcer.textContent = `Course details panel opened. Press Escape to close.`;
     }
 }
 
@@ -726,12 +830,22 @@ window.closeCourseInfo = function() {
         pane.style.removeProperty('right');
         pane.style.removeProperty('bottom');
     }
+    // Remove inert from background elements
+    const headerEl = document.querySelector('header');
+    const scrollControls = document.querySelector('.scroll-controls');
+    const viewToggle = document.querySelector('.view-toggle-wrapper');
+    const legend = document.querySelector('.legend');
+    [headerEl, scrollControls, viewToggle, legend].forEach(el => {
+        if (el) el.removeAttribute('inert');
+    });
 
     if (currentNotesIndicator) {
         currentNotesIndicator = null;
     }
 
-    // Reset aria-expanded on all course buttons
+    // Reset close button label and aria-expanded on all course buttons
+    const closeBtn = pane ? pane.querySelector('#closeCourseInfoBtn') : null;
+    if (closeBtn) closeBtn.setAttribute('aria-label', 'Close');
     document.querySelectorAll('.course[data-course-key]').forEach(cd => {
         cd.setAttribute('aria-expanded', 'false');
     });
@@ -770,10 +884,17 @@ function setupPaneFocusTrap(pane) {
         
         const firstFocusable = focusableElements[0];
         const lastFocusable = focusableElements[focusableElements.length - 1];
-        
+
+        // Check whether the currently focused element is in the tab-stop set.
+        // The pane heading has tabindex="-1" (programmatically focused but not
+        // a tab stop), so it won't be in the list.  If the active element is
+        // NOT in the set we treat it as being "before the first" for Tab and
+        // "after the last" for Shift+Tab.
+        const activeIsTabStop = Array.from(focusableElements).indexOf(document.activeElement) !== -1;
+
         if (e.shiftKey) {
-            // Shift+Tab: if at first element, wrap to last
-            if (document.activeElement === firstFocusable) {
+            // Shift+Tab: if at first element or on a non-tab-stop (e.g. heading), wrap to last
+            if (document.activeElement === firstFocusable || !activeIsTabStop) {
                 e.preventDefault();
                 lastFocusable.focus();
             }
@@ -1025,7 +1146,7 @@ function dimOtherCourses(courseKey, coursesCache = null) {
     courses.forEach(courseDiv => {
         if (courseDiv.getAttribute('data-course-key') !== courseKey) {
             courseDiv.classList.add('dimmed');
-            courseDiv.style.opacity = '0.25';
+            courseDiv.style.opacity = '0.4';
             courseDiv.style.filter = 'grayscale(80%)';
         }
     });
@@ -3184,6 +3305,8 @@ function buildFlowchart(isProgramSwitch = false) {
     semesterOrder.forEach(semester => {
         const column = document.createElement('div');
         column.className = 'semester-column';
+        column.setAttribute('role', 'region');
+        column.setAttribute('aria-label', semester);
 
         // Calculate total credits for this semester
         const totalCredits = courseBySemester[semester].reduce((sum, course) => sum + course.credits, 0);
@@ -3236,8 +3359,10 @@ function buildFlowchart(isProgramSwitch = false) {
 
             // Build supplementary description for screen readers (WCAG 2.5.3 compliance)
             // Accessible name comes from visible text content; extra context via aria-describedby
+            // Semester is omitted here — it's already announced by the semester-column region label.
             const descParts = [];
-            descParts.push(`${semester}. ${courseTypeLabel}.`);
+            descParts.push(`${course.credits} ${creditWord}.`);
+            descParts.push(`${courseTypeLabel}.`);
             if (semesterRestrictionText) descParts.push(semesterRestrictionText.trim());
             if (prereqText) descParts.push(prereqText.trim());
             if (coreqText) descParts.push(coreqText.trim());
@@ -3261,11 +3386,13 @@ function buildFlowchart(isProgramSwitch = false) {
             // AAA Compliance: Use abbreviation tags for course prefixes
             const formattedCode = formatCourseCodeWithAbbr(course.code);
             const typeLabel = COURSE_TYPE_LABELS[course.type] || course.type;
+            // aria-label uses full course.name so SR hears complete words, not abbreviations.
+            // shortName is visual-only (fits in the box); aria-label is SR-only.
+            courseDiv.setAttribute('aria-label', `${speakCourseCode(course.code)} ${speakName(course.name)}`);
             courseDiv.innerHTML = `
-                <span class="course-code">${formattedCode}</span>
-                <span class="course-name">${course.shortName || course.name}</span>
-                <span class="course-credits">${course.credits} ${creditWord}</span>
-                <span class="course-type-label" aria-hidden="true">${typeLabel}</span>
+                <span class="course-code" aria-hidden="true">${formattedCode}</span>
+                <span class="course-name" aria-hidden="true">${course.shortName || course.name}</span>
+                <span class="course-credits" aria-hidden="true">${course.credits} ${creditWord}</span>
                 <span id="${descId}" class="visually-hidden" aria-hidden="true">${descParts.join(' ')}</span>
             `;
             courseDiv.setAttribute('aria-describedby', descId);
@@ -3493,6 +3620,9 @@ window.switchProgram = function() {
         const totalCredits = Object.values(courseData).reduce((sum, c) => sum + parseInt(c.credits || 0), 0);
         announcer.textContent = `Loaded ${programsData[currentProgram].name} program flowchart. ${courseCount} courses across ${semesterCount} semesters. Total ${totalCredits} credits. Use Tab to navigate between courses.`;
     }
+
+    // Return focus to the select so the user stays oriented
+    if (select) select.focus();
 };
 
 // Disclaimer Modal Functions
@@ -3555,9 +3685,26 @@ window.closeDisclaimerModal = function() {
         if (headerEl) headerEl.removeAttribute('inert');
         // Store that user has seen the disclaimer
         safeLocalStorageSet('flowchartDisclaimerShown', true);
-        // Return focus to previously focused element
-        if (modalPreviousFocus && modalPreviousFocus.focus) {
-            modalPreviousFocus.focus();
+        // Return focus to previously focused element.
+        // On first visit modalPreviousFocus is <body>, which gives SR nowhere to land;
+        // fall back to h1 in that case (same as the returning-user path).
+        const focusTarget = (modalPreviousFocus && modalPreviousFocus !== document.body)
+            ? modalPreviousFocus
+            : document.querySelector('h1');
+        if (focusTarget) {
+            if (focusTarget.tagName === 'H1') {
+                focusTarget.setAttribute('tabindex', '-1');
+            }
+            focusTarget.focus({ preventScroll: true });
+        }
+        // Announce navigation instructions via live region so they're read once
+        // automatically without cluttering the virtual buffer.
+        const announcer = domCache.announcements;
+        if (announcer) {
+            setTimeout(() => {
+                announcer.textContent = 'Use the program dropdown to choose your degree plan. Tab between courses, Arrow Keys to navigate the grid, Enter or Space to open details, Escape to close. Press V to switch views.';
+                setTimeout(() => { announcer.textContent = ''; }, 5000);
+            }, 600);
         }
     }
 };
@@ -3624,13 +3771,18 @@ function checkAndShowDisclaimer() {
                 h1.setAttribute('tabindex', '-1');
                 h1.focus({ preventScroll: true });
             }
+            // Announce navigation instructions via live region
+            const announcer = domCache.announcements;
+            if (announcer) {
+                setTimeout(() => {
+                    announcer.textContent = 'Use the program dropdown to choose your degree plan. Tab between courses, Arrow Keys to navigate the grid, Enter or Space to open details, Escape to close. Press V to switch views.';
+                    setTimeout(() => { announcer.textContent = ''; }, 5000);
+                }, 600);
+            }
         } else {
             modal.classList.remove('hidden');
             // Store current focus
             modalPreviousFocus = document.activeElement;
-            // Background inert is already set by inline script in HTML
-            // Set up focus trap
-            trapFocus(modal);
             // Focus the dialog container so NVDA announces "Disclaimer, dialog"
             // then user arrows through the heading and content naturally
             setTimeout(() => {
@@ -3714,23 +3866,21 @@ function populateProgramSelector() {
         return a.name.localeCompare(b.name);
     });
 
-    // Add all programs as individual options with separators between status groups
+    // Group programs by status using <optgroup> for screen reader accessibility
+    const statusLabel = { current: 'Current Programs', proposed: 'Proposed Programs', archived: 'Archived Programs' };
+    let currentGroup = null;
     let lastStatus = null;
     programs.forEach(program => {
-        // Add separator when status changes
-        if (lastStatus !== null && lastStatus !== program.status) {
-            const separator = document.createElement('option');
-            separator.disabled = true;
-            separator.textContent = '─────────────────────────';
-            select.appendChild(separator);
+        if (program.status !== lastStatus) {
+            currentGroup = document.createElement('optgroup');
+            currentGroup.label = statusLabel[program.status] || program.status;
+            select.appendChild(currentGroup);
+            lastStatus = program.status;
         }
-        
         const option = document.createElement('option');
         option.value = program.key;
         option.textContent = program.displayLabel;
-        select.appendChild(option);
-        
-        lastStatus = program.status;
+        currentGroup.appendChild(option);
     });
 }
 
@@ -3900,6 +4050,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
+            // Show/hide scroll arrows based on whether chart overflows
+            updateScrollArrows();
+            const wrapperForArrows = domCache.visualView;
+            if (wrapperForArrows) {
+                wrapperForArrows.addEventListener('scroll', updateScrollArrows);
+            }
+            window.addEventListener('resize', updateScrollArrows);
+
+            // Show/hide scroll arrows based on whether flowchart is in the viewport
+            const flowchartEl = document.getElementById('flowchartContainer');
+            if (flowchartEl) {
+                const arrowVisibilityObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        document.body.classList.toggle('flowchart-in-view', entry.isIntersecting);
+                    });
+                }, { threshold: 0, rootMargin: '0px 0px -400px 0px' });
+                arrowVisibilityObserver.observe(flowchartEl);
+            }
+
             const programSelect = domCache.programSelect;
             if (programSelect) {
                 programSelect.addEventListener('change', switchProgram);
@@ -3937,6 +4106,10 @@ function setupScrollIndicators() {
 
     if (!container || !indicatorsDiv || !wrapper) return;
 
+    // Set toolbar role for roving tabindex keyboard pattern
+    indicatorsDiv.setAttribute('role', 'toolbar');
+    indicatorsDiv.setAttribute('aria-label', 'Jump to semester');
+
     // Clear existing indicators efficiently
     while (indicatorsDiv.firstChild) {
         indicatorsDiv.removeChild(indicatorsDiv.firstChild);
@@ -3946,6 +4119,8 @@ function setupScrollIndicators() {
         const dot = document.createElement('button');
         dot.className = 'scroll-dot';
         dot.setAttribute('type', 'button');
+        // Roving tabindex: only the active dot is in the tab order
+        dot.setAttribute('tabindex', index === 0 ? '0' : '-1');
 
         // Add visually-hidden text and aria-label for accessible name
         const label = document.createElement('span');
@@ -3953,44 +4128,143 @@ function setupScrollIndicators() {
         if (index === 0) {
             dot.classList.add('active');
             dot.setAttribute('aria-current', 'true');
-            label.textContent = `Jump to ${semester} (current)`;
-            dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
+            label.textContent = `${semester}`;
+            dot.setAttribute('aria-label', `${semester}`);
         } else {
             dot.removeAttribute('aria-current');
-            label.textContent = `Jump to ${semester}`;
-            dot.setAttribute('aria-label', `Jump to ${semester}`);
+            label.textContent = `${semester}`;
+            dot.setAttribute('aria-label', `${semester}`);
         }
         dot.appendChild(label);
-        
+
         dot.addEventListener('click', () => {
+            const allDots = Array.from(indicatorsDiv.querySelectorAll('.scroll-dot'));
+            // Immediately apply active state so the correct dot is highlighted
+            // right away — don't wait for updateActiveIndicator to run.
+            allDots.forEach(d => {
+                d.setAttribute('tabindex', '-1');
+                d.classList.remove('active');
+                d.removeAttribute('aria-current');
+            });
+            dot.setAttribute('tabindex', '0');
+            dot.classList.add('active');
+            dot.setAttribute('aria-current', 'true');
+
             const columns = container.querySelectorAll('.semester-column');
             if (columns[index]) {
                 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                columns[index].scrollIntoView({
-                    behavior: prefersReducedMotion ? 'auto' : 'smooth',
-                    block: 'nearest',
-                    inline: 'start'
+                wrapper.scrollTo({
+                    left: columns[index].offsetLeft,
+                    behavior: prefersReducedMotion ? 'auto' : 'smooth'
                 });
-                // Move focus to first course in the scrolled semester
-                setTimeout(() => {
-                    const firstCourse = columns[index].querySelector('.course');
-                    if (firstCourse) {
-                        firstCourse.focus();
-                    }
-                }, prefersReducedMotion ? 50 : 500);
+                // Hold this index as forced-active for 1.2s (covers any smooth
+                // scroll duration) so mid-scroll positions can't activate the
+                // wrong dot.
+                updateActiveIndicator._forcedIndex = index;
+                clearTimeout(updateActiveIndicator._forceTimeout);
+                updateActiveIndicator._forceTimeout = setTimeout(() => {
+                    updateActiveIndicator._forcedIndex = null;
+                }, 1200);
+                // Mark as already-announced so updateActiveIndicator doesn't
+                // fire a duplicate "Now viewing" for this click.
+                updateActiveIndicator._lastAnnounced = semester;
             }
         });
-        
+
         indicatorsDiv.appendChild(dot);
     });
-    
-    let scrollTimeout;
-    wrapper.addEventListener('scroll', () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            updateActiveIndicator();
-        }, 100);
-    });
+
+    // Populate end labels from actual semesterOrder
+    const startLabel = document.getElementById('scrollNavLabelStart');
+    const endLabel   = document.getElementById('scrollNavLabelEnd');
+    if (startLabel) startLabel.textContent = semesterOrder[0] || '';
+    if (endLabel)   endLabel.textContent   = semesterOrder[semesterOrder.length - 1] || '';
+
+    // Roving tabindex: arrow key navigation within the toolbar (attach only once)
+    if (!indicatorsDiv.dataset.keydownAttached) {
+        indicatorsDiv.dataset.keydownAttached = '1';
+        indicatorsDiv.addEventListener('keydown', (e) => {
+            const dots = Array.from(indicatorsDiv.querySelectorAll('.scroll-dot'));
+
+            // Tab (forward): move focus to the first course of the active semester.
+            // Must be checked BEFORE the currentIdx guard, because Tab should work
+            // regardless of how focus arrived at the toolbar (keyboard or mouse).
+            if (e.key === 'Tab' && !e.shiftKey) {
+                const activeDotIdx = dots.findIndex(d => d.getAttribute('tabindex') === '0');
+                const targetIdx = activeDotIdx !== -1 ? activeDotIdx : 0;
+                const columns = container.querySelectorAll('.semester-column');
+                if (columns[targetIdx]) {
+                    const firstCourse = columns[targetIdx].querySelector('.course');
+                    if (firstCourse) {
+                        e.preventDefault();
+                        firstCourse.focus();
+                    }
+                }
+                return;
+            }
+
+            // Arrow keys only apply when a specific dot has focus
+            const currentIdx = dots.indexOf(document.activeElement);
+            if (currentIdx === -1) return;
+
+            let newIdx = currentIdx;
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                e.stopPropagation();
+                newIdx = Math.min(currentIdx + 1, dots.length - 1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                e.stopPropagation();
+                newIdx = Math.max(currentIdx - 1, 0);
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                e.stopPropagation();
+                newIdx = 0;
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                e.stopPropagation();
+                newIdx = dots.length - 1;
+            } else {
+                return;
+            }
+
+            if (newIdx !== currentIdx) {
+                dots[currentIdx].setAttribute('tabindex', '-1');
+                dots[newIdx].setAttribute('tabindex', '0');
+                dots[newIdx].focus();
+                dots[newIdx].click();
+            }
+        });
+    }
+
+    // Attach scroll listener only once
+    if (!wrapper.dataset.scrollIndicatorAttached) {
+        wrapper.dataset.scrollIndicatorAttached = '1';
+        let scrollTimeout;
+        wrapper.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                updateActiveIndicator();
+            }, 100);
+        });
+    }
+}
+
+/**
+ * Show/hide scroll arrows based on whether the flowchart overflows horizontally.
+ * Also disables the left arrow at the start and the right arrow at the end.
+ */
+function updateScrollArrows() {
+    const wrapper = domCache.visualView;
+    const leftBtn = domCache.scrollLeftBtn;
+    const rightBtn = domCache.scrollRightBtn;
+    if (!wrapper) return;
+
+    const hasOverflow = wrapper.scrollWidth > wrapper.clientWidth + 5;
+    document.body.classList.toggle('has-overflow', hasOverflow && currentView === 'visual');
+
+    if (leftBtn)  leftBtn.disabled = wrapper.scrollLeft <= 1;
+    if (rightBtn) rightBtn.disabled = wrapper.scrollLeft + wrapper.clientWidth >= wrapper.scrollWidth - 1;
 }
 
 function updateActiveIndicator() {
@@ -3999,112 +4273,80 @@ function updateActiveIndicator() {
     const dots = document.querySelectorAll('.scroll-dot');
 
     if (!wrapper || !container || dots.length === 0) return;
-    
+
+    const announcer = domCache.announcements;
+    function announceIfChanged(semester) {
+        if (announcer && semester !== updateActiveIndicator._lastAnnounced) {
+            updateActiveIndicator._lastAnnounced = semester;
+            announcer.textContent = '';
+            requestAnimationFrame(() => {
+                announcer.textContent = `Now viewing ${semester}`;
+            });
+        }
+    }
+
     const scrollLeft = wrapper.scrollLeft;
     const wrapperWidth = wrapper.clientWidth;
     const scrollWidth = wrapper.scrollWidth;
     const columns = container.querySelectorAll('.semester-column');
-    
     const visibleLeft = scrollLeft;
     const visibleRight = scrollLeft + wrapperWidth;
-    
-    if (scrollLeft + wrapperWidth >= scrollWidth - 5) {
-        dots.forEach((dot, index) => {
-            const semester = window.semesterOrder[index];
-            const spanLabel = dot.querySelector('.visually-hidden');
-            if (index === dots.length - 1) {
-                dot.classList.add('active');
-                dot.setAttribute('aria-current', 'true');
-                dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
-                if (spanLabel) spanLabel.textContent = `Jump to ${semester} (current)`;
-            } else {
-                dot.classList.remove('active');
-                dot.removeAttribute('aria-current');
-                dot.setAttribute('aria-label', `Jump to ${semester}`);
-                if (spanLabel) spanLabel.textContent = `Jump to ${semester}`;
-            }
-            
-            const column = columns[index];
+
+    // Determine which index should be active.
+    // If a dot was explicitly clicked, honour that choice for the duration of
+    // the scroll animation so intermediate scroll positions don't activate the
+    // wrong dot.
+    let activeIndex;
+    const forcedIndex = updateActiveIndicator._forcedIndex;
+    if (forcedIndex !== null && forcedIndex !== undefined) {
+        activeIndex = forcedIndex;
+    } else if (scrollLeft + wrapperWidth >= scrollWidth - 5) {
+        activeIndex = dots.length - 1;
+    } else if (scrollLeft <= 5) {
+        activeIndex = 0;
+    } else {
+        activeIndex = 0;
+        let minDistance = Infinity;
+        columns.forEach((column, index) => {
             const columnLeft = column.offsetLeft - container.offsetLeft;
-            const columnRight = columnLeft + column.offsetWidth;
-            const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
-            
-            if (isInView) {
-                dot.classList.remove('out-of-view');
-            } else {
-                dot.classList.add('out-of-view');
+            const distance = Math.abs(scrollLeft - columnLeft);
+            if (distance < minDistance) {
+                minDistance = distance;
+                activeIndex = index;
             }
         });
-        return;
     }
-    
-    if (scrollLeft <= 5) {
-        dots.forEach((dot, index) => {
-            const semester = window.semesterOrder[index];
-            const spanLabel = dot.querySelector('.visually-hidden');
-            if (index === 0) {
-                dot.classList.add('active');
-                dot.setAttribute('aria-current', 'true');
-                dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
-                if (spanLabel) spanLabel.textContent = `Jump to ${semester} (current)`;
-            } else {
-                dot.classList.remove('active');
-                dot.removeAttribute('aria-current');
-                dot.setAttribute('aria-label', `Jump to ${semester}`);
-                if (spanLabel) spanLabel.textContent = `Jump to ${semester}`;
-            }
-            
-            const column = columns[index];
-            const columnLeft = column.offsetLeft - container.offsetLeft;
-            const columnRight = columnLeft + column.offsetWidth;
-            const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
-            
-            if (isInView) {
-                dot.classList.remove('out-of-view');
-            } else {
-                dot.classList.add('out-of-view');
-            }
-        });
-        return;
-    }
-    
-    let activeIndex = 0;
-    let minDistance = Infinity;
-    
-    columns.forEach((column, index) => {
-        const columnLeft = column.offsetLeft - container.offsetLeft;
-        const distance = Math.abs(scrollLeft - columnLeft);
-        
-        if (distance < minDistance) {
-            minDistance = distance;
-            activeIndex = index;
-        }
-    });
-    
+
     dots.forEach((dot, index) => {
         const semester = window.semesterOrder[index];
         const spanLabel = dot.querySelector('.visually-hidden');
         if (index === activeIndex) {
             dot.classList.add('active');
             dot.setAttribute('aria-current', 'true');
-            dot.setAttribute('aria-label', `Jump to ${semester} (current)`);
-            if (spanLabel) spanLabel.textContent = `Jump to ${semester} (current)`;
+            dot.setAttribute('aria-label', `${semester}`);
+            dot.setAttribute('tabindex', '0');
+            if (spanLabel) spanLabel.textContent = `${semester}`;
+            // announceIfChanged is guarded by _lastAnnounced — dot clicks
+            // pre-set _lastAnnounced so no duplicate fires.
+            announceIfChanged(semester);
         } else {
             dot.classList.remove('active');
             dot.removeAttribute('aria-current');
-            dot.setAttribute('aria-label', `Jump to ${semester}`);
-            if (spanLabel) spanLabel.textContent = `Jump to ${semester}`;
+            dot.setAttribute('aria-label', `${semester}`);
+            dot.setAttribute('tabindex', '-1');
+            if (spanLabel) spanLabel.textContent = `${semester}`;
         }
-        
+
         const column = columns[index];
-        const columnLeft = column.offsetLeft - container.offsetLeft;
-        const columnRight = columnLeft + column.offsetWidth;
-        const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
-        
-        if (isInView) {
-            dot.classList.remove('out-of-view');
-        } else {
-            dot.classList.add('out-of-view');
+        if (column) {
+            const columnLeft = column.offsetLeft - container.offsetLeft;
+            const columnRight = columnLeft + column.offsetWidth;
+            const isInView = columnRight > visibleLeft && columnLeft < visibleRight;
+            if (isInView) {
+                dot.classList.remove('out-of-view');
+            } else {
+                dot.classList.add('out-of-view');
+            }
         }
     });
 }
@@ -4136,21 +4378,9 @@ function buildTextView() {
         courseBySemester[semester].forEach(course => {
             const courseDiv = document.createElement('div');
             courseDiv.className = `text-course ${course.type}`;
-            courseDiv.setAttribute('tabindex', '0');
-            courseDiv.setAttribute('role', 'button');
             courseDiv.setAttribute('data-course-key', course.key);
-            courseDiv.setAttribute('aria-expanded', 'false');
-            courseDiv.addEventListener('click', () => {
-                window.highlightCourseLines(course.key);
-                showCourseInfo(course.key, 'details');
-            });
-            courseDiv.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    window.highlightCourseLines(course.key);
-                    showCourseInfo(course.key, 'details');
-                }
-            });
+            // List view already shows all course details inline — no interactive
+            // behaviour needed. Plain div, no role, no tabindex.
 
             const heading = document.createElement('h4');
             // AAA Compliance: Format course code with abbreviation
@@ -4282,6 +4512,7 @@ window.toggleView = function() {
         visualView.style.display = 'none';
         textView.style.display = 'block';
         scrollControls.style.display = 'none';
+        document.body.classList.add('list-view');
         btn.textContent = 'Switch to Visual Flowchart';
 
         if (announcer) {
@@ -4302,6 +4533,7 @@ window.toggleView = function() {
         visualView.style.display = 'block';
         textView.style.display = 'none';
         scrollControls.style.display = 'block';
+        document.body.classList.remove('list-view');
         btn.textContent = 'Switch to List View';
 
         if (announcer) {
@@ -4449,6 +4681,7 @@ window.highlightCourseLines = function(courseKey) {
                             const badge = document.createElement('div');
                             badge.className = 'relationship-badge coreq';
                             badge.textContent = 'CO';
+                            badge.setAttribute('aria-hidden', 'true');
                             badge.title = 'Co-requisite for selected course';
                             coreqDiv.appendChild(badge);
                             coreqDiv.classList.add('coreq-glow'); // Add blue glow
@@ -4467,6 +4700,7 @@ window.highlightCourseLines = function(courseKey) {
                             const badge = document.createElement('div');
                             badge.className = 'relationship-badge prereq';
                             badge.textContent = 'PRE';
+                            badge.setAttribute('aria-hidden', 'true');
                             badge.title = 'Prerequisite for selected course';
                             prereqDiv.appendChild(badge);
                             prereqDiv.classList.add('prereq-glow'); // Add orange glow
@@ -4489,6 +4723,7 @@ window.highlightCourseLines = function(courseKey) {
                             const badge = document.createElement('div');
                             badge.className = 'relationship-badge leadsto';
                             badge.textContent = '▶';
+                            badge.setAttribute('aria-hidden', 'true');
                             badge.title = 'This course leads to: ' + otherCourse.code;
                             otherDiv.appendChild(badge);
                             otherDiv.classList.add('leadsto-glow'); // Add green glow
@@ -4646,7 +4881,10 @@ function navigateCourses(direction) {
 // Single consolidated keyboard handler
 function setupKeyboardNavigation() {
     document.addEventListener('keydown', (e) => {
-        // Always allow modal Escape
+        // No global Tab interception needed — background `inert` + `aria-modal`
+        // on the course pane natively prevent Tab from escaping the dialog.
+
+        // Always allow modal Escape (modal makes background inert, so this is safe)
         if (e.key === 'Escape') {
             const modal = domCache.disclaimerModal;
             if (modal && !modal.classList.contains('hidden')) {
@@ -4655,7 +4893,7 @@ function setupKeyboardNavigation() {
             }
         }
 
-        // Skip if typing in a form field
+        // Skip if interacting with a form field (let native controls handle all keys)
         if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
 
         // V toggles view regardless of visual/text mode
@@ -4691,6 +4929,9 @@ function setupKeyboardNavigation() {
         const pane = domCache.courseInfoPane;
         if (pane && pane.contains(document.activeElement)) return;
 
+        // Don't process arrow keys when focus is on the semester navigation dots
+        if (document.activeElement && document.activeElement.classList.contains('scroll-dot')) return;
+
         switch (e.key) {
             case 'ArrowRight':
             case 'ArrowLeft':
@@ -4709,11 +4950,12 @@ function setupKeyboardNavigation() {
                 if (activeCourse) {
                     e.preventDefault();
                     const courseKey = activeCourse.getAttribute('data-course-key');
-                    // Only highlight if not already highlighted (arrow nav already did it)
                     if (currentlyHighlightedCourse !== courseKey) {
+                        showCourseInfo(courseKey, 'details');
                         window.highlightCourseLines(courseKey);
+                    } else {
+                        showCourseInfo(courseKey, 'details');
                     }
-                    showCourseInfo(courseKey, 'details');
                 }
                 break;
             }
@@ -4725,6 +4967,15 @@ function setupKeyboardNavigation() {
 function attachCourseClickHandlers() {
     const courseDivs = document.querySelectorAll('.course[data-course-key]');
     courseDivs.forEach(courseDiv => {
+        // Prevent mouse click from moving focus to the course button when the
+        // pane is already open — keeps focus in the pane so NVDA doesn't read
+        // the full button description before the pane updates.
+        // Also prevents it on first open so NVDA doesn't read the full button
+        // description before focus moves to the pane.
+        courseDiv.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevents focus transfer, click still fires
+        });
+
         courseDiv.addEventListener('click', (e) => {
             const courseKey = courseDiv.getAttribute('data-course-key');
             
@@ -4735,15 +4986,65 @@ function attachCourseClickHandlers() {
                 return;
             }
             
-            // Highlight the new course and show pane
-            window.highlightCourseLines(courseKey);
+            // Show pane first (moves focus away from flowchart), then highlight.
+            // This prevents NVDA from reading badge DOM changes on related courses.
             showCourseInfo(courseKey, 'details');
+            window.highlightCourseLines(courseKey);
         });
+
+        // Shift+Tab from the first course in a semester column returns focus
+        // to the active dot in the toolbar (ARIA tabpanel pattern).
+        // Also: when Tab naturally lands on the first course of a new semester,
+        // sync the active toolbar dot to that semester and announce it.
+        const column = courseDiv.closest('.semester-column');
+        if (column) {
+            const firstCourse = column.querySelector('.course');
+            if (firstCourse === courseDiv) {
+                // Sync toolbar + announce when focus arrives here (Tab from previous semester)
+                courseDiv.addEventListener('focus', () => {
+                    const columns = Array.from(document.querySelectorAll('.semester-column'));
+                    const colIdx = columns.indexOf(column);
+                    if (colIdx === -1) return;
+                    const dots = Array.from(document.querySelectorAll('#scrollIndicators .scroll-dot'));
+                    dots.forEach((dot, i) => {
+                        if (i === colIdx) {
+                            dot.setAttribute('tabindex', '0');
+                            dot.setAttribute('aria-current', 'true');
+                            dot.classList.add('active');
+                        } else {
+                            dot.setAttribute('tabindex', '-1');
+                            dot.removeAttribute('aria-current');
+                            dot.classList.remove('active');
+                        }
+                    });
+                    const semester = window.semesterOrder[colIdx];
+                    const announcer = domCache.announcements;
+                    if (announcer && semester && semester !== updateActiveIndicator._lastAnnounced) {
+                        updateActiveIndicator._lastAnnounced = semester;
+                        announcer.textContent = '';
+                        requestAnimationFrame(() => {
+                            announcer.textContent = `Now viewing ${semester}`;
+                        });
+                    }
+                });
+
+                courseDiv.addEventListener('keydown', (e) => {
+                    if (e.key === 'Tab' && e.shiftKey) {
+                        const activeDot = document.querySelector('#scrollIndicators .scroll-dot[tabindex="0"]');
+                        if (activeDot) {
+                            e.preventDefault();
+                            activeDot.focus();
+                        }
+                    }
+                });
+            }
+        }
         
         // Make courses keyboard focusable and announce as buttons
         courseDiv.setAttribute('tabindex', '0');
         courseDiv.setAttribute('role', 'button');
         courseDiv.setAttribute('aria-expanded', 'false');
+        courseDiv.setAttribute('aria-controls', 'courseInfoPane');
     });
 }
 
@@ -4771,6 +5072,9 @@ function applyCenteringLogic() {
         visualView.style.alignItems = 'flex-start';
         flowchartContainer.style.margin = '0';
     }
+
+    // Re-evaluate scroll arrows after layout change
+    updateScrollArrows();
 }
 
 window.applyCenteringLogic = applyCenteringLogic;
