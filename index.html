@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WSU Engineering Curriculum Flowchart</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
-    <link rel="stylesheet" href="flowchart.css?v=20260313j">
+    <link rel="stylesheet" href="flowchart.css?v=20260312e">
 </head>
 <body>
     <!-- Fallback for users with JavaScript disabled -->
@@ -26,13 +26,15 @@
     </noscript>
     
     <!-- Skip Navigation Link -->
-    <a href="#flowchart-container" class="skip-link">Skip to flowchart</a>
+    <nav aria-label="Skip navigation" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10000; background: transparent; padding: 0; margin: 0;">
+        <a href="#flowchart-container" class="skip-link" style="pointer-events: auto;">Skip to flowchart</a>
+    </nav>
     
     <!-- Disclaimer Modal -->
-    <div id="disclaimerModal" class="modal-overlay" role="dialog" aria-labelledby="disclaimerTitle" aria-modal="true">
+    <div id="disclaimerModal" class="modal-overlay" role="dialog" aria-label="Disclaimer" aria-modal="true">
         <div class="modal-content">
             <h2 id="disclaimerTitle">Important: Planning Tool Disclaimer</h2>
-            <p>This flowchart is for <strong>convenience only</strong>. See the <a href="https://catalog.wsu.edu/" target="_blank" rel="noopener noreferrer">WSU Course Catalog (opens in new window)</a> for all official degree requirements.</p>
+            <p>This flowchart is provided for <strong>convenience only</strong> to help you visualize your degree plan. The official <a href="https://catalog.wsu.edu/" target="_blank" rel="noopener noreferrer">WSU Course Catalog (opens in new window)</a> is the authoritative reference for all degree requirements.</p>
 
             <p><strong>Students are responsible for:</strong></p>
             <ul>
@@ -41,7 +43,7 @@
                 <li>Consulting with their academic advisor for questions or concerns</li>
             </ul>
 
-            <p>By using this tool you acknowledge it is for planning purposes only.</p>
+            <p>By using this tool, you acknowledge that it is for planning purposes only and may not reflect the most current information.</p>
 
             <button class="modal-button" id="disclaimerButton">I Understand</button>
         </div>
@@ -49,7 +51,7 @@
     
     <header>
         <h1>Washington State University</h1>
-        <p class="subtitle">Voiland School of Chemical Engineering and Bioengineering</p>
+        <h2 class="subtitle">Voiland School of Chemical Engineering and Bioengineering</h2>
         <h2 class="subtitle" id="programTitle">Bachelor of Science - Chemical Engineering (4 Year Plan)</h2>
         <div class="program-selector">
             <label for="programSelect">Select Program:</label>
@@ -64,6 +66,19 @@
         <h2 class="visually-hidden">Curriculum Flowchart</h2>
         <div id="announcements" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
+        <!-- Getting Started Instructions -->
+        <div id="welcomeBanner" class="welcome-banner" role="region" aria-label="Getting started">
+            <div class="welcome-banner-content">
+                <h3 class="welcome-banner-heading">Here's how to get started!</h3>
+                <ul class="welcome-steps">
+                    <li><strong>Choose a program</strong> from the dropdown, then <strong>select any course</strong> to see its details and connections.</li>
+                    <li><strong>Navigate semesters</strong> with the arrow buttons or keys, or switch to <strong>List View</strong> for a text-friendly layout.</li>
+                </ul>
+                <p class="welcome-encourage">See <strong>"How to Use This Tool"</strong> below for the full guide.</p>
+                <button id="welcomeDismissBtn" class="welcome-dismiss-btn">Got it!</button>
+            </div>
+        </div>
+
         <!-- User Guide / Legend -->
         <div class="legend">
             <button id="guideToggle" class="collapsed" aria-expanded="false" aria-controls="guideContent">
@@ -72,18 +87,7 @@
 
             <div class="legend-content hidden" id="guideContent">
             <h3 class="visually-hidden">User Guide</h3>
-
-            <div class="legend-section">
-                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Keyboard Navigation:</h4>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> - Move between courses and controls</li>
-                    <li><kbd>Arrow Keys</kbd> - Move between courses in the grid</li>
-                    <li><kbd>Enter</kbd> / <kbd>Space</kbd> - Show course details and highlight relationships</li>
-                    <li><kbd>Escape</kbd> - Close details panel or clear highlighting</li>
-                    <li><kbd>V</kbd> - Switch between flowchart and list view</li>
-                </ul>
-            </div>
-
+            
             <div class="legend-section">
                 <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Course Types:</h4>
                 <div class="legend-items">
@@ -182,6 +186,16 @@
                 </div>
             </div>
 
+            <div class="legend-section">
+                <h4 style="font-size: 1em; margin-bottom: 10px; color: #333; font-weight: 600;">Keyboard Navigation:</h4>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> - Move between courses and controls</li>
+                    <li><kbd>Arrow Keys</kbd> - Move between courses in the grid</li>
+                    <li><kbd>Enter</kbd> / <kbd>Space</kbd> - Show course details and highlight relationships</li>
+                    <li><kbd>Escape</kbd> - Close details panel or clear highlighting</li>
+                    <li><kbd>V</kbd> - Switch between flowchart and list view</li>
+                </ul>
+            </div>
             </div>
         </div>
 
@@ -191,18 +205,9 @@
             </button>
         </div>
 
-        <div class="scroll-controls">
-            <div class="scroll-indicators">
-                <span class="scroll-nav-label" aria-hidden="true" id="scrollNavLabelStart"></span>
-                <div id="scrollIndicators"></div>
-                <span class="scroll-nav-label" aria-hidden="true" id="scrollNavLabelEnd"></span>
-            </div>
-            <div class="visually-hidden">Use the semester navigation buttons to jump between semesters, or press V to switch to list view for easier browsing.</div>
-        </div>
-
         <div class="diagram-wrapper" id="flowchart-container" tabindex="-1">
             <section aria-labelledby="flowchart-heading">
-                <h3 id="flowchart-heading" class="visually-hidden">Course Flowchart</h3>
+                <h2 id="flowchart-heading" class="visually-hidden">Course Flowchart</h2>
                 <div class="diagram-container" id="flowchartContainer">
                     <svg id="fadedConnectionsSvg" aria-hidden="true" role="presentation" focusable="false" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;">
                     </svg>
@@ -210,6 +215,14 @@
                     </svg>
                 </div>
             </section>
+        </div>
+        
+        <div class="scroll-controls">
+            <div class="scroll-indicators" role="navigation" aria-label="Semester navigation">
+                <div id="scrollIndicators"></div>
+            </div>
+            <div class="scroll-hint" aria-hidden="true"><span>💡</span> Use arrows, swipe, or scroll horizontally to view all semesters • Click dots to jump to a semester</div>
+            <div class="visually-hidden">Use the semester navigation buttons to jump between semesters, or press V to switch to list view for easier browsing.</div>
         </div>
         
         <!-- Fixed position scroll arrow buttons -->
@@ -225,25 +238,24 @@
         </button>
         
         <div id="textView" class="text-view-container" style="display: none;">
-            <h3 style="color: #A60F2D; margin-bottom: 20px;">Course Listing by Semester</h3>
+            <h2 style="color: #A60F2D; margin-bottom: 20px;">Course Listing by Semester</h2>
             <div id="textContent"></div>
         </div>
 
         <!-- Side Pane for Course Information (placed after main content for correct screen reader order) -->
-        <div id="courseInfoPane" class="course-info-pane" aria-hidden="true" inert>
-            <p class="sr-only" id="paneEscapeHint">Press Escape to close.</p>
+        <aside id="courseInfoPane" class="course-info-pane" aria-label="Course information details" aria-hidden="true" inert>
             <div class="course-info-pane-header">
-                <button class="course-info-pane-close" aria-label="Close" aria-describedby="paneEscapeHint" id="closeCourseInfoBtn">
-                    <span aria-hidden="true">&times;</span>
-                </button>
                 <h2 id="courseInfoHeader" class="course-info-pane-title">Course Information</h2>
+                <button class="course-info-pane-close" aria-label="Close course information" id="closeCourseInfoBtn">
+                    <span aria-hidden="true">×</span>
+                </button>
             </div>
             
             <!-- Single Content Panel (no tabs) -->
-            <div class="course-info-panel active">
+            <div class="course-info-panel active" role="region" aria-label="Course details">
                 <div class="course-info-content" id="detailsContent"></div>
             </div>
-        </div>
+        </aside>
     </main>
 
     <!-- Handle disclaimer state synchronously before screen reader builds virtual buffer -->
@@ -267,6 +279,6 @@
     <!-- Load external course data (with cache busting timestamp) -->
     <script src="programsData.js?v=20251203"></script>
 
-    <script src="flowchart.js?v=20260313bw"></script>
+    <script src="flowchart.js?v=20260312i"></script>
 </body>
 </html>
