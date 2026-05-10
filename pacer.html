@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshop Pacer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a1a1a;
+    color: #f0f0f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  #clock {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #status-band {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 4px;
+    background: #333;
+    color: #aaa;
+  }
+  #status-band.on-time   { background: #1a3d1a; color: #6fcf6f; }
+  #status-band.slightly  { background: #3d2f00; color: #f5c842; }
+  #status-band.behind    { background: #3d1010; color: #ff6b6b; }
+
+  .card {
+    margin-top: 28px;
+    background: #2a2a2a;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 680px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  .card-header {
+    background: #981E32;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .card-header .label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
+  .card-header .deadline {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .card-body {
+    padding: 20px 24px 24px;
+  }
+
+  .slide-title {
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #ffffff;
+  }
+
+  .time-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 14px;
+  }
+  .time-box {
+    flex: 1;
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+  .time-box .tb-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 3px;
+  }
+  .time-box .tb-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #e0e0e0;
+  }
+  .time-box.delta .tb-value { color: #6fcf6f; }
+  .time-box.delta.neg .tb-value { color: #ff6b6b; }
+
+  .progress-bar-wrap {
+    margin-top: 16px;
+    height: 6px;
+    background: #3a3a3a;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #981E32;
+    border-radius: 3px;
+    transition: width 1s linear;
+  }
+
+  /* Next slide card */
+  .next-card {
+    margin-top: 14px;
+    background: #222;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 680px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  .next-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .next-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #bbb;
+  }
+  .next-time {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Before/after workshop states */
+  #pre-message, #post-message {
+    font-size: 1.3rem;
+    color: #888;
+    text-align: center;
+    margin-top: 20px;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  #phase-pip {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #981E32;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div id="clock">--:-- --</div>
+<div id="status-band">Loading…</div>
+<div id="phase-pip"></div>
+
+<div class="card" id="current-card" style="display:none">
+  <div class="card-header">
+    <span class="label" id="cur-label">Current Slide</span>
+    <span class="deadline" id="cur-deadline"></span>
+  </div>
+  <div class="card-body">
+    <div class="slide-title" id="cur-title"></div>
+    <div class="time-row">
+      <div class="time-box">
+        <div class="tb-label">Should end by</div>
+        <div class="tb-value" id="cur-end"></div>
+      </div>
+      <div class="time-box" id="delta-box">
+        <div class="tb-label">Time remaining</div>
+        <div class="tb-value" id="cur-delta"></div>
+      </div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="next-card" id="next-card" style="display:none">
+  <span class="next-label">Up next</span>
+  <span class="next-title" id="next-title"></span>
+  <span class="next-time" id="next-time"></span>
+</div>
+
+<div id="pre-message" style="display:none"></div>
+<div id="post-message" style="display:none"></div>
+
+<script>
+// ─── Slide schedule ──────────────────────────────────────────────────────────
+// Each entry: { title, phase, end: "H:MM AM/PM" }
+// "end" is the \nend time — the target time to leave this slide.
+// The start of each slide is inferred as the end of the previous one.
+
+const SLIDES = [
+  { title: "Title Slide",                                          phase: "Opening",  end: "9:02 AM"  },
+  { title: "The Course That Didn't Go the Way You Planned",        phase: "Opening",  end: "9:06 AM"  },
+  { title: "The Modern Student",                                   phase: "Opening",  end: "9:09 AM"  },
+  { title: "What You Will Be Able to Do",                          phase: "Opening",  end: "9:11 AM"  },
+  { title: "A Note on Scope",                                      phase: "Opening",  end: "9:12 AM"  },
+  { title: "How Today Works",                                      phase: "Opening",  end: "9:13 AM"  },
+  { title: "The Engineering Design Loop",                          phase: "Opening",  end: "9:14 AM"  },
+  { title: "Your Workbook",                                        phase: "Opening",  end: "9:15 AM"  },
+  { title: "Ground Rules for Today",                               phase: "Opening",  end: "9:15 AM"  },
+
+  { title: "Phase 1 Transition — Define Specifications",           phase: "Phase 1",  end: "9:16 AM"  },
+  { title: "Activity 1 — The Student Preparation Test",            phase: "Phase 1",  end: "9:21 AM"  },
+  { title: "Debrief — Activity 1",                                 phase: "Phase 1",  end: "9:25 AM"  },
+  { title: "Activity 2 — The Objective Ranking Sort",              phase: "Phase 1",  end: "9:31 AM"  },
+  { title: "Debrief — Activity 2",                                 phase: "Phase 1",  end: "9:40 AM"  },
+  { title: "Backward Design",                                      phase: "Phase 1",  end: "9:46 AM"  },
+  { title: "Coverage Goal vs. Performance Specification",          phase: "Phase 1",  end: "9:49 AM"  },
+  { title: "Bloom's Taxonomy as an Honesty Tool",                  phase: "Phase 1",  end: "9:52 AM"  },
+  { title: "The Mismatch Problem",                                 phase: "Phase 1",  end: "9:55 AM"  },
+  { title: "The Four Diagnostic Questions",                        phase: "Phase 1",  end: "9:59 AM"  },
+  { title: "Activity 3 — The Specification Autopsy",               phase: "Phase 1",  end: "10:10 AM" },
+  { title: "Debrief — Activity 3",                                 phase: "Phase 1",  end: "10:15 AM" },
+  { title: "Activity 4 — Rewrite to Spec",                        phase: "Phase 1",  end: "10:21 AM" },
+  { title: "Debrief — Activity 4",                                 phase: "Phase 1",  end: "10:28 AM" },
+  { title: "The Design Choice the Stress Test Reveals",            phase: "Phase 1",  end: "10:35 AM" },
+  { title: "What Phase 1 Built",                                   phase: "Phase 1",  end: "10:37 AM" },
+  { title: "Questions?",                                           phase: "Phase 1",  end: "10:42 AM" },
+  { title: "Bridge to Phase 2",                                    phase: "Phase 1",  end: "10:45 AM" },
+
+  { title: "☕ BREAK",                                             phase: "Break",    end: "11:00 AM" },
+
+  { title: "Phase 2 Transition — Characterize Constraints",        phase: "Phase 2",  end: "11:01 AM" },
+  { title: "Activity 1 — The Motivation Sort",                     phase: "Phase 2",  end: "11:07 AM" },
+  { title: "Debrief — Activity 1",                                 phase: "Phase 2",  end: "11:12 AM" },
+  { title: "Expectancy-Value Theory",                              phase: "Phase 2",  end: "11:16 AM" },
+  { title: "Activity 2 — The Working Memory List",                 phase: "Phase 2",  end: "11:24 AM" },
+  { title: "Debrief — Activity 2",                                 phase: "Phase 2",  end: "11:29 AM" },
+  { title: "Working Memory and Cognitive Load",                    phase: "Phase 2",  end: "11:33 AM" },
+  { title: "Activity 3 — The Forgetting Curve Audit",              phase: "Phase 2",  end: "11:38 AM" },
+  { title: "Activity 3 — Focus Drill",                             phase: "Phase 2",  end: "11:41 AM" },
+  { title: "Debrief — Activity 3",                                 phase: "Phase 2",  end: "11:44 AM" },
+  { title: "Desirable Difficulties",                               phase: "Phase 2",  end: "11:46 AM" },
+  { title: "The Design Choice That Desirable Difficulty Creates (1 of 2)", phase: "Phase 2", end: "11:49 AM" },
+  { title: "The Design Choice That Desirable Difficulty Creates (2 of 2)", phase: "Phase 2", end: "11:51 AM" },
+  { title: "Activity 4 — Implications for Your Phase 1 Objective", phase: "Phase 2",  end: "11:57 AM" },
+  { title: "What Phase 2 Built",                                   phase: "Phase 2",  end: "11:58 AM" },
+  { title: "Bridge to Phase 3",                                    phase: "Phase 2",  end: "12:00 PM" },
+  { title: "Questions?",                                           phase: "Phase 2",  end: "12:00 PM" },
+
+  { title: "🥪 WORKING LUNCH",                                     phase: "Break",    end: "12:45 PM" },
+
+  { title: "Phase 3 Transition — Design the System",               phase: "Phase 3",  end: "12:46 PM" },
+  { title: "Activity 1 — Map Your Current Sequence",               phase: "Phase 3",  end: "12:53 PM" },
+  { title: "Scaffolding as System Architecture",                   phase: "Phase 3",  end: "12:57 PM" },
+  { title: "The Six-Level Scaffold — Formative Levels",            phase: "Phase 3",  end: "1:01 PM"  },
+  { title: "The Six-Level Scaffold — Checkpoints and Capstones",   phase: "Phase 3",  end: "1:04 PM"  },
+  { title: "Activity 2 — Evaluate Your Sequence",                  phase: "Phase 3",  end: "1:12 PM"  },
+  { title: "Debrief — Activity 2",                                 phase: "Phase 3",  end: "1:16 PM"  },
+  { title: "Activity 3 — Design the Missing Rungs",                phase: "Phase 3",  end: "1:25 PM"  },
+  { title: "Debrief — Activity 3",                                 phase: "Phase 3",  end: "1:29 PM"  },
+  { title: "Activity 4 — The Readiness Signal",                    phase: "Phase 3",  end: "1:38 PM"  },
+  { title: "Debrief — Activity 4",                                 phase: "Phase 3",  end: "1:42 PM"  },
+  { title: "What Phase 3 Built",                                   phase: "Phase 3",  end: "1:44 PM"  },
+  { title: "Bridge to Phase 4",                                    phase: "Phase 3",  end: "1:49 PM"  },
+  { title: "Questions?",                                           phase: "Phase 3",  end: "2:00 PM"  },
+
+  { title: "☕ BREAK",                                             phase: "Break",    end: "2:15 PM"  },
+
+  { title: "Phase 4 Transition — Instrument and Test",             phase: "Phase 4",  end: "2:02 PM"  },
+  { title: "The Framework: Rubric Design",                         phase: "Phase 4",  end: "2:05 PM"  },
+  { title: "What a Rubric Looks Like",                             phase: "Phase 4",  end: "2:12 PM"  },
+  { title: "Activity 1 — Identify Your Criteria",                  phase: "Phase 4",  end: "2:19 PM"  },
+  { title: "Activity 2 — Draft the Descriptors",                   phase: "Phase 4",  end: "2:27 PM"  },
+  { title: "Debrief — Activity 2",                                 phase: "Phase 4",  end: "2:33 PM"  },
+  { title: "Sharing the Rubric: A Design Choice",                  phase: "Phase 4",  end: "2:36 PM"  },
+  { title: "Formative and Summative Assessment",                   phase: "Phase 4",  end: "2:37 PM"  },
+  { title: "Formative Assessment: Five Formats That Work",         phase: "Phase 4",  end: "2:40 PM"  },
+  { title: "Activity 3 — Design Your Check Sequence",              phase: "Phase 4",  end: "2:48 PM"  },
+  { title: "Debrief — Activity 3",                                 phase: "Phase 4",  end: "2:56 PM"  },
+  { title: "Early Alert: Making It Evidence-Based",                phase: "Phase 4",  end: "3:00 PM"  },
+  { title: "Activity 4 — Define the Early Alert Trigger",          phase: "Phase 4",  end: "3:07 PM"  },
+  { title: "Debrief — Activity 4",                                 phase: "Phase 4",  end: "3:11 PM"  },
+  { title: "What Phase 4 Built",                                   phase: "Phase 4",  end: "3:13 PM"  },
+  { title: "Bridge to Phase 5",                                    phase: "Phase 4",  end: "3:18 PM"  },
+  { title: "Questions?",                                           phase: "Phase 4",  end: "3:22 PM"  },
+
+  { title: "☕ BREAK",                                             phase: "Break",    end: "3:40 PM"  },
+
+  { title: "Phase 5 Transition — Build a Prototype",               phase: "Phase 5",  end: "3:41 PM"  },
+  { title: "The Framework: What Active Learning Is",               phase: "Phase 5",  end: "3:43 PM"  },
+  { title: "Why It Works: Four Cognitive Mechanisms",              phase: "Phase 5",  end: "3:46 PM"  },
+  { title: "The Evidence",                                         phase: "Phase 5",  end: "3:49 PM"  },
+  { title: "The Instructor Role Shift",                            phase: "Phase 5",  end: "3:52 PM"  },
+  { title: "Active Learning Technique Reference",                  phase: "Phase 5",  end: "3:56 PM"  },
+  { title: "Active Learning Technique Reference (continued)",      phase: "Phase 5",  end: "3:58 PM"  },
+  { title: "Active Learning Technique Reference (continued)",      phase: "Phase 5",  end: "4:00 PM"  },
+  { title: "Active Learning Technique Reference (continued)",      phase: "Phase 5",  end: "4:02 PM"  },
+  { title: "Activity 1 — Place a Technique",                       phase: "Phase 5",  end: "4:08 PM"  },
+  { title: "Common Objections",                                    phase: "Phase 5",  end: "4:10 PM"  },
+  { title: "The Four-Part Session Arc",                            phase: "Phase 5",  end: "4:18 PM"  },
+  { title: "Activity 2 — Redesign Sprint",                         phase: "Phase 5",  end: "4:26 PM"  },
+  { title: "Debrief — Activity 2",                                 phase: "Phase 5",  end: "4:28 PM"  },
+  { title: "What Phase 5 Built",                                   phase: "Phase 5",  end: "4:29 PM"  },
+  { title: "Bridge to Phase 6",                                    phase: "Phase 5",  end: "4:30 PM"  },
+  { title: "Questions?",                                           phase: "Phase 5",  end: "4:30 PM"  },
+
+  { title: "☕ BREAK",                                             phase: "Break",    end: "4:45 PM"  },
+
+  { title: "Phase 6 Transition — Iterate the Design",              phase: "Phase 6",  end: "4:47 PM"  },
+  { title: "The Engineering Design Loop",                          phase: "Phase 6",  end: "4:48 PM"  },
+  { title: "Activity 1 — Compare Your Specifications",             phase: "Phase 6",  end: "4:53 PM"  },
+  { title: "Activity 2 — The Design Revision: Your Commitment",    phase: "Phase 6",  end: "4:57 PM"  },
+  { title: "What Today Built",                                     phase: "Phase 6",  end: "4:58 PM"  },
+  { title: "Workshop Learning Objectives: Self-Assessment",        phase: "Phase 6",  end: "5:00 PM"  },
+  { title: "Closing Slide",                                        phase: "Phase 6",  end: "5:00 PM"  },
+  { title: "Exit Ticket",                                          phase: "Phase 6",  end: "5:00 PM"  },
+];
+
+const WORKSHOP_START = "9:00 AM";
+const WORKSHOP_END   = "5:00 PM";
+
+// ─── Time helpers ─────────────────────────────────────────────────────────────
+function parseTime(str) {
+  // e.g. "9:02 AM", "12:45 PM"
+  const m = str.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!m) return null;
+  let h = parseInt(m[1]), min = parseInt(m[2]);
+  const ampm = m[3].toUpperCase();
+  if (ampm === 'PM' && h !== 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return h * 60 + min; // minutes since midnight
+}
+
+function nowMinutes() {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+}
+
+function formatDelta(mins) {
+  const neg = mins < 0;
+  const abs = Math.abs(Math.round(mins));
+  const m = abs % 60, h = Math.floor(abs / 60);
+  let s = '';
+  if (h > 0) s += h + 'h ';
+  s += m + 'm';
+  return (neg ? '−' : '') + s;
+}
+
+function fmtClock(d) {
+  let h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} ${ampm}`;
+}
+
+// Pre-compute end minutes for each slide
+const endMins = SLIDES.map(s => parseTime(s.end));
+// Start of each slide = end of previous (or workshop start for index 0)
+const workshopStartMins = parseTime(WORKSHOP_START);
+const workshopEndMins   = parseTime(WORKSHOP_END);
+const startMins = SLIDES.map((_, i) => i === 0 ? workshopStartMins : endMins[i - 1]);
+
+// ─── DOM refs ─────────────────────────────────────────────────────────────────
+const clockEl      = document.getElementById('clock');
+const statusEl     = document.getElementById('status-band');
+const phasePip     = document.getElementById('phase-pip');
+const currentCard  = document.getElementById('current-card');
+const nextCard     = document.getElementById('next-card');
+const curTitle     = document.getElementById('cur-title');
+const curEnd       = document.getElementById('cur-end');
+const curDelta     = document.getElementById('cur-delta');
+const curDeadline  = document.getElementById('cur-deadline');
+const progressFill = document.getElementById('progress-fill');
+const nextTitle    = document.getElementById('next-title');
+const nextTime     = document.getElementById('next-time');
+const preMsg       = document.getElementById('pre-message');
+const postMsg      = document.getElementById('post-message');
+const deltaBox     = document.getElementById('delta-box');
+
+function tick() {
+  const now = nowMinutes();
+  clockEl.textContent = fmtClock(new Date());
+
+  // Before workshop
+  if (now < workshopStartMins) {
+    currentCard.style.display = 'none';
+    nextCard.style.display    = 'none';
+    postMsg.style.display     = 'none';
+    preMsg.style.display      = 'block';
+    const minsUntil = Math.round(workshopStartMins - now);
+    preMsg.textContent = `Workshop starts in ${formatDelta(minsUntil).replace('−','')}`;
+    statusEl.className = '';
+    statusEl.textContent = 'Not started';
+    phasePip.textContent = '';
+    return;
+  }
+
+  // After workshop
+  if (now > workshopEndMins) {
+    currentCard.style.display = 'none';
+    nextCard.style.display    = 'none';
+    preMsg.style.display      = 'none';
+    postMsg.style.display     = 'block';
+    postMsg.textContent       = 'Workshop complete. Great session!';
+    statusEl.className        = 'on-time';
+    statusEl.textContent      = 'Done';
+    phasePip.textContent      = '';
+    return;
+  }
+
+  preMsg.style.display  = 'none';
+  postMsg.style.display = 'none';
+
+  // Find current slide: last one whose start ≤ now
+  let idx = SLIDES.length - 1;
+  for (let i = 0; i < SLIDES.length; i++) {
+    if (now < endMins[i]) { idx = i; break; }
+  }
+
+  const slide  = SLIDES[idx];
+  const sStart = startMins[idx];
+  const sEnd   = endMins[idx];
+  const delta  = sEnd - now; // positive = time remaining, negative = overdue
+
+  // Progress within this slide
+  const duration = sEnd - sStart;
+  const elapsed  = now - sStart;
+  const pct = duration > 0 ? Math.min(100, Math.max(0, (elapsed / duration) * 100)) : 100;
+
+  // Status
+  let statusClass, statusText;
+  if (delta >= 2)        { statusClass = 'on-time';  statusText = 'On schedule'; }
+  else if (delta >= -2)  { statusClass = 'slightly'; statusText = 'Right on time'; }
+  else                   { statusClass = 'behind';   statusText = `Running late`; }
+
+  statusEl.className   = statusClass;
+  statusEl.textContent = statusText;
+  phasePip.textContent = slide.phase;
+
+  curTitle.textContent    = slide.title;
+  curEnd.textContent      = slide.end;
+  curDeadline.textContent = `End by ${slide.end}`;
+  curDelta.textContent    = delta >= 0 ? formatDelta(delta) + ' left' : formatDelta(delta) + ' over';
+
+  deltaBox.className = 'time-box delta' + (delta < 0 ? ' neg' : '');
+  progressFill.style.width = pct + '%';
+  currentCard.style.display = '';
+
+  // Next slide
+  if (idx + 1 < SLIDES.length) {
+    const next = SLIDES[idx + 1];
+    nextTitle.textContent = next.title;
+    nextTime.textContent  = `Starts at ${slide.end}`;
+    nextCard.style.display = '';
+  } else {
+    nextCard.style.display = 'none';
+  }
+}
+
+tick();
+setInterval(tick, 250);
+</script>
+</body>
+</html>
