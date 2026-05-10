@@ -107,6 +107,11 @@
     font-variant-numeric: tabular-nums;
     color: #e0e0e0;
   }
+  .time-box.delta .tb-value {
+    font-size: 1.4rem;
+    font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+    letter-spacing: 0.04em;
+  }
   .time-box.delta .tb-value { color: #6fcf6f; }
   .time-box.delta.neg .tb-value { color: #ff6b6b; }
 
@@ -372,6 +377,15 @@ function formatDelta(mins) {
   return (neg ? '−' : '') + s;
 }
 
+function formatCountdown(mins) {
+  // MM:SS countdown with sign
+  const neg = mins < 0;
+  const totalSec = Math.round(Math.abs(mins) * 60);
+  const s = totalSec % 60;
+  const m = Math.floor(totalSec / 60);
+  return (neg ? '−' : '') + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
 function fmtClock(d) {
   let h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
   const ampm = h >= 12 ? 'PM' : 'AM';
@@ -466,7 +480,7 @@ function tick() {
   curTitle.textContent    = slide.title;
   curEnd.textContent      = slide.end;
   curDeadline.textContent = `End by ${slide.end}`;
-  curDelta.textContent    = delta >= 0 ? formatDelta(delta) + ' left' : formatDelta(delta) + ' over';
+  curDelta.textContent    = delta >= 0 ? formatCountdown(delta) : '−' + formatCountdown(delta).replace('−','') + ' over';
 
   deltaBox.className = 'time-box delta' + (delta < 0 ? ' neg' : '');
   progressFill.style.width = pct + '%';
